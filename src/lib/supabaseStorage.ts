@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import { Imovel, Metrica, ExportData } from '@/types';
+import type { Imovel, Metrica, ExportData } from '@/types';
 
 export const supabaseStorageService = {
   // Imóveis

@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { supabaseStorageService } from '@/lib/supabaseStorage';
 import { getCurrentMonth, getMonthName, getPreviousMonth, getLast6Months, formatDate } from '@/lib/dateUtils';
-import { Imovel, Metrica } from '@/types';
+import type { Imovel, Metrica } from '@/types';
 import logoBlack from '@/assets/logo-geum-black.png';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);

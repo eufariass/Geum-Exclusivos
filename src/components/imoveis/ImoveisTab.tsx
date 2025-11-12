@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ImovelModal } from './ImovelModal';
-import { Imovel } from '@/types';
+import type { Imovel } from '@/types';
 import { supabaseStorageService } from '@/lib/supabaseStorage';
 import { formatCurrency } from '@/lib/dateUtils';
 import { Building2, MapPin, User, DollarSign, Pencil, Trash2, Home } from 'lucide-react';

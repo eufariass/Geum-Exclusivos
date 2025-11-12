@@ -14,7 +14,7 @@ import {
 import { supabaseStorageService } from '@/lib/supabaseStorage';
 import { getCurrentMonth, getPreviousMonth, getLast6Months, getMonthName } from '@/lib/dateUtils';
 import { KPICard } from './KPICard';
-import { Imovel, Metrica } from '@/types';
+import type { Imovel, Metrica } from '@/types';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 

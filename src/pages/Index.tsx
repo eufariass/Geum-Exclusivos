@@ -7,7 +7,7 @@ import { MetricasTab } from '@/components/metricas/MetricasTab';
 import { RelatoriosTab } from '@/components/relatorios/RelatoriosTab';
 import { useToastManager } from '@/components/Toast';
 import { supabaseStorageService } from '@/lib/supabaseStorage';
-import { TabType } from '@/types';
+import type { TabType } from '@/types';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
