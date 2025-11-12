@@ -21,6 +21,7 @@ export type Database = {
           cover_image_index: number | null
           created_at: string | null
           data_cadastro: string | null
+          descricao: string | null
           endereco: string
           id: string
           image_urls: string[] | null
@@ -33,6 +34,7 @@ export type Database = {
           cover_image_index?: number | null
           created_at?: string | null
           data_cadastro?: string | null
+          descricao?: string | null
           endereco: string
           id?: string
           image_urls?: string[] | null
@@ -45,6 +47,7 @@ export type Database = {
           cover_image_index?: number | null
           created_at?: string | null
           data_cadastro?: string | null
+          descricao?: string | null
           endereco?: string
           id?: string
           image_urls?: string[] | null
