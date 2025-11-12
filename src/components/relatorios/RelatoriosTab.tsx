@@ -90,41 +90,49 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
     };
   }, [selectedImovel, selectedImovelId, selectedMes, metricas]);
 
-  const chartData = useMemo(() => {
+  const leadsChartData = useMemo(() => {
     if (!selectedImovelId) return null;
 
-    const last6Months = getLast6Months();
-    const labels = last6Months.map((month) => {
-      const [, m] = month.split('-');
-      return new Date(2000, parseInt(m) - 1).toLocaleDateString('pt-BR', { month: 'short' });
-    });
+    const currentMetrics = metricas.find((m) => m.imovel_id === selectedImovelId && m.mes === selectedMes);
+    const previousMonth = getPreviousMonth(selectedMes);
+    const previousMetrics = metricas.find((m) => m.imovel_id === selectedImovelId && m.mes === previousMonth);
 
-    const leadsData = last6Months.map((month) => {
-      const m = metricas.find((met) => met.imovel_id === selectedImovelId && met.mes === month);
-      return m ? m.leads : 0;
-    });
-
-    const visitsData = last6Months.map((month) => {
-      const m = metricas.find((met) => met.imovel_id === selectedImovelId && met.mes === month);
-      return m ? m.visitas_realizadas : 0;
-    });
+    const currentLeads = currentMetrics?.leads || 0;
+    const previousLeads = previousMetrics?.leads || 0;
 
     return {
-      labels,
+      labels: [getMonthName(previousMonth), getMonthName(selectedMes)],
       datasets: [
         {
           label: 'Leads',
-          data: leadsData,
-          backgroundColor: 'hsla(150, 100%, 50%, 0.8)',
-        },
-        {
-          label: 'Visitas',
-          data: visitsData,
-          backgroundColor: 'hsla(220, 100%, 50%, 0.8)',
+          data: [previousLeads, currentLeads],
+          backgroundColor: ['hsla(210, 15%, 60%, 0.8)', 'hsla(150, 100%, 50%, 0.8)'],
         },
       ],
     };
-  }, [selectedImovelId, metricas]);
+  }, [selectedImovelId, metricas, selectedMes]);
+
+  const visitasChartData = useMemo(() => {
+    if (!selectedImovelId) return null;
+
+    const currentMetrics = metricas.find((m) => m.imovel_id === selectedImovelId && m.mes === selectedMes);
+    const previousMonth = getPreviousMonth(selectedMes);
+    const previousMetrics = metricas.find((m) => m.imovel_id === selectedImovelId && m.mes === previousMonth);
+
+    const currentVisitas = currentMetrics?.visitas_realizadas || 0;
+    const previousVisitas = previousMetrics?.visitas_realizadas || 0;
+
+    return {
+      labels: [getMonthName(previousMonth), getMonthName(selectedMes)],
+      datasets: [
+        {
+          label: 'Visitas Realizadas',
+          data: [previousVisitas, currentVisitas],
+          backgroundColor: ['hsla(210, 15%, 60%, 0.8)', 'hsla(220, 100%, 50%, 0.8)'],
+        },
+      ],
+    };
+  }, [selectedImovelId, metricas, selectedMes]);
 
   const handleGenerate = () => {
     if (!selectedImovelId) {
@@ -336,26 +344,49 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
             </div>
           </div>
 
-          {chartData && (
-            <div className="bg-gray-50 rounded-lg p-6 mb-6">
-              <h3 className="text-sm font-semibold text-black mb-4">Evolução - Últimos 6 Meses</h3>
-              <div className="h-[250px]">
-                <Bar
-                  data={chartData}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                      legend: { position: 'top' },
-                    },
-                    scales: {
-                      y: { beginAtZero: true },
-                    },
-                  }}
-                />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            {leadsChartData && (
+              <div className="bg-gray-50 rounded-lg p-6">
+                <h3 className="text-sm font-semibold text-black mb-4">Comparação de Leads</h3>
+                <div className="h-[250px]">
+                  <Bar
+                    data={leadsChartData}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: { display: false },
+                      },
+                      scales: {
+                        y: { beginAtZero: true },
+                      },
+                    }}
+                  />
+                </div>
               </div>
-            </div>
-          )}
+            )}
+
+            {visitasChartData && (
+              <div className="bg-gray-50 rounded-lg p-6">
+                <h3 className="text-sm font-semibold text-black mb-4">Comparação de Visitas</h3>
+                <div className="h-[250px]">
+                  <Bar
+                    data={visitasChartData}
+                    options={{
+                      responsive: true,
+                      maintainAspectRatio: false,
+                      plugins: {
+                        legend: { display: false },
+                      },
+                      scales: {
+                        y: { beginAtZero: true },
+                      },
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
 
           <div className="border-t border-gray-300 pt-4 text-center text-xs text-gray-600">
             <p>Relatório gerado em {formatDate(new Date())} | Imobiliária Geum</p>
