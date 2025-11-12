@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -15,8 +15,9 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { storageService } from '@/lib/storage';
+import { supabaseStorageService } from '@/lib/supabaseStorage';
 import { getCurrentMonth, getMonthName, getPreviousMonth, getLast6Months, formatDate } from '@/lib/dateUtils';
+import { Imovel, Metrica } from '@/types';
 import logoBlack from '@/assets/logo-geum-black.png';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -26,8 +27,9 @@ interface RelatoriosTabProps {
 }
 
 export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
-  const imoveis = storageService.getImoveis();
-  const metricas = storageService.getMetricas();
+  const [imoveis, setImoveis] = useState<Imovel[]>([]);
+  const [metricas, setMetricas] = useState<Metrica[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [selectedImovelId, setSelectedImovelId] = useState('');
   const [selectedMes, setSelectedMes] = useState(getCurrentMonth());
@@ -36,6 +38,26 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
 
   const reportRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      const [imoveisData, metricasData] = await Promise.all([
+        supabaseStorageService.getImoveis(),
+        supabaseStorageService.getMetricas()
+      ]);
+      setImoveis(imoveisData);
+      setMetricas(metricasData);
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+      showToast('Erro ao carregar dados', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const selectedImovel = useMemo(() => {
     return imoveis.find((i) => i.id === selectedImovelId);
   }, [imoveis, selectedImovelId]);
@@ -43,9 +65,9 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
   const reportData = useMemo(() => {
     if (!selectedImovel) return null;
 
-    const currentMetrics = metricas.find((m) => m.imovelId === selectedImovelId && m.mes === selectedMes);
+    const currentMetrics = metricas.find((m) => m.imovel_id === selectedImovelId && m.mes === selectedMes);
     const previousMonth = getPreviousMonth(selectedMes);
-    const previousMetrics = metricas.find((m) => m.imovelId === selectedImovelId && m.mes === previousMonth);
+    const previousMetrics = metricas.find((m) => m.imovel_id === selectedImovelId && m.mes === previousMonth);
 
     const getTrend = (current: number, previous: number) => {
       if (previous === 0 && current > 0) return { value: 0, direction: 'new' as const };
@@ -56,15 +78,15 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
       return { value: 0, direction: 'neutral' as const };
     };
 
-    const current = currentMetrics || { leads: 0, visualizacoes: 0, visitasRealizadas: 0 };
-    const previous = previousMetrics || { leads: 0, visualizacoes: 0, visitasRealizadas: 0 };
+    const current = currentMetrics || { leads: 0, visualizacoes: 0, visitas_realizadas: 0 };
+    const previous = previousMetrics || { leads: 0, visualizacoes: 0, visitas_realizadas: 0 };
 
     return {
       imovel: selectedImovel,
       mes: selectedMes,
       leads: { value: current.leads, trend: getTrend(current.leads, previous.leads) },
       visualizacoes: { value: current.visualizacoes, trend: getTrend(current.visualizacoes, previous.visualizacoes) },
-      visitas: { value: current.visitasRealizadas, trend: getTrend(current.visitasRealizadas, previous.visitasRealizadas) },
+      visitas: { value: current.visitas_realizadas, trend: getTrend(current.visitas_realizadas, previous.visitas_realizadas) },
     };
   }, [selectedImovel, selectedImovelId, selectedMes, metricas]);
 
@@ -78,13 +100,13 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
     });
 
     const leadsData = last6Months.map((month) => {
-      const m = metricas.find((met) => met.imovelId === selectedImovelId && met.mes === month);
+      const m = metricas.find((met) => met.imovel_id === selectedImovelId && met.mes === month);
       return m ? m.leads : 0;
     });
 
     const visitsData = last6Months.map((month) => {
-      const m = metricas.find((met) => met.imovelId === selectedImovelId && met.mes === month);
-      return m ? m.visitasRealizadas : 0;
+      const m = metricas.find((met) => met.imovel_id === selectedImovelId && met.mes === month);
+      return m ? m.visitas_realizadas : 0;
     });
 
     return {
@@ -132,7 +154,6 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
       const imgX = (pdfWidth - imgWidth * ratio) / 2;
       const imgY = 10;
 
-      // Handle multiple pages if content is too tall
       const scaledHeight = imgHeight * ratio;
       if (scaledHeight > pdfHeight - 20) {
         let heightLeft = scaledHeight;
@@ -160,6 +181,14 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
       setIsExporting(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-muted-foreground">Carregando relatórios...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -207,7 +236,6 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
 
       {showReport && reportData && (
         <div ref={reportRef} className="bg-white p-8 rounded-xl shadow-sm border border-border" id="report-content">
-          {/* Header */}
           <div className="flex items-center justify-between border-b border-gray-300 pb-6 mb-6">
             <img src={logoBlack} alt="Geum" className="h-12 w-auto" />
             <div className="text-right">
@@ -216,7 +244,6 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
             </div>
           </div>
 
-          {/* Property Info */}
           <div className="bg-gray-50 rounded-lg p-6 mb-6">
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -238,7 +265,6 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
             </div>
           </div>
 
-          {/* KPIs */}
           <div className="grid grid-cols-3 gap-4 mb-6">
             <div className="bg-gray-50 rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
@@ -310,7 +336,6 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
             </div>
           </div>
 
-          {/* Chart */}
           {chartData && (
             <div className="bg-gray-50 rounded-lg p-6 mb-6">
               <h3 className="text-sm font-semibold text-black mb-4">Evolução - Últimos 6 Meses</h3>
@@ -332,7 +357,6 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
             </div>
           )}
 
-          {/* Footer */}
           <div className="border-t border-gray-300 pt-4 text-center text-xs text-gray-600">
             <p>Relatório gerado em {formatDate(new Date())} | Imobiliária Geum</p>
           </div>

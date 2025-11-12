@@ -6,7 +6,7 @@ import { ImoveisTab } from '@/components/imoveis/ImoveisTab';
 import { MetricasTab } from '@/components/metricas/MetricasTab';
 import { RelatoriosTab } from '@/components/relatorios/RelatoriosTab';
 import { useToastManager } from '@/components/Toast';
-import { storageService } from '@/lib/storage';
+import { supabaseStorageService } from '@/lib/supabaseStorage';
 import { TabType } from '@/types';
 
 const Index = () => {
@@ -18,9 +18,9 @@ const Index = () => {
     setRefreshKey((prev) => prev + 1);
   }, []);
 
-  const handleExport = () => {
+  const handleExport = async () => {
     try {
-      const data = storageService.exportData();
+      const data = await supabaseStorageService.exportData();
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -30,6 +30,7 @@ const Index = () => {
       URL.revokeObjectURL(url);
       showToast('Dados exportados com sucesso!', 'success');
     } catch (error) {
+      console.error('Erro ao exportar:', error);
       showToast('Erro ao exportar dados', 'error');
     }
   };
@@ -56,11 +57,12 @@ const Index = () => {
             'Importar dados substituirá todos os dados existentes. Deseja continuar?'
           )
         ) {
-          storageService.importData(data);
+          await supabaseStorageService.importData(data);
           showToast('Dados importados com sucesso! Recarregando...', 'success');
           setTimeout(() => window.location.reload(), 1500);
         }
       } catch (error) {
+        console.error('Erro ao importar:', error);
         showToast('Erro ao importar dados', 'error');
       }
     };
