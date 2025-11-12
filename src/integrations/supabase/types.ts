@@ -14,7 +14,83 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      imoveis: {
+        Row: {
+          cliente: string
+          codigo: string
+          created_at: string | null
+          data_cadastro: string | null
+          endereco: string
+          id: string
+          image_url: string | null
+          tipo: string
+          valor: number | null
+        }
+        Insert: {
+          cliente: string
+          codigo: string
+          created_at?: string | null
+          data_cadastro?: string | null
+          endereco: string
+          id?: string
+          image_url?: string | null
+          tipo: string
+          valor?: number | null
+        }
+        Update: {
+          cliente?: string
+          codigo?: string
+          created_at?: string | null
+          data_cadastro?: string | null
+          endereco?: string
+          id?: string
+          image_url?: string | null
+          tipo?: string
+          valor?: number | null
+        }
+        Relationships: []
+      }
+      metricas: {
+        Row: {
+          created_at: string | null
+          data_registro: string | null
+          id: string
+          imovel_id: string
+          leads: number
+          mes: string
+          visitas_realizadas: number
+          visualizacoes: number
+        }
+        Insert: {
+          created_at?: string | null
+          data_registro?: string | null
+          id?: string
+          imovel_id: string
+          leads?: number
+          mes: string
+          visitas_realizadas?: number
+          visualizacoes?: number
+        }
+        Update: {
+          created_at?: string | null
+          data_registro?: string | null
+          id?: string
+          imovel_id?: string
+          leads?: number
+          mes?: string
+          visitas_realizadas?: number
+          visualizacoes?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "metricas_imovel_id_fkey"
+            columns: ["imovel_id"]
+            isOneToOne: false
+            referencedRelation: "imoveis"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

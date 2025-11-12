@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Imovel, TipoImovel } from '@/types';
-import { storageService } from '@/lib/storage';
+import { supabaseStorageService } from '@/lib/supabaseStorage';
+import { ImageUpload } from './ImageUpload';
 
 interface ImovelModalProps {
   isOpen: boolean;
@@ -25,6 +26,8 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
     valor: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (editingImovel) {
@@ -45,6 +48,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
       });
     }
     setErrors({});
+    setImageFile(null);
   }, [editingImovel, isOpen]);
 
   const formatCurrencyInput = (value: string) => {
@@ -64,7 +68,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
     return parseInt(numbers) / 100;
   };
 
-  const validate = (): boolean => {
+  const validate = async (): Promise<boolean> => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.codigo.trim()) newErrors.codigo = 'Código é obrigatório';
@@ -73,7 +77,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
 
     // Check unique codigo
     if (formData.codigo.trim()) {
-      const imoveis = storageService.getImoveis();
+      const imoveis = await supabaseStorageService.getImoveis();
       const exists = imoveis.some(
         (i) => i.codigo === formData.codigo.trim() && (!editingImovel || i.id !== editingImovel.id)
       );
@@ -84,22 +88,44 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
+    if (!(await validate()) || isSubmitting) return;
 
-    const imovel: Imovel = {
-      id: editingImovel?.id || Math.random().toString(36).substring(7),
-      codigo: formData.codigo.trim(),
-      cliente: formData.cliente.trim(),
-      endereco: formData.endereco.trim(),
-      tipo: formData.tipo,
-      valor: parseValor(formData.valor),
-      dataCadastro: editingImovel?.dataCadastro || new Date().toISOString(),
-    };
+    setIsSubmitting(true);
+    try {
+      let imageUrl = editingImovel?.image_url;
 
-    onSave(imovel);
-    onClose();
+      // Upload da nova imagem se selecionada
+      if (imageFile) {
+        const tempId = editingImovel?.id || `temp-${Date.now()}`;
+        imageUrl = await supabaseStorageService.uploadImage(imageFile, tempId);
+      }
+
+      const imovelData = {
+        codigo: formData.codigo.trim(),
+        cliente: formData.cliente.trim(),
+        endereco: formData.endereco.trim(),
+        tipo: formData.tipo,
+        valor: parseValor(formData.valor),
+        image_url: imageUrl,
+        data_cadastro: editingImovel?.data_cadastro || new Date().toISOString(),
+      };
+
+      if (editingImovel) {
+        await supabaseStorageService.updateImovel(editingImovel.id, imovelData);
+      } else {
+        await supabaseStorageService.addImovel(imovelData);
+      }
+
+      onSave({} as Imovel); // Trigger refresh
+      onClose();
+    } catch (error) {
+      console.error('Erro ao salvar imóvel:', error);
+      alert('Erro ao salvar imóvel. Tente novamente.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -172,12 +198,21 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
             </div>
           </div>
 
+          <div>
+            <Label>Imagem do Imóvel</Label>
+            <ImageUpload
+              currentImage={editingImovel?.image_url}
+              onImageSelect={setImageFile}
+              onRemoveImage={() => setImageFile(null)}
+            />
+          </div>
+
           <div className="flex gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={onClose} className="flex-1">
+            <Button type="button" variant="outline" onClick={onClose} className="flex-1" disabled={isSubmitting}>
               Cancelar
             </Button>
-            <Button type="submit" className="flex-1">
-              {editingImovel ? 'Salvar' : 'Cadastrar'}
+            <Button type="submit" className="flex-1" disabled={isSubmitting}>
+              {isSubmitting ? 'Salvando...' : editingImovel ? 'Salvar' : 'Cadastrar'}
             </Button>
           </div>
         </form>

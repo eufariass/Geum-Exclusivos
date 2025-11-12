@@ -7,17 +7,20 @@ export interface Imovel {
   endereco: string;
   tipo: TipoImovel;
   valor?: number;
-  dataCadastro: string;
+  image_url?: string;
+  data_cadastro: string;
+  created_at?: string;
 }
 
 export interface Metrica {
   id: string;
-  imovelId: string;
+  imovel_id: string;
   mes: string; // YYYY-MM
   leads: number;
   visualizacoes: number;
-  visitasRealizadas: number;
-  dataRegistro: string;
+  visitas_realizadas: number;
+  data_registro: string;
+  created_at?: string;
 }
 
 export interface ExportData {

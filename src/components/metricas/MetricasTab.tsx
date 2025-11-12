@@ -1,20 +1,20 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Metrica } from '@/types';
-import { storageService } from '@/lib/storage';
+import { Imovel, Metrica } from '@/types';
+import { supabaseStorageService } from '@/lib/supabaseStorage';
 import { getCurrentMonth, getMonthName } from '@/lib/dateUtils';
 
 interface MetricasTabProps {
-  onUpdate: () => void;
-  showToast: (message: string, type: 'success' | 'error') => void;
+  onToast: (message: string, type: 'success' | 'error') => void;
 }
 
-export const MetricasTab = ({ onUpdate, showToast }: MetricasTabProps) => {
-  const imoveis = storageService.getImoveis();
-  const [metricas, setMetricas] = useState<Metrica[]>(storageService.getMetricas());
+export const MetricasTab = ({ onToast }: MetricasTabProps) => {
+  const [imoveis, setImoveis] = useState<Imovel[]>([]);
+  const [metricas, setMetricas] = useState<Metrica[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const [formData, setFormData] = useState({
     imovelId: '',
@@ -24,64 +24,89 @@ export const MetricasTab = ({ onUpdate, showToast }: MetricasTabProps) => {
     visitasRealizadas: '',
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    try {
+      const [imoveisData, metricasData] = await Promise.all([
+        supabaseStorageService.getImoveis(),
+        supabaseStorageService.getMetricas()
+      ]);
+      setImoveis(imoveisData);
+      setMetricas(metricasData);
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+      onToast('Erro ao carregar dados', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.imovelId) {
-      showToast('Selecione um imóvel', 'error');
+      onToast('Selecione um imóvel', 'error');
       return;
     }
 
-    const leads = parseInt(formData.leads) || 0;
-    const visualizacoes = parseInt(formData.visualizacoes) || 0;
-    const visitasRealizadas = parseInt(formData.visitasRealizadas) || 0;
+    try {
+      const leads = parseInt(formData.leads) || 0;
+      const visualizacoes = parseInt(formData.visualizacoes) || 0;
+      const visitas_realizadas = parseInt(formData.visitasRealizadas) || 0;
 
-    // Check if exists
-    const existing = storageService.getMetricaByImovelMes(formData.imovelId, formData.mes);
+      const existing = await supabaseStorageService.getMetricaByImovelMes(formData.imovelId, formData.mes);
 
-    if (existing) {
-      if (window.confirm('Já existe uma métrica para este imóvel neste mês. Deseja substituir?')) {
-        storageService.updateMetrica(formData.imovelId, formData.mes, {
+      if (existing) {
+        if (window.confirm('Já existe uma métrica para este imóvel neste mês. Deseja substituir?')) {
+          await supabaseStorageService.updateMetrica(formData.imovelId, formData.mes, {
+            leads,
+            visualizacoes,
+            visitas_realizadas,
+            data_registro: new Date().toISOString(),
+          });
+          onToast('Métrica atualizada com sucesso!', 'success');
+        } else {
+          return;
+        }
+      } else {
+        await supabaseStorageService.addMetrica({
+          imovel_id: formData.imovelId,
+          mes: formData.mes,
           leads,
           visualizacoes,
-          visitasRealizadas,
-          dataRegistro: new Date().toISOString(),
+          visitas_realizadas,
+          data_registro: new Date().toISOString(),
         });
-        showToast('Métrica atualizada com sucesso!', 'success');
-      } else {
-        return;
+        onToast('Métrica adicionada com sucesso!', 'success');
       }
-    } else {
-      const metrica: Metrica = {
-        id: Math.random().toString(36).substring(7),
-        imovelId: formData.imovelId,
-        mes: formData.mes,
-        leads,
-        visualizacoes,
-        visitasRealizadas,
-        dataRegistro: new Date().toISOString(),
-      };
-      storageService.addMetrica(metrica);
-      showToast('Métrica adicionada com sucesso!', 'success');
-    }
 
-    setMetricas(storageService.getMetricas());
-    setFormData({
-      imovelId: '',
-      mes: getCurrentMonth(),
-      leads: '',
-      visualizacoes: '',
-      visitasRealizadas: '',
-    });
-    onUpdate();
+      await loadData();
+      setFormData({
+        imovelId: '',
+        mes: getCurrentMonth(),
+        leads: '',
+        visualizacoes: '',
+        visitasRealizadas: '',
+      });
+    } catch (error) {
+      console.error('Erro ao salvar métrica:', error);
+      onToast('Erro ao salvar métrica', 'error');
+    }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Tem certeza que deseja deletar esta métrica?')) {
-      storageService.deleteMetrica(id);
-      setMetricas(storageService.getMetricas());
-      showToast('Métrica deletada com sucesso!', 'success');
-      onUpdate();
+      try {
+        await supabaseStorageService.deleteMetrica(id);
+        await loadData();
+        onToast('Métrica deletada com sucesso!', 'success');
+      } catch (error) {
+        console.error('Erro ao deletar métrica:', error);
+        onToast('Erro ao deletar métrica', 'error');
+      }
     }
   };
 
@@ -96,6 +121,14 @@ export const MetricasTab = ({ onUpdate, showToast }: MetricasTabProps) => {
       .sort(([a], [b]) => b.localeCompare(a))
       .map(([mes, items]) => ({ mes, items }));
   }, [metricas]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-muted-foreground">Carregando métricas...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -187,7 +220,7 @@ export const MetricasTab = ({ onUpdate, showToast }: MetricasTabProps) => {
                 <h3 className="text-lg font-semibold mb-4 capitalize">{getMonthName(mes)}</h3>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {items.map((metrica) => {
-                    const imovel = imoveis.find((i) => i.id === metrica.imovelId);
+                    const imovel = imoveis.find((i) => i.id === metrica.imovel_id);
                     return (
                       <div key={metrica.id} className="border border-border rounded-lg p-4 card-hover">
                         <div className="flex items-start justify-between mb-3">
@@ -205,7 +238,7 @@ export const MetricasTab = ({ onUpdate, showToast }: MetricasTabProps) => {
                         <div className="space-y-1 text-sm">
                           <p>📧 Leads: {metrica.leads}</p>
                           <p>👁️ Visualizações: {metrica.visualizacoes.toLocaleString('pt-BR')}</p>
-                          <p>🚗 Visitas: {metrica.visitasRealizadas}</p>
+                          <p>🚗 Visitas: {metrica.visitas_realizadas}</p>
                         </div>
                       </div>
                     );

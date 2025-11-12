@@ -75,10 +75,10 @@ const Index = () => {
       <main className="container mx-auto px-6 py-8">
         {activeTab === 'dashboard' && <DashboardTab key={refreshKey} />}
         {activeTab === 'imoveis' && (
-          <ImoveisTab onUpdate={handleUpdate} showToast={showToast} key={refreshKey} />
+          <ImoveisTab onToast={showToast} key={refreshKey} />
         )}
         {activeTab === 'metricas' && (
-          <MetricasTab onUpdate={handleUpdate} showToast={showToast} key={refreshKey} />
+          <MetricasTab onToast={showToast} key={refreshKey} />
         )}
         {activeTab === 'relatorios' && <RelatoriosTab showToast={showToast} key={refreshKey} />}
       </main>

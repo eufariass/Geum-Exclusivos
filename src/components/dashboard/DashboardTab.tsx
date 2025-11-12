@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -11,17 +11,37 @@ import {
   Legend,
   Filler,
 } from 'chart.js';
-import { storageService } from '@/lib/storage';
+import { supabaseStorageService } from '@/lib/supabaseStorage';
 import { getCurrentMonth, getPreviousMonth, getLast6Months, getMonthName } from '@/lib/dateUtils';
 import { KPICard } from './KPICard';
+import { Imovel, Metrica } from '@/types';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
 export const DashboardTab = () => {
-  const imoveis = storageService.getImoveis();
-  const metricas = storageService.getMetricas();
+  const [imoveis, setImoveis] = useState<Imovel[]>([]);
+  const [metricas, setMetricas] = useState<Metrica[]>([]);
+  const [loading, setLoading] = useState(true);
   const currentMonth = getCurrentMonth();
   const previousMonth = getPreviousMonth(currentMonth);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [imoveisData, metricasData] = await Promise.all([
+          supabaseStorageService.getImoveis(),
+          supabaseStorageService.getMetricas()
+        ]);
+        setImoveis(imoveisData);
+        setMetricas(metricasData);
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadData();
+  }, []);
 
   const stats = useMemo(() => {
     const currentMetrics = metricas.filter((m) => m.mes === currentMonth);
@@ -33,8 +53,8 @@ export const DashboardTab = () => {
     const currentViews = currentMetrics.reduce((sum, m) => sum + m.visualizacoes, 0);
     const previousViews = previousMetrics.reduce((sum, m) => sum + m.visualizacoes, 0);
 
-    const currentVisits = currentMetrics.reduce((sum, m) => sum + m.visitasRealizadas, 0);
-    const previousVisits = previousMetrics.reduce((sum, m) => sum + m.visitasRealizadas, 0);
+    const currentVisits = currentMetrics.reduce((sum, m) => sum + m.visitas_realizadas, 0);
+    const previousVisits = previousMetrics.reduce((sum, m) => sum + m.visitas_realizadas, 0);
 
     const getTrend = (current: number, previous: number) => {
       if (previous === 0 && current > 0) return { value: 0, direction: 'new' as const };
@@ -65,7 +85,7 @@ export const DashboardTab = () => {
     });
 
     const visitsData = last6Months.map((month) => {
-      return metricas.filter((m) => m.mes === month).reduce((sum, m) => sum + m.visitasRealizadas, 0);
+      return metricas.filter((m) => m.mes === month).reduce((sum, m) => sum + m.visitas_realizadas, 0);
     });
 
     return {
@@ -93,9 +113,17 @@ export const DashboardTab = () => {
 
   const recentImoveis = useMemo(() => {
     return [...imoveis]
-      .sort((a, b) => new Date(b.dataCadastro).getTime() - new Date(a.dataCadastro).getTime())
+      .sort((a, b) => new Date(b.data_cadastro).getTime() - new Date(a.data_cadastro).getTime())
       .slice(0, 3);
   }, [imoveis]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-muted-foreground">Carregando dashboard...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -140,7 +168,7 @@ export const DashboardTab = () => {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {recentImoveis.map((imovel) => {
-              const metricaAtual = metricas.find((m) => m.imovelId === imovel.id && m.mes === currentMonth);
+              const metricaAtual = metricas.find((m) => m.imovel_id === imovel.id && m.mes === currentMonth);
               return (
                 <div key={imovel.id} className="border border-border rounded-lg p-4 card-hover">
                   <div className="flex items-start justify-between mb-2">
