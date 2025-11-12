@@ -155,11 +155,11 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>{editingImovel ? 'Editar Imóvel' : 'Cadastrar Imóvel'}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 overflow-y-auto px-1">
           <div>
             <Label htmlFor="codigo">Código *</Label>
             <Input
