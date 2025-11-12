@@ -105,6 +105,10 @@ const ImoveisPublic = () => {
                   </div>
 
                   <CardContent className="p-4 space-y-3">
+                    {imovel.titulo && (
+                      <h2 className="text-lg font-semibold line-clamp-2 mb-2">{imovel.titulo}</h2>
+                    )}
+                    
                     <div>
                       <p className="text-sm text-muted-foreground mb-1">Endereço</p>
                       <p className="font-medium line-clamp-2">{imovel.endereco}</p>

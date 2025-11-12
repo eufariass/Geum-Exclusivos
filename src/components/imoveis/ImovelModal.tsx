@@ -21,6 +21,7 @@ const tiposImovel: TipoImovel[] = ['Casa', 'Apartamento', 'Terreno', 'Comercial'
 export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelModalProps) => {
   const [formData, setFormData] = useState({
     codigo: '',
+    titulo: '',
     cliente: '',
     endereco: '',
     tipo: 'Casa' as TipoImovel,
@@ -42,6 +43,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
     if (editingImovel) {
       setFormData({
         codigo: editingImovel.codigo,
+        titulo: editingImovel.titulo || '',
         cliente: editingImovel.cliente,
         endereco: editingImovel.endereco,
         tipo: editingImovel.tipo,
@@ -57,6 +59,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
     } else {
       setFormData({
         codigo: '',
+        titulo: '',
         cliente: '',
         endereco: '',
         tipo: 'Casa',
@@ -147,6 +150,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
 
       const imovelData = {
         codigo: formData.codigo.trim(),
+        titulo: formData.titulo.trim() || undefined,
         cliente: formData.cliente.trim(),
         endereco: formData.endereco.trim(),
         tipo: formData.tipo,
@@ -193,6 +197,16 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
               className={errors.codigo ? 'border-destructive' : ''}
             />
             {errors.codigo && <p className="text-xs text-destructive mt-1">{errors.codigo}</p>}
+          </div>
+
+          <div>
+            <Label htmlFor="titulo">Título do Imóvel</Label>
+            <Input
+              id="titulo"
+              value={formData.titulo}
+              onChange={(e) => setFormData((prev) => ({ ...prev, titulo: e.target.value }))}
+              placeholder="Ex: Apartamento Moderno no Centro"
+            />
           </div>
 
           <div>

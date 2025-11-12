@@ -29,6 +29,7 @@ export type Database = {
           image_urls: string[] | null
           quartos: number | null
           tipo: string
+          titulo: string | null
           vagas: number | null
           valor: number | null
         }
@@ -46,6 +47,7 @@ export type Database = {
           image_urls?: string[] | null
           quartos?: number | null
           tipo: string
+          titulo?: string | null
           vagas?: number | null
           valor?: number | null
         }
@@ -63,6 +65,7 @@ export type Database = {
           image_urls?: string[] | null
           quartos?: number | null
           tipo?: string
+          titulo?: string | null
           vagas?: number | null
           valor?: number | null
         }

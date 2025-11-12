@@ -3,6 +3,7 @@ export type TipoImovel = 'Casa' | 'Apartamento' | 'Terreno' | 'Comercial' | 'Rur
 export interface Imovel {
   id: string;
   codigo: string;
+  titulo?: string;
   cliente: string;
   endereco: string;
   tipo: TipoImovel;

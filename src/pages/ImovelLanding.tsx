@@ -160,6 +160,12 @@ const ImovelLanding = () => {
         {/* Informações do Imóvel */}
         <Card className="mb-6">
           <CardContent className="p-6 space-y-4">
+            {imovel.titulo && (
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">{imovel.titulo}</h1>
+              </div>
+            )}
+            
             <div>
               <p className="text-sm text-muted-foreground mb-1">Código</p>
               <p className="text-lg font-semibold text-foreground">{imovel.codigo}</p>
