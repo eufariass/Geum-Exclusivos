@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ImovelModal } from './ImovelModal';
@@ -120,9 +121,14 @@ export const ImoveisTab = ({ onToast }: ImoveisTabProps) => {
                 <div className="absolute top-3 left-3 px-3 py-1 bg-background/90 backdrop-blur-sm rounded-full text-xs font-medium">
                   {imovel.tipo}
                 </div>
-                <div className="absolute top-3 right-3 px-3 py-1 bg-primary text-primary-foreground rounded-full text-xs font-bold">
+                <Link 
+                  to={`/${imovel.codigo}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute top-3 right-3 px-3 py-1 bg-primary text-primary-foreground rounded-full text-xs font-bold hover:bg-primary/90 transition-colors cursor-pointer"
+                >
                   {imovel.codigo}
-                </div>
+                </Link>
               </div>
 
               <div className="p-4 space-y-3">
