@@ -16,6 +16,8 @@ export type Database = {
     Tables: {
       imoveis: {
         Row: {
+          area_m2: number | null
+          banheiros: number | null
           cliente: string
           codigo: string
           cover_image_index: number | null
@@ -25,10 +27,14 @@ export type Database = {
           endereco: string
           id: string
           image_urls: string[] | null
+          quartos: number | null
           tipo: string
+          vagas: number | null
           valor: number | null
         }
         Insert: {
+          area_m2?: number | null
+          banheiros?: number | null
           cliente: string
           codigo: string
           cover_image_index?: number | null
@@ -38,10 +44,14 @@ export type Database = {
           endereco: string
           id?: string
           image_urls?: string[] | null
+          quartos?: number | null
           tipo: string
+          vagas?: number | null
           valor?: number | null
         }
         Update: {
+          area_m2?: number | null
+          banheiros?: number | null
           cliente?: string
           codigo?: string
           cover_image_index?: number | null
@@ -51,7 +61,9 @@ export type Database = {
           endereco?: string
           id?: string
           image_urls?: string[] | null
+          quartos?: number | null
           tipo?: string
+          vagas?: number | null
           valor?: number | null
         }
         Relationships: []

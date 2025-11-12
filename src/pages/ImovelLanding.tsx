@@ -4,7 +4,7 @@ import { supabaseStorageService } from '@/lib/supabaseStorage';
 import type { Imovel } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, Home } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Home, BedDouble, Bath, Car, Maximize } from 'lucide-react';
 import logoBlack from '@/assets/logo-geum-black.png';
 import logoWhite from '@/assets/logo-geum-white.png';
 
@@ -166,21 +166,53 @@ const ImovelLanding = () => {
               <p className="text-lg text-foreground">{imovel.endereco}</p>
             </div>
             
-            <div className="flex gap-6">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Tipo</p>
-                <p className="text-base text-foreground">{imovel.tipo}</p>
-              </div>
-              
-              {imovel.valor && (
+            <div className="space-y-4">
+              <div className="flex gap-6">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Valor</p>
-                  <p className="text-xl font-bold text-primary">
-                    {new Intl.NumberFormat('pt-BR', {
-                      style: 'currency',
-                      currency: 'BRL',
-                    }).format(imovel.valor)}
-                  </p>
+                  <p className="text-sm text-muted-foreground mb-1">Tipo</p>
+                  <p className="text-base text-foreground">{imovel.tipo}</p>
+                </div>
+                
+                {imovel.valor && (
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-1">Valor</p>
+                    <p className="text-xl font-bold text-primary">
+                      {new Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL',
+                      }).format(imovel.valor)}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Características */}
+              {(imovel.quartos || imovel.banheiros || imovel.area_m2 || imovel.vagas) && (
+                <div className="flex flex-wrap gap-4 pt-2">
+                  {imovel.quartos && (
+                    <div className="flex items-center gap-2 text-foreground">
+                      <BedDouble className="h-5 w-5 text-muted-foreground" />
+                      <span>{imovel.quartos} {imovel.quartos === 1 ? 'Quarto' : 'Quartos'}</span>
+                    </div>
+                  )}
+                  {imovel.banheiros && (
+                    <div className="flex items-center gap-2 text-foreground">
+                      <Bath className="h-5 w-5 text-muted-foreground" />
+                      <span>{imovel.banheiros} {imovel.banheiros === 1 ? 'Banheiro' : 'Banheiros'}</span>
+                    </div>
+                  )}
+                  {imovel.area_m2 && (
+                    <div className="flex items-center gap-2 text-foreground">
+                      <Maximize className="h-5 w-5 text-muted-foreground" />
+                      <span>{imovel.area_m2} m²</span>
+                    </div>
+                  )}
+                  {imovel.vagas && (
+                    <div className="flex items-center gap-2 text-foreground">
+                      <Car className="h-5 w-5 text-muted-foreground" />
+                      <span>{imovel.vagas} {imovel.vagas === 1 ? 'Vaga' : 'Vagas'}</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

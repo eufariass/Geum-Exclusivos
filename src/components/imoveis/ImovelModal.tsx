@@ -26,6 +26,10 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
     tipo: 'Casa' as TipoImovel,
     valor: '',
     descricao: '',
+    quartos: '',
+    banheiros: '',
+    area_m2: '',
+    vagas: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -42,6 +46,10 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
         tipo: editingImovel.tipo,
         valor: editingImovel.valor ? String(editingImovel.valor) : '',
         descricao: editingImovel.descricao || '',
+        quartos: editingImovel.quartos ? String(editingImovel.quartos) : '',
+        banheiros: editingImovel.banheiros ? String(editingImovel.banheiros) : '',
+        area_m2: editingImovel.area_m2 ? String(editingImovel.area_m2) : '',
+        vagas: editingImovel.vagas ? String(editingImovel.vagas) : '',
       });
       setCoverImageIndex(editingImovel.cover_image_index || 0);
     } else {
@@ -52,6 +60,10 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
         tipo: 'Casa',
         valor: '',
         descricao: '',
+        quartos: '',
+        banheiros: '',
+        area_m2: '',
+        vagas: '',
       });
       setCoverImageIndex(0);
     }
@@ -132,6 +144,10 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
         tipo: formData.tipo,
         valor: parseValor(formData.valor),
         descricao: formData.descricao.trim() || undefined,
+        quartos: formData.quartos ? parseInt(formData.quartos) : undefined,
+        banheiros: formData.banheiros ? parseInt(formData.banheiros) : undefined,
+        area_m2: formData.area_m2 ? parseFloat(formData.area_m2) : undefined,
+        vagas: formData.vagas ? parseInt(formData.vagas) : undefined,
         image_urls: imageUrls,
         cover_image_index: coverImageIndex,
         data_cadastro: editingImovel?.data_cadastro || new Date().toISOString(),
@@ -219,6 +235,57 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
                 onChange={handleValorChange}
                 placeholder="0,00"
                 className="pl-10"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="quartos">Quartos</Label>
+              <Input
+                id="quartos"
+                type="number"
+                min="0"
+                value={formData.quartos}
+                onChange={(e) => setFormData((prev) => ({ ...prev, quartos: e.target.value }))}
+                placeholder="0"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="banheiros">Banheiros</Label>
+              <Input
+                id="banheiros"
+                type="number"
+                min="0"
+                value={formData.banheiros}
+                onChange={(e) => setFormData((prev) => ({ ...prev, banheiros: e.target.value }))}
+                placeholder="0"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="area_m2">Área (m²)</Label>
+              <Input
+                id="area_m2"
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.area_m2}
+                onChange={(e) => setFormData((prev) => ({ ...prev, area_m2: e.target.value }))}
+                placeholder="0"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="vagas">Vagas</Label>
+              <Input
+                id="vagas"
+                type="number"
+                min="0"
+                value={formData.vagas}
+                onChange={(e) => setFormData((prev) => ({ ...prev, vagas: e.target.value }))}
+                placeholder="0"
               />
             </div>
           </div>

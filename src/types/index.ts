@@ -8,6 +8,10 @@ export interface Imovel {
   tipo: TipoImovel;
   valor?: number;
   descricao?: string;
+  quartos?: number;
+  banheiros?: number;
+  area_m2?: number;
+  vagas?: number;
   image_urls?: string[];
   cover_image_index?: number;
   data_cadastro: string;
