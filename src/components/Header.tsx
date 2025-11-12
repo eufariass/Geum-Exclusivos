@@ -13,7 +13,7 @@ export const Header = () => {
           <img src={logoWhite} alt="Geum" className="h-8 w-auto" />
           <div className="hidden sm:block border-l border-primary-foreground/20 pl-4">
             <p className="text-xs font-light tracking-widest uppercase text-primary-foreground">
-              Sistema de Relatórios
+              Gestão de Exclusivos
             </p>
           </div>
         </div>
