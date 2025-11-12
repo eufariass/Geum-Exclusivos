@@ -106,7 +106,9 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
         {
           label: 'Leads',
           data: [previousLeads, currentLeads],
-          backgroundColor: ['hsla(210, 15%, 60%, 0.8)', 'hsla(150, 100%, 50%, 0.8)'],
+          backgroundColor: ['hsla(210, 15%, 60%, 0.6)', 'hsla(223, 94%, 59%, 1)'],
+          borderRadius: 8,
+          borderWidth: 0,
         },
       ],
     };
@@ -128,7 +130,9 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
         {
           label: 'Visitas Realizadas',
           data: [previousVisitas, currentVisitas],
-          backgroundColor: ['hsla(210, 15%, 60%, 0.8)', 'hsla(220, 100%, 50%, 0.8)'],
+          backgroundColor: ['hsla(210, 15%, 60%, 0.6)', 'hsla(27, 100%, 55%, 1)'],
+          borderRadius: 8,
+          borderWidth: 0,
         },
       ],
     };
@@ -243,153 +247,208 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
       </div>
 
       {showReport && reportData && (
-        <div ref={reportRef} className="bg-white p-8 rounded-xl shadow-sm border border-border" id="report-content">
-          <div className="flex items-center justify-between border-b border-gray-300 pb-6 mb-6">
-            <img src={logoBlack} alt="Geum" className="h-12 w-auto" />
-            <div className="text-right">
-              <h1 className="text-2xl font-bold text-black">Relatório Mensal</h1>
-              <p className="text-sm text-gray-600 capitalize">{getMonthName(selectedMes)}</p>
+        <div ref={reportRef} className="bg-white rounded-2xl shadow-xl overflow-hidden" id="report-content">
+          {/* Header com gradiente azul */}
+          <div className="bg-gradient-to-r from-[#325df9] to-[#1e3a8a] p-8 text-white">
+            <div className="flex items-center justify-between mb-6">
+              <img src={logoBlack} alt="Geum" className="h-12 w-auto brightness-0 invert" />
+              <div className="text-right">
+                <h1 className="text-3xl font-bold">Relatório Mensal</h1>
+                <p className="text-sm opacity-90 capitalize mt-1">{getMonthName(selectedMes)}</p>
+              </div>
+            </div>
+
+            {/* Informações do imóvel em cards brancos sobre o azul */}
+            <div className="grid grid-cols-2 gap-3 mt-6">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+                <p className="text-xs opacity-80 mb-1">Código</p>
+                <p className="font-semibold text-sm">{reportData.imovel.codigo}</p>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+                <p className="text-xs opacity-80 mb-1">Tipo</p>
+                <p className="font-semibold text-sm">{reportData.imovel.tipo}</p>
+              </div>
+              <div className="col-span-2 bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+                <p className="text-xs opacity-80 mb-1">Endereço</p>
+                <p className="font-semibold text-sm">{reportData.imovel.endereco}</p>
+              </div>
+              <div className="col-span-2 bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+                <p className="text-xs opacity-80 mb-1">Cliente</p>
+                <p className="font-semibold text-sm">{reportData.imovel.cliente}</p>
+              </div>
             </div>
           </div>
 
-          <div className="bg-gray-50 rounded-lg p-6 mb-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-xs text-gray-600 mb-1">Código</p>
-                <p className="font-semibold text-black">{reportData.imovel.codigo}</p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-600 mb-1">Tipo</p>
-                <p className="font-semibold text-black">{reportData.imovel.tipo}</p>
-              </div>
-              <div className="col-span-2">
-                <p className="text-xs text-gray-600 mb-1">Endereço</p>
-                <p className="font-semibold text-black">{reportData.imovel.endereco}</p>
-              </div>
-              <div className="col-span-2">
-                <p className="text-xs text-gray-600 mb-1">Cliente</p>
-                <p className="font-semibold text-black">{reportData.imovel.cliente}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-4 mb-6">
-            <div className="bg-gray-50 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-2xl">📧</span>
-                <span
-                  className={`text-xs font-semibold px-2 py-1 rounded ${
-                    reportData.leads.trend.direction === 'up'
-                      ? 'bg-green-100 text-green-700'
-                      : reportData.leads.trend.direction === 'down'
-                      ? 'bg-red-100 text-red-700'
-                      : 'bg-gray-100 text-gray-700'
-                  }`}
-                >
-                  {reportData.leads.trend.direction === 'up' && '↑'}
-                  {reportData.leads.trend.direction === 'down' && '↓'}
-                  {reportData.leads.trend.direction === 'neutral' && '→'}
-                  {reportData.leads.trend.direction === 'new' && '↑'}
-                  {reportData.leads.trend.direction === 'new' ? ' Novo' : ` ${reportData.leads.trend.value}%`}
-                </span>
-              </div>
-              <p className="text-xs text-gray-600">Leads</p>
-              <p className="text-2xl font-bold text-black">{reportData.leads.value}</p>
-            </div>
-
-            <div className="bg-gray-50 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-2xl">👁️</span>
-                <span
-                  className={`text-xs font-semibold px-2 py-1 rounded ${
-                    reportData.visualizacoes.trend.direction === 'up'
-                      ? 'bg-green-100 text-green-700'
-                      : reportData.visualizacoes.trend.direction === 'down'
-                      ? 'bg-red-100 text-red-700'
-                      : 'bg-gray-100 text-gray-700'
-                  }`}
-                >
-                  {reportData.visualizacoes.trend.direction === 'up' && '↑'}
-                  {reportData.visualizacoes.trend.direction === 'down' && '↓'}
-                  {reportData.visualizacoes.trend.direction === 'neutral' && '→'}
-                  {reportData.visualizacoes.trend.direction === 'new' && '↑'}
-                  {reportData.visualizacoes.trend.direction === 'new' ? ' Novo' : ` ${reportData.visualizacoes.trend.value}%`}
-                </span>
-              </div>
-              <p className="text-xs text-gray-600">Visualizações</p>
-              <p className="text-2xl font-bold text-black">{reportData.visualizacoes.value.toLocaleString('pt-BR')}</p>
-            </div>
-
-            <div className="bg-gray-50 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-2xl">🚗</span>
-                <span
-                  className={`text-xs font-semibold px-2 py-1 rounded ${
-                    reportData.visitas.trend.direction === 'up'
-                      ? 'bg-green-100 text-green-700'
-                      : reportData.visitas.trend.direction === 'down'
-                      ? 'bg-red-100 text-red-700'
-                      : 'bg-gray-100 text-gray-700'
-                  }`}
-                >
-                  {reportData.visitas.trend.direction === 'up' && '↑'}
-                  {reportData.visitas.trend.direction === 'down' && '↓'}
-                  {reportData.visitas.trend.direction === 'neutral' && '→'}
-                  {reportData.visitas.trend.direction === 'new' && '↑'}
-                  {reportData.visitas.trend.direction === 'new' ? ' Novo' : ` ${reportData.visitas.trend.value}%`}
-                </span>
-              </div>
-              <p className="text-xs text-gray-600">Visitas Realizadas</p>
-              <p className="text-2xl font-bold text-black">{reportData.visitas.value}</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            {leadsChartData && (
-              <div className="bg-gray-50 rounded-lg p-6">
-                <h3 className="text-sm font-semibold text-black mb-4">Comparação de Leads</h3>
-                <div className="h-[250px]">
-                  <Bar
-                    data={leadsChartData}
-                    options={{
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: {
-                        legend: { display: false },
-                      },
-                      scales: {
-                        y: { beginAtZero: true },
-                      },
-                    }}
-                  />
+          {/* Conteúdo principal */}
+          <div className="p-8">
+            {/* Cards de métricas com design moderno */}
+            <div className="grid grid-cols-3 gap-6 mb-8">
+              <div className="relative overflow-hidden rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-[#325df9]/5 rounded-full -mr-12 -mt-12"></div>
+                <div className="relative">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-12 h-12 rounded-xl bg-[#325df9]/10 flex items-center justify-center text-2xl">
+                      📧
+                    </div>
+                    <span
+                      className={`text-xs font-bold px-3 py-1.5 rounded-full ${
+                        reportData.leads.trend.direction === 'up'
+                          ? 'bg-[#325df9]/10 text-[#325df9]'
+                          : reportData.leads.trend.direction === 'down'
+                          ? 'bg-red-50 text-red-600'
+                          : 'bg-gray-100 text-gray-600'
+                      }`}
+                    >
+                      {reportData.leads.trend.direction === 'up' && '↑'}
+                      {reportData.leads.trend.direction === 'down' && '↓'}
+                      {reportData.leads.trend.direction === 'neutral' && '→'}
+                      {reportData.leads.trend.direction === 'new' && '↑'}
+                      {reportData.leads.trend.direction === 'new' ? ' Novo' : ` ${reportData.leads.trend.value}%`}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 font-medium mb-1">Leads</p>
+                  <p className="text-3xl font-bold text-black">{reportData.leads.value}</p>
                 </div>
               </div>
-            )}
 
-            {visitasChartData && (
-              <div className="bg-gray-50 rounded-lg p-6">
-                <h3 className="text-sm font-semibold text-black mb-4">Comparação de Visitas</h3>
-                <div className="h-[250px]">
-                  <Bar
-                    data={visitasChartData}
-                    options={{
-                      responsive: true,
-                      maintainAspectRatio: false,
-                      plugins: {
-                        legend: { display: false },
-                      },
-                      scales: {
-                        y: { beginAtZero: true },
-                      },
-                    }}
-                  />
+              <div className="relative overflow-hidden rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-full -mr-12 -mt-12"></div>
+                <div className="relative">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center text-2xl">
+                      👁️
+                    </div>
+                    <span
+                      className={`text-xs font-bold px-3 py-1.5 rounded-full ${
+                        reportData.visualizacoes.trend.direction === 'up'
+                          ? 'bg-purple-50 text-purple-600'
+                          : reportData.visualizacoes.trend.direction === 'down'
+                          ? 'bg-red-50 text-red-600'
+                          : 'bg-gray-100 text-gray-600'
+                      }`}
+                    >
+                      {reportData.visualizacoes.trend.direction === 'up' && '↑'}
+                      {reportData.visualizacoes.trend.direction === 'down' && '↓'}
+                      {reportData.visualizacoes.trend.direction === 'neutral' && '→'}
+                      {reportData.visualizacoes.trend.direction === 'new' && '↑'}
+                      {reportData.visualizacoes.trend.direction === 'new' ? ' Novo' : ` ${reportData.visualizacoes.trend.value}%`}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 font-medium mb-1">Visualizações</p>
+                  <p className="text-3xl font-bold text-black">{reportData.visualizacoes.value.toLocaleString('pt-BR')}</p>
                 </div>
               </div>
-            )}
+
+              <div className="relative overflow-hidden rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/5 rounded-full -mr-12 -mt-12"></div>
+                <div className="relative">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center text-2xl">
+                      🚗
+                    </div>
+                    <span
+                      className={`text-xs font-bold px-3 py-1.5 rounded-full ${
+                        reportData.visitas.trend.direction === 'up'
+                          ? 'bg-orange-50 text-orange-600'
+                          : reportData.visitas.trend.direction === 'down'
+                          ? 'bg-red-50 text-red-600'
+                          : 'bg-gray-100 text-gray-600'
+                      }`}
+                    >
+                      {reportData.visitas.trend.direction === 'up' && '↑'}
+                      {reportData.visitas.trend.direction === 'down' && '↓'}
+                      {reportData.visitas.trend.direction === 'neutral' && '→'}
+                      {reportData.visitas.trend.direction === 'new' && '↑'}
+                      {reportData.visitas.trend.direction === 'new' ? ' Novo' : ` ${reportData.visitas.trend.value}%`}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 font-medium mb-1">Visitas Realizadas</p>
+                  <p className="text-3xl font-bold text-black">{reportData.visitas.value}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Gráficos de comparação com design moderno */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {leadsChartData && (
+                <div className="rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-lg bg-[#325df9]/10 flex items-center justify-center">
+                      <span className="text-xl">📧</span>
+                    </div>
+                    <h3 className="text-base font-bold text-black">Comparação de Leads</h3>
+                  </div>
+                  <div className="h-[280px]">
+                    <Bar
+                      data={leadsChartData}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: { display: false },
+                        },
+                        scales: {
+                          y: { 
+                            beginAtZero: true,
+                            grid: {
+                              color: 'rgba(0, 0, 0, 0.05)',
+                            },
+                          },
+                          x: {
+                            grid: {
+                              display: false,
+                            },
+                          },
+                        },
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {visitasChartData && (
+                <div className="rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
+                      <span className="text-xl">🚗</span>
+                    </div>
+                    <h3 className="text-base font-bold text-black">Comparação de Visitas</h3>
+                  </div>
+                  <div className="h-[280px]">
+                    <Bar
+                      data={visitasChartData}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: { display: false },
+                        },
+                        scales: {
+                          y: { 
+                            beginAtZero: true,
+                            grid: {
+                              color: 'rgba(0, 0, 0, 0.05)',
+                            },
+                          },
+                          x: {
+                            grid: {
+                              display: false,
+                            },
+                          },
+                        },
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
-          <div className="border-t border-gray-300 pt-4 text-center text-xs text-gray-600">
-            <p>Relatório gerado em {formatDate(new Date())} | Imobiliária Geum</p>
+          {/* Footer */}
+          <div className="border-t border-gray-200 bg-gray-50 px-8 py-4">
+            <p className="text-center text-xs text-gray-500">
+              Relatório gerado em {formatDate(new Date())} | <span className="font-semibold">Imobiliária Geum</span>
+            </p>
           </div>
         </div>
       )}
