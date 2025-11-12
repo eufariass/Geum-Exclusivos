@@ -470,8 +470,7 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
           <div className="px-8 pb-6">
             <div className="bg-gradient-to-r from-[#325df9]/5 to-[#1e3a8a]/5 rounded-xl p-6 border border-[#325df9]/20">
               <p className="text-center text-sm text-gray-700 leading-relaxed">
-                <span className="font-semibold text-[#325df9]">Agradecemos</span> por manter seu imóvel com <span className="font-semibold">exclusividade</span> na <span className="font-semibold text-[#325df9]">Imobiliária Geum</span>. 
-                Nosso compromisso é oferecer o melhor serviço e dedicação para alcançar resultados excepcionais na comercialização do seu imóvel.
+                <span className="font-semibold text-[#325df9]">Agradecemos</span> por manter seu imóvel com <span className="font-semibold">exclusividade</span> na <span className="font-semibold text-[#325df9]">Imobiliária Geum</span>.
               </p>
             </div>
           </div>
