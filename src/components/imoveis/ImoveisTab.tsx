@@ -47,8 +47,8 @@ export const ImoveisTab = ({ onToast }: ImoveisTabProps) => {
     if (!confirm(`Deseja realmente excluir o imóvel ${imovel.codigo}?`)) return;
 
     try {
-      if (imovel.image_url) {
-        await supabaseStorageService.deleteImage(imovel.image_url);
+      if (imovel.image_urls && imovel.image_urls.length > 0) {
+        await supabaseStorageService.deleteImages(imovel.image_urls);
       }
       await supabaseStorageService.deleteImovel(imovel.id);
       await loadImoveis();
@@ -99,12 +99,19 @@ export const ImoveisTab = ({ onToast }: ImoveisTabProps) => {
           {imoveis.map((imovel) => (
             <Card key={imovel.id} className="overflow-hidden card-hover group">
               <div className="relative h-48 bg-muted overflow-hidden">
-                {imovel.image_url ? (
-                  <img
-                    src={imovel.image_url}
-                    alt={imovel.endereco}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
+                {imovel.image_urls && imovel.image_urls.length > 0 ? (
+                  <>
+                    <img
+                      src={imovel.image_urls[0]}
+                      alt={imovel.endereco}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                    {imovel.image_urls.length > 1 && (
+                      <div className="absolute bottom-3 left-3 px-2 py-1 bg-background/90 backdrop-blur-sm rounded text-xs font-medium">
+                        +{imovel.image_urls.length - 1} fotos
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted-foreground/10">
                     <Home className="h-16 w-16 text-muted-foreground/40" />

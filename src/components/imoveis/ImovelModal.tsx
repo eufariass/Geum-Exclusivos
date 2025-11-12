@@ -26,7 +26,8 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
     valor: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [removedImageIndices, setRemovedImageIndices] = useState<number[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -48,7 +49,8 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
       });
     }
     setErrors({});
-    setImageFile(null);
+    setImageFiles([]);
+    setRemovedImageIndices([]);
   }, [editingImovel, isOpen]);
 
   const formatCurrencyInput = (value: string) => {
@@ -94,12 +96,26 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
 
     setIsSubmitting(true);
     try {
-      let imageUrl = editingImovel?.image_url;
+      let imageUrls = editingImovel?.image_urls || [];
 
-      // Upload da nova imagem se selecionada
-      if (imageFile) {
+      // Remover imagens marcadas para exclusão
+      if (removedImageIndices.length > 0 && editingImovel) {
+        const imagesToDelete = removedImageIndices
+          .map(index => editingImovel.image_urls?.[index])
+          .filter(url => url) as string[];
+        
+        if (imagesToDelete.length > 0) {
+          await supabaseStorageService.deleteImages(imagesToDelete);
+        }
+        
+        imageUrls = imageUrls.filter((_, index) => !removedImageIndices.includes(index));
+      }
+
+      // Upload de novas imagens se selecionadas
+      if (imageFiles.length > 0) {
         const tempId = editingImovel?.id || `temp-${Date.now()}`;
-        imageUrl = await supabaseStorageService.uploadImage(imageFile, tempId);
+        const newUrls = await supabaseStorageService.uploadImages(imageFiles, tempId);
+        imageUrls = [...imageUrls, ...newUrls];
       }
 
       const imovelData = {
@@ -108,7 +124,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
         endereco: formData.endereco.trim(),
         tipo: formData.tipo,
         valor: parseValor(formData.valor),
-        image_url: imageUrl,
+        image_urls: imageUrls,
         data_cadastro: editingImovel?.data_cadastro || new Date().toISOString(),
       };
 
@@ -199,11 +215,18 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
           </div>
 
           <div>
-            <Label>Imagem do Imóvel</Label>
+            <Label>Imagens do Imóvel (até 5 fotos de 15MB cada)</Label>
             <ImageUpload
-              currentImage={editingImovel?.image_url}
-              onImageSelect={setImageFile}
-              onRemoveImage={() => setImageFile(null)}
+              currentImages={editingImovel?.image_urls}
+              onImagesSelect={(files) => setImageFiles([...imageFiles, ...files])}
+              onRemoveImage={(index) => {
+                if (editingImovel && index < (editingImovel.image_urls?.length || 0)) {
+                  setRemovedImageIndices([...removedImageIndices, index]);
+                } else {
+                  const newIndex = index - (editingImovel?.image_urls?.length || 0);
+                  setImageFiles(imageFiles.filter((_, i) => i !== newIndex));
+                }
+              }}
             />
           </div>
 

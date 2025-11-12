@@ -42,38 +42,45 @@ export const supabaseStorageService = {
     if (error) throw error;
   },
 
-  // Upload de imagem
-  async uploadImage(file: File, imovelId: string): Promise<string> {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${imovelId}-${Date.now()}.${fileExt}`;
-    const filePath = `${fileName}`;
+  // Upload de múltiplas imagens
+  async uploadImages(files: File[], imovelId: string): Promise<string[]> {
+    const uploadPromises = files.map(async (file) => {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${imovelId}-${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `${fileName}`;
 
-    const { error: uploadError } = await supabase.storage
-      .from('imoveis')
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: true
-      });
+      const { error: uploadError } = await supabase.storage
+        .from('imoveis')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
 
-    if (uploadError) throw uploadError;
+      if (uploadError) throw uploadError;
 
-    const { data: { publicUrl } } = supabase.storage
-      .from('imoveis')
-      .getPublicUrl(filePath);
+      const { data: { publicUrl } } = supabase.storage
+        .from('imoveis')
+        .getPublicUrl(filePath);
 
-    return publicUrl;
+      return publicUrl;
+    });
+
+    return Promise.all(uploadPromises);
   },
 
-  async deleteImage(imageUrl: string): Promise<void> {
+  async deleteImages(imageUrls: string[]): Promise<void> {
     try {
-      const fileName = imageUrl.split('/').pop();
-      if (!fileName) return;
+      const fileNames = imageUrls
+        .map(url => url.split('/').pop())
+        .filter(name => name) as string[];
+
+      if (fileNames.length === 0) return;
 
       await supabase.storage
         .from('imoveis')
-        .remove([fileName]);
+        .remove(fileNames);
     } catch (error) {
-      console.error('Erro ao deletar imagem:', error);
+      console.error('Erro ao deletar imagens:', error);
     }
   },
 

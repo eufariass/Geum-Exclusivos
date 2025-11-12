@@ -7,7 +7,7 @@ export interface Imovel {
   endereco: string;
   tipo: TipoImovel;
   valor?: number;
-  image_url?: string;
+  image_urls?: string[];
   data_cadastro: string;
   created_at?: string;
 }

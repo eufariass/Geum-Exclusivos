@@ -22,7 +22,7 @@ export type Database = {
           data_cadastro: string | null
           endereco: string
           id: string
-          image_url: string | null
+          image_urls: string[] | null
           tipo: string
           valor: number | null
         }
@@ -33,7 +33,7 @@ export type Database = {
           data_cadastro?: string | null
           endereco: string
           id?: string
-          image_url?: string | null
+          image_urls?: string[] | null
           tipo: string
           valor?: number | null
         }
@@ -44,7 +44,7 @@ export type Database = {
           data_cadastro?: string | null
           endereco?: string
           id?: string
-          image_url?: string | null
+          image_urls?: string[] | null
           tipo?: string
           valor?: number | null
         }
