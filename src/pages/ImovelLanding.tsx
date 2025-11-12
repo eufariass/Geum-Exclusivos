@@ -1,0 +1,231 @@
+import { useEffect, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { supabaseStorageService } from '@/lib/supabaseStorage';
+import type { Imovel } from '@/types';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { ChevronLeft, ChevronRight, Home } from 'lucide-react';
+import logoBlack from '@/assets/logo-geum-black.png';
+import logoWhite from '@/assets/logo-geum-white.png';
+
+const ImovelLanding = () => {
+  const { codigo } = useParams<{ codigo: string }>();
+  const [imovel, setImovel] = useState<Imovel | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadImovel = async () => {
+      if (!codigo) return;
+      
+      try {
+        const imoveis = await supabaseStorageService.getImoveis();
+        const found = imoveis.find(i => i.codigo === codigo.toUpperCase());
+        
+        if (found) {
+          setImovel(found);
+          setCurrentImageIndex(found.cover_image_index || 0);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar imóvel:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadImovel();
+  }, [codigo]);
+
+  const nextImage = () => {
+    if (imovel?.image_urls && imovel.image_urls.length > 0) {
+      setCurrentImageIndex((prev) => (prev + 1) % imovel.image_urls!.length);
+    }
+  };
+
+  const prevImage = () => {
+    if (imovel?.image_urls && imovel.image_urls.length > 0) {
+      setCurrentImageIndex((prev) => (prev - 1 + imovel.image_urls!.length) % imovel.image_urls!.length);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="text-muted-foreground">Carregando...</p>
+      </div>
+    );
+  }
+
+  if (!imovel) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 p-4">
+        <Home className="h-16 w-16 text-muted-foreground" />
+        <h1 className="text-2xl font-semibold text-foreground">Imóvel não encontrado</h1>
+        <p className="text-muted-foreground">O código informado não corresponde a nenhum imóvel cadastrado.</p>
+        <Link to="/">
+          <Button variant="outline">Voltar</Button>
+        </Link>
+      </div>
+    );
+  }
+
+  const whatsappMessage = `Olá, vim da página exclusivos e gostaria de saber mais sobre o imóvel ${imovel.codigo}`;
+  const whatsappLink = `https://wa.me/554333413000?text=${encodeURIComponent(whatsappMessage)}`;
+
+  return (
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b border-border bg-card sticky top-0 z-10 shadow-sm">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <img 
+            src={logoBlack} 
+            alt="Imobiliária Geum" 
+            className="h-10 dark:hidden"
+          />
+          <img 
+            src={logoWhite} 
+            alt="Imobiliária Geum" 
+            className="h-10 hidden dark:block"
+          />
+          <p className="text-sm text-muted-foreground">Exclusivo</p>
+        </div>
+      </header>
+
+      <main className="container mx-auto px-4 py-8 max-w-5xl">
+        {/* Galeria de Imagens */}
+        {imovel.image_urls && imovel.image_urls.length > 0 && (
+          <Card className="mb-6 overflow-hidden">
+            <CardContent className="p-0 relative">
+              <div className="relative aspect-video bg-muted">
+                <img
+                  src={imovel.image_urls[currentImageIndex]}
+                  alt={`${imovel.endereco} - Foto ${currentImageIndex + 1}`}
+                  className="w-full h-full object-cover"
+                />
+                
+                {imovel.image_urls.length > 1 && (
+                  <>
+                    <button
+                      onClick={prevImage}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background text-foreground rounded-full p-2 transition-colors"
+                      aria-label="Imagem anterior"
+                    >
+                      <ChevronLeft className="h-6 w-6" />
+                    </button>
+                    <button
+                      onClick={nextImage}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background text-foreground rounded-full p-2 transition-colors"
+                      aria-label="Próxima imagem"
+                    >
+                      <ChevronRight className="h-6 w-6" />
+                    </button>
+                    
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-background/80 px-3 py-1 rounded-full text-sm">
+                      {currentImageIndex + 1} / {imovel.image_urls.length}
+                    </div>
+                  </>
+                )}
+              </div>
+              
+              {/* Miniaturas */}
+              {imovel.image_urls.length > 1 && (
+                <div className="p-4 flex gap-2 overflow-x-auto">
+                  {imovel.image_urls.map((url, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentImageIndex(index)}
+                      className={`flex-shrink-0 w-20 h-20 rounded-md overflow-hidden border-2 transition-all ${
+                        index === currentImageIndex
+                          ? 'border-primary scale-105'
+                          : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      <img
+                        src={url}
+                        alt={`Miniatura ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Informações do Imóvel */}
+        <Card className="mb-6">
+          <CardContent className="p-6 space-y-4">
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">Código</p>
+              <p className="text-lg font-semibold text-foreground">{imovel.codigo}</p>
+            </div>
+            
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">Endereço</p>
+              <p className="text-lg text-foreground">{imovel.endereco}</p>
+            </div>
+            
+            <div className="flex gap-6">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Tipo</p>
+                <p className="text-base text-foreground">{imovel.tipo}</p>
+              </div>
+              
+              {imovel.valor && (
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Valor</p>
+                  <p className="text-xl font-bold text-primary">
+                    {new Intl.NumberFormat('pt-BR', {
+                      style: 'currency',
+                      currency: 'BRL',
+                    }).format(imovel.valor)}
+                  </p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Descrição */}
+        {imovel.descricao && (
+          <Card className="mb-6">
+            <CardContent className="p-6">
+              <h2 className="text-xl font-semibold text-foreground mb-4">Sobre o Imóvel</h2>
+              <p 
+                className="text-[15px] leading-[1.7] text-foreground whitespace-pre-wrap"
+                style={{ textAlign: 'justify', fontFamily: 'Inter, sans-serif' }}
+              >
+                {imovel.descricao}
+              </p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Botão WhatsApp */}
+        <div className="flex justify-center">
+          <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
+            <Button 
+              size="lg"
+              className="w-full sm:w-auto text-base px-8 py-6 font-semibold"
+              style={{ backgroundColor: '#00ff88', color: '#000' }}
+            >
+              Saber mais sobre este imóvel
+            </Button>
+          </a>
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-border mt-12 py-6">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-sm text-muted-foreground">
+            © {new Date().getFullYear()} Imobiliária Geum. Todos os direitos reservados.
+          </p>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default ImovelLanding;

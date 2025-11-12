@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Imovel, TipoImovel } from '@/types';
 import { supabaseStorageService } from '@/lib/supabaseStorage';
@@ -24,6 +25,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
     endereco: '',
     tipo: 'Casa' as TipoImovel,
     valor: '',
+    descricao: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -39,6 +41,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
         endereco: editingImovel.endereco,
         tipo: editingImovel.tipo,
         valor: editingImovel.valor ? String(editingImovel.valor) : '',
+        descricao: editingImovel.descricao || '',
       });
       setCoverImageIndex(editingImovel.cover_image_index || 0);
     } else {
@@ -48,6 +51,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
         endereco: '',
         tipo: 'Casa',
         valor: '',
+        descricao: '',
       });
       setCoverImageIndex(0);
     }
@@ -127,6 +131,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
         endereco: formData.endereco.trim(),
         tipo: formData.tipo,
         valor: parseValor(formData.valor),
+        descricao: formData.descricao.trim() || undefined,
         image_urls: imageUrls,
         cover_image_index: coverImageIndex,
         data_cadastro: editingImovel?.data_cadastro || new Date().toISOString(),
@@ -216,6 +221,17 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
                 className="pl-10"
               />
             </div>
+          </div>
+
+          <div>
+            <Label htmlFor="descricao">Descrição do Imóvel</Label>
+            <Textarea
+              id="descricao"
+              value={formData.descricao}
+              onChange={(e) => setFormData((prev) => ({ ...prev, descricao: e.target.value }))}
+              placeholder="Texto de apresentação do imóvel, principais destaques..."
+              className="min-h-[100px] resize-none"
+            />
           </div>
 
           <div>
