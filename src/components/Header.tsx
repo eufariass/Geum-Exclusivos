@@ -1,5 +1,7 @@
 import logoWhite from '@/assets/logo-geum-white.png';
 import { Button } from './ui/button';
+import { useAuth } from '@/contexts/AuthContext';
+import { LogOut } from 'lucide-react';
 
 interface HeaderProps {
   onExport: () => void;
@@ -7,6 +9,8 @@ interface HeaderProps {
 }
 
 export const Header = ({ onExport, onImport }: HeaderProps) => {
+  const { signOut, user } = useAuth();
+
   return (
     <header className="bg-primary text-primary-foreground py-4 px-6 sticky top-0 z-40 shadow-md no-print">
       <div className="container mx-auto flex items-center justify-between gap-4 flex-wrap">
@@ -20,13 +24,18 @@ export const Header = ({ onExport, onImport }: HeaderProps) => {
         </div>
         
         <div className="flex items-center gap-2">
+          {user && (
+            <span className="hidden md:inline text-xs text-primary-foreground/80">
+              {user.email}
+            </span>
+          )}
           <Button
             variant="outline"
             size="sm"
             onClick={onExport}
             className="bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 text-xs"
           >
-            📥 Exportar Dados
+            📥 Exportar
           </Button>
           <Button
             variant="outline"
@@ -34,7 +43,16 @@ export const Header = ({ onExport, onImport }: HeaderProps) => {
             onClick={onImport}
             className="bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 text-xs"
           >
-            📤 Importar Dados
+            📤 Importar
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={signOut}
+            className="bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 gap-2"
+          >
+            <LogOut className="h-3 w-3" />
+            <span className="hidden sm:inline">Sair</span>
           </Button>
         </div>
       </div>
