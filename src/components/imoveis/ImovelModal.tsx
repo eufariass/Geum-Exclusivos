@@ -36,6 +36,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
   const [removedImageIndices, setRemovedImageIndices] = useState<number[]>([]);
   const [coverImageIndex, setCoverImageIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [imageOrder, setImageOrder] = useState<string[]>([]);
 
   useEffect(() => {
     if (editingImovel) {
@@ -52,6 +53,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
         vagas: editingImovel.vagas ? String(editingImovel.vagas) : '',
       });
       setCoverImageIndex(editingImovel.cover_image_index || 0);
+      setImageOrder(editingImovel.image_urls || []);
     } else {
       setFormData({
         codigo: '',
@@ -66,6 +68,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
         vagas: '',
       });
       setCoverImageIndex(0);
+      setImageOrder([]);
     }
     setErrors({});
     setImageFiles([]);
@@ -135,6 +138,11 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
         const tempId = editingImovel?.id || `temp-${Date.now()}`;
         const newUrls = await supabaseStorageService.uploadImages(imageFiles, tempId);
         imageUrls = [...imageUrls, ...newUrls];
+      }
+
+      // Use reordered images if available
+      if (imageOrder.length > 0) {
+        imageUrls = imageOrder;
       }
 
       const imovelData = {
@@ -303,14 +311,16 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
 
           <div>
             <Label>Imagens do Imóvel (até 10 fotos de 15MB cada)</Label>
-            <p className="text-xs text-muted-foreground mb-2">Clique em uma foto para defini-la como capa</p>
+            <p className="text-xs text-muted-foreground mb-2">Arraste para reordenar • Clique para definir capa</p>
             <ImageUpload
-              currentImages={editingImovel?.image_urls}
+              currentImages={imageOrder.length > 0 ? imageOrder : editingImovel?.image_urls}
               coverIndex={coverImageIndex}
               onImagesSelect={(files) => setImageFiles([...imageFiles, ...files])}
               onRemoveImage={(index) => {
                 if (editingImovel && index < (editingImovel.image_urls?.length || 0)) {
                   setRemovedImageIndices([...removedImageIndices, index]);
+                  const newOrder = imageOrder.filter((_, i) => i !== index);
+                  setImageOrder(newOrder);
                   if (coverImageIndex === index) {
                     setCoverImageIndex(0);
                   } else if (coverImageIndex > index) {
@@ -322,6 +332,10 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
                 }
               }}
               onSetCover={(index) => setCoverImageIndex(index)}
+              onReorderImages={(startIndex, endIndex) => {
+                const newOrder = [...(imageOrder.length > 0 ? imageOrder : editingImovel?.image_urls || [])];
+                setImageOrder(newOrder);
+              }}
             />
           </div>
 

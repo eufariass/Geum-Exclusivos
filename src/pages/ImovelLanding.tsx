@@ -15,6 +15,10 @@ const ImovelLanding = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    document.title = 'Imóveis Exclusivos Geum.';
+  }, []);
+
+  useEffect(() => {
     const loadImovel = async () => {
       if (!codigo) return;
       

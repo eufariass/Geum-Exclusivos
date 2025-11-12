@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { X, Image as ImageIcon } from 'lucide-react';
+import { X, Image as ImageIcon, GripVertical } from 'lucide-react';
 
 interface ImageUploadProps {
   currentImages?: string[];
@@ -8,13 +8,15 @@ interface ImageUploadProps {
   onImagesSelect: (files: File[]) => void;
   onRemoveImage: (index: number) => void;
   onSetCover: (index: number) => void;
+  onReorderImages: (startIndex: number, endIndex: number) => void;
 }
 
 const MAX_IMAGES = 10;
 const MAX_SIZE = 15 * 1024 * 1024; // 15MB
 
-export const ImageUpload = ({ currentImages = [], coverIndex = 0, onImagesSelect, onRemoveImage, onSetCover }: ImageUploadProps) => {
+export const ImageUpload = ({ currentImages = [], coverIndex = 0, onImagesSelect, onRemoveImage, onSetCover, onReorderImages }: ImageUploadProps) => {
   const [previews, setPreviews] = useState<string[]>(currentImages);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -68,6 +70,30 @@ export const ImageUpload = ({ currentImages = [], coverIndex = 0, onImagesSelect
     onRemoveImage(index);
   };
 
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+
+    const newPreviews = [...previews];
+    const draggedItem = newPreviews[draggedIndex];
+    newPreviews.splice(draggedIndex, 1);
+    newPreviews.splice(index, 0, draggedItem);
+    
+    setPreviews(newPreviews);
+    setDraggedIndex(index);
+  };
+
+  const handleDragEnd = () => {
+    if (draggedIndex !== null) {
+      onReorderImages(draggedIndex, draggedIndex);
+    }
+    setDraggedIndex(null);
+  };
+
   const canAddMore = previews.length < MAX_IMAGES;
 
   return (
@@ -87,19 +113,32 @@ export const ImageUpload = ({ currentImages = [], coverIndex = 0, onImagesSelect
           {previews.map((preview, index) => (
             <div 
               key={index} 
-              className="relative group cursor-pointer"
-              onClick={() => onSetCover(index)}
-              title="Clique para definir como capa"
+              draggable
+              onDragStart={() => handleDragStart(index)}
+              onDragOver={(e) => handleDragOver(e, index)}
+              onDragEnd={handleDragEnd}
+              className={`relative group cursor-move ${
+                draggedIndex === index ? 'opacity-50' : 'opacity-100'
+              }`}
+              title="Arraste para reordenar"
             >
-              <img
-                src={preview}
-                alt={`Preview ${index + 1}`}
-                className={`w-full h-32 object-cover rounded-lg border-2 transition-all ${
-                  index === coverIndex 
-                    ? 'border-accent shadow-lg' 
-                    : 'border-border hover:border-accent/50'
-                }`}
-              />
+              <div className="absolute top-2 left-2 z-20 bg-background/80 rounded p-1">
+                <GripVertical className="h-4 w-4 text-muted-foreground" />
+              </div>
+              <div
+                onClick={() => onSetCover(index)}
+                className="cursor-pointer"
+              >
+                <img
+                  src={preview}
+                  alt={`Preview ${index + 1}`}
+                  className={`w-full h-32 object-cover rounded-lg border-2 transition-all ${
+                    index === coverIndex 
+                      ? 'border-accent shadow-lg' 
+                      : 'border-border hover:border-accent/50'
+                  }`}
+                />
+              </div>
               <Button
                 type="button"
                 variant="destructive"
