@@ -235,7 +235,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
           </div>
 
           <div>
-            <Label>Imagens do Imóvel (até 5 fotos de 15MB cada)</Label>
+            <Label>Imagens do Imóvel (até 10 fotos de 15MB cada)</Label>
             <p className="text-xs text-muted-foreground mb-2">Clique em uma foto para defini-la como capa</p>
             <ImageUpload
               currentImages={editingImovel?.image_urls}

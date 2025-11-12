@@ -10,7 +10,7 @@ interface ImageUploadProps {
   onSetCover: (index: number) => void;
 }
 
-const MAX_IMAGES = 5;
+const MAX_IMAGES = 10;
 const MAX_SIZE = 15 * 1024 * 1024; // 15MB
 
 export const ImageUpload = ({ currentImages = [], coverIndex = 0, onImagesSelect, onRemoveImage, onSetCover }: ImageUploadProps) => {
