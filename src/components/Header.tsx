@@ -3,12 +3,7 @@ import { Button } from './ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { LogOut } from 'lucide-react';
 
-interface HeaderProps {
-  onExport: () => void;
-  onImport: () => void;
-}
-
-export const Header = ({ onExport, onImport }: HeaderProps) => {
+export const Header = () => {
   const { signOut, user } = useAuth();
 
   return (
@@ -17,7 +12,7 @@ export const Header = ({ onExport, onImport }: HeaderProps) => {
         <div className="flex items-center gap-4">
           <img src={logoWhite} alt="Geum" className="h-8 w-auto" />
           <div className="hidden sm:block border-l border-primary-foreground/20 pl-4">
-            <p className="text-xs font-light tracking-widest uppercase text-accent">
+            <p className="text-xs font-light tracking-widest uppercase text-primary-foreground">
               Sistema de Relatórios
             </p>
           </div>
@@ -29,22 +24,6 @@ export const Header = ({ onExport, onImport }: HeaderProps) => {
               {user.email}
             </span>
           )}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onExport}
-            className="bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 text-xs"
-          >
-            📥 Exportar
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onImport}
-            className="bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10 text-xs"
-          >
-            📤 Importar
-          </Button>
           <Button
             variant="outline"
             size="sm"
