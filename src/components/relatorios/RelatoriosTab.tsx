@@ -154,7 +154,12 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
 
     try {
       const element = reportRef.current;
-      const canvas = await html2canvas(element, { scale: 2 });
+      const canvas = await html2canvas(element, { 
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        logging: false
+      });
       const imgData = canvas.toDataURL('image/png');
 
       const pdf = new jsPDF('p', 'mm', 'a4');
@@ -268,6 +273,7 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
                       src={reportData.imovel.image_urls[reportData.imovel.cover_image_index || 0]}
                       alt={reportData.imovel.codigo}
                       className="w-full h-48 md:h-full object-cover"
+                      crossOrigin="anonymous"
                     />
                   </div>
                 </div>
@@ -360,7 +366,7 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
                 <div className="relative">
                   <div className="flex items-center justify-between mb-4">
                     <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center text-2xl">
-                      🚗
+                      🕵🏻
                     </div>
                     <span
                       className={`text-xs font-bold px-3 py-1.5 rounded-full ${
@@ -392,7 +398,7 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
                     <div className="w-10 h-10 rounded-lg bg-[#325df9]/10 flex items-center justify-center">
                       <span className="text-xl">📧</span>
                     </div>
-                    <h3 className="text-base font-bold text-black">Comparação de Leads</h3>
+                    <h3 className="text-base font-bold text-black">Acompanhamento Mensal de Leads</h3>
                   </div>
                   <div className="h-[280px]">
                     <Bar
@@ -426,9 +432,9 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
                 <div className="rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
-                      <span className="text-xl">🚗</span>
+                      <span className="text-xl">🕵🏻</span>
                     </div>
-                    <h3 className="text-base font-bold text-black">Comparação de Visitas</h3>
+                    <h3 className="text-base font-bold text-black">Acompanhamento Mensal de Visitas</h3>
                   </div>
                   <div className="h-[280px]">
                     <Bar
@@ -457,6 +463,16 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Mensagem de agradecimento */}
+          <div className="px-8 pb-6">
+            <div className="bg-gradient-to-r from-[#325df9]/5 to-[#1e3a8a]/5 rounded-xl p-6 border border-[#325df9]/20">
+              <p className="text-center text-sm text-gray-700 leading-relaxed">
+                <span className="font-semibold text-[#325df9]">Agradecemos</span> por manter seu imóvel com <span className="font-semibold">exclusividade</span> na <span className="font-semibold text-[#325df9]">Imobiliária Geum</span>. 
+                Nosso compromisso é oferecer o melhor serviço e dedicação para alcançar resultados excepcionais na comercialização do seu imóvel.
+              </p>
             </div>
           </div>
 
