@@ -4,14 +4,16 @@ import { X, Image as ImageIcon } from 'lucide-react';
 
 interface ImageUploadProps {
   currentImages?: string[];
+  coverIndex?: number;
   onImagesSelect: (files: File[]) => void;
   onRemoveImage: (index: number) => void;
+  onSetCover: (index: number) => void;
 }
 
 const MAX_IMAGES = 5;
 const MAX_SIZE = 15 * 1024 * 1024; // 15MB
 
-export const ImageUpload = ({ currentImages = [], onImagesSelect, onRemoveImage }: ImageUploadProps) => {
+export const ImageUpload = ({ currentImages = [], coverIndex = 0, onImagesSelect, onRemoveImage, onSetCover }: ImageUploadProps) => {
   const [previews, setPreviews] = useState<string[]>(currentImages);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -83,24 +85,36 @@ export const ImageUpload = ({ currentImages = [], onImagesSelect, onRemoveImage 
       {previews.length > 0 && (
         <div className="grid grid-cols-2 gap-3">
           {previews.map((preview, index) => (
-            <div key={index} className="relative group">
+            <div 
+              key={index} 
+              className="relative group cursor-pointer"
+              onClick={() => onSetCover(index)}
+              title="Clique para definir como capa"
+            >
               <img
                 src={preview}
                 alt={`Preview ${index + 1}`}
-                className="w-full h-32 object-cover rounded-lg border border-border"
+                className={`w-full h-32 object-cover rounded-lg border-2 transition-all ${
+                  index === coverIndex 
+                    ? 'border-accent shadow-lg' 
+                    : 'border-border hover:border-accent/50'
+                }`}
               />
               <Button
                 type="button"
                 variant="destructive"
                 size="icon"
-                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6"
-                onClick={() => handleRemove(index)}
+                className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 z-10"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemove(index);
+                }}
               >
                 <X className="h-3 w-3" />
               </Button>
-              {index === 0 && (
-                <div className="absolute bottom-2 left-2 bg-primary text-primary-foreground text-xs px-2 py-1 rounded">
-                  Capa
+              {index === coverIndex && (
+                <div className="absolute bottom-2 left-2 bg-accent text-accent-foreground text-xs px-2 py-1 rounded font-medium">
+                  ⭐ Capa
                 </div>
               )}
             </div>

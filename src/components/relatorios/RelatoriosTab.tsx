@@ -258,23 +258,39 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
               </div>
             </div>
 
-            {/* Informações do imóvel em cards brancos sobre o azul */}
-            <div className="grid grid-cols-2 gap-3 mt-6">
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
-                <p className="text-xs opacity-80 mb-1">Código</p>
-                <p className="font-semibold text-sm">{reportData.imovel.codigo}</p>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
-                <p className="text-xs opacity-80 mb-1">Tipo</p>
-                <p className="font-semibold text-sm">{reportData.imovel.tipo}</p>
-              </div>
-              <div className="col-span-2 bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
-                <p className="text-xs opacity-80 mb-1">Endereço</p>
-                <p className="font-semibold text-sm">{reportData.imovel.endereco}</p>
-              </div>
-              <div className="col-span-2 bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
-                <p className="text-xs opacity-80 mb-1">Cliente</p>
-                <p className="font-semibold text-sm">{reportData.imovel.cliente}</p>
+            {/* Layout com foto e informações lado a lado */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+              {/* Foto de capa do imóvel */}
+              {reportData.imovel.image_urls && reportData.imovel.image_urls.length > 0 && (
+                <div className="md:col-span-1">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden border border-white/20 h-full">
+                    <img
+                      src={reportData.imovel.image_urls[reportData.imovel.cover_image_index || 0]}
+                      alt={reportData.imovel.codigo}
+                      className="w-full h-48 md:h-full object-cover"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Informações do imóvel */}
+              <div className={`grid grid-cols-2 gap-3 ${reportData.imovel.image_urls && reportData.imovel.image_urls.length > 0 ? 'md:col-span-2' : 'md:col-span-3'}`}>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+                  <p className="text-xs opacity-80 mb-1">Código</p>
+                  <p className="font-semibold text-sm">{reportData.imovel.codigo}</p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+                  <p className="text-xs opacity-80 mb-1">Tipo</p>
+                  <p className="font-semibold text-sm">{reportData.imovel.tipo}</p>
+                </div>
+                <div className="col-span-2 bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+                  <p className="text-xs opacity-80 mb-1">Endereço</p>
+                  <p className="font-semibold text-sm">{reportData.imovel.endereco}</p>
+                </div>
+                <div className="col-span-2 bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
+                  <p className="text-xs opacity-80 mb-1">Cliente</p>
+                  <p className="font-semibold text-sm">{reportData.imovel.cliente}</p>
+                </div>
               </div>
             </div>
           </div>

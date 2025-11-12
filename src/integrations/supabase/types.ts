@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           cliente: string
           codigo: string
+          cover_image_index: number | null
           created_at: string | null
           data_cadastro: string | null
           endereco: string
@@ -29,6 +30,7 @@ export type Database = {
         Insert: {
           cliente: string
           codigo: string
+          cover_image_index?: number | null
           created_at?: string | null
           data_cadastro?: string | null
           endereco: string
@@ -40,6 +42,7 @@ export type Database = {
         Update: {
           cliente?: string
           codigo?: string
+          cover_image_index?: number | null
           created_at?: string | null
           data_cadastro?: string | null
           endereco?: string

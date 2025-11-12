@@ -28,6 +28,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [removedImageIndices, setRemovedImageIndices] = useState<number[]>([]);
+  const [coverImageIndex, setCoverImageIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -39,6 +40,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
         tipo: editingImovel.tipo,
         valor: editingImovel.valor ? String(editingImovel.valor) : '',
       });
+      setCoverImageIndex(editingImovel.cover_image_index || 0);
     } else {
       setFormData({
         codigo: '',
@@ -47,6 +49,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
         tipo: 'Casa',
         valor: '',
       });
+      setCoverImageIndex(0);
     }
     setErrors({});
     setImageFiles([]);
@@ -125,6 +128,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
         tipo: formData.tipo,
         valor: parseValor(formData.valor),
         image_urls: imageUrls,
+        cover_image_index: coverImageIndex,
         data_cadastro: editingImovel?.data_cadastro || new Date().toISOString(),
       };
 
@@ -216,17 +220,25 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
 
           <div>
             <Label>Imagens do Imóvel (até 5 fotos de 15MB cada)</Label>
+            <p className="text-xs text-muted-foreground mb-2">Clique em uma foto para defini-la como capa</p>
             <ImageUpload
               currentImages={editingImovel?.image_urls}
+              coverIndex={coverImageIndex}
               onImagesSelect={(files) => setImageFiles([...imageFiles, ...files])}
               onRemoveImage={(index) => {
                 if (editingImovel && index < (editingImovel.image_urls?.length || 0)) {
                   setRemovedImageIndices([...removedImageIndices, index]);
+                  if (coverImageIndex === index) {
+                    setCoverImageIndex(0);
+                  } else if (coverImageIndex > index) {
+                    setCoverImageIndex(coverImageIndex - 1);
+                  }
                 } else {
                   const newIndex = index - (editingImovel?.image_urls?.length || 0);
                   setImageFiles(imageFiles.filter((_, i) => i !== newIndex));
                 }
               }}
+              onSetCover={(index) => setCoverImageIndex(index)}
             />
           </div>
 

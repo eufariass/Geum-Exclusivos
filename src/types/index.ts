@@ -8,6 +8,7 @@ export interface Imovel {
   tipo: TipoImovel;
   valor?: number;
   image_urls?: string[];
+  cover_image_index?: number;
   data_cadastro: string;
   created_at?: string;
 }
