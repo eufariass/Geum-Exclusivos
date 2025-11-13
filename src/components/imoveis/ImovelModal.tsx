@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import type { Imovel, TipoImovel } from '@/types';
 import { supabaseStorageService } from '@/lib/supabaseStorage';
 import { ImageUpload } from './ImageUpload';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ImovelModalProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ interface ImovelModalProps {
 const tiposImovel: TipoImovel[] = ['Casa', 'Apartamento', 'Terreno', 'Comercial', 'Rural'];
 
 export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelModalProps) => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     codigo: '',
     titulo: '',
@@ -163,6 +165,8 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
         image_urls: imageUrls,
         cover_image_index: coverImageIndex,
         data_cadastro: editingImovel?.data_cadastro || new Date().toISOString(),
+        updated_by: user?.id,
+        ...(editingImovel ? {} : { created_by: user?.id }),
       };
 
       if (editingImovel) {
