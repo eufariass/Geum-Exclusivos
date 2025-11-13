@@ -10,7 +10,7 @@ export const supabaseStorageService = {
       .order('created_at', { ascending: false });
     
     if (error) throw error;
-    return data || [];
+    return (data || []) as Imovel[];
   },
 
   async addImovel(imovel: Omit<Imovel, 'id' | 'created_at'>): Promise<Imovel> {
@@ -21,7 +21,7 @@ export const supabaseStorageService = {
       .single();
     
     if (error) throw error;
-    return data;
+    return data as Imovel;
   },
 
   async updateImovel(id: string, updates: Partial<Imovel>): Promise<void> {

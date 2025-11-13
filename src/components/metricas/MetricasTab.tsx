@@ -6,12 +6,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import type { Imovel, Metrica } from '@/types';
 import { supabaseStorageService } from '@/lib/supabaseStorage';
 import { getCurrentMonth, getMonthName } from '@/lib/dateUtils';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface MetricasTabProps {
   onToast: (message: string, type: 'success' | 'error') => void;
 }
 
 export const MetricasTab = ({ onToast }: MetricasTabProps) => {
+  const { user } = useAuth();
   const [imoveis, setImoveis] = useState<Imovel[]>([]);
   const [metricas, setMetricas] = useState<Metrica[]>([]);
   const [loading, setLoading] = useState(true);
@@ -66,6 +68,7 @@ export const MetricasTab = ({ onToast }: MetricasTabProps) => {
             visualizacoes,
             visitas_realizadas,
             data_registro: new Date().toISOString(),
+            updated_by: user?.id,
           });
           onToast('Métrica atualizada com sucesso!', 'success');
         } else {
@@ -79,6 +82,8 @@ export const MetricasTab = ({ onToast }: MetricasTabProps) => {
           visualizacoes,
           visitas_realizadas,
           data_registro: new Date().toISOString(),
+          created_by: user?.id,
+          updated_by: user?.id,
         });
         onToast('Métrica adicionada com sucesso!', 'success');
       }

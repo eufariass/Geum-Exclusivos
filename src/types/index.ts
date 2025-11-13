@@ -1,5 +1,14 @@
 export type TipoImovel = 'Casa' | 'Apartamento' | 'Terreno' | 'Comercial' | 'Rural';
 
+export interface Profile {
+  id: string;
+  nome_completo: string;
+  avatar_url?: string;
+  cargo?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface Imovel {
   id: string;
   codigo: string;
@@ -17,6 +26,8 @@ export interface Imovel {
   cover_image_index?: number;
   data_cadastro: string;
   created_at?: string;
+  created_by?: string;
+  updated_by?: string;
 }
 
 export interface Metrica {
@@ -28,6 +39,8 @@ export interface Metrica {
   visitas_realizadas: number;
   data_registro: string;
   created_at?: string;
+  created_by?: string;
+  updated_by?: string;
 }
 
 export interface ExportData {
