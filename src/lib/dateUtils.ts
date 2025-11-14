@@ -1,7 +1,9 @@
 export const getMonthName = (yearMonth: string): string => {
   const [year, month] = yearMonth.split('-');
   const date = new Date(parseInt(year), parseInt(month) - 1);
-  return date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  const formatted = date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  // Substituir "De" por "de" para manter minúscula
+  return formatted.replace(' De ', ' de ');
 };
 
 export const getCurrentMonth = (): string => {

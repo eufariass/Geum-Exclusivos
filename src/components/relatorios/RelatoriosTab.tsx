@@ -467,7 +467,7 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
           <div className="px-8 pb-6">
             <div className="bg-gradient-to-r from-[#325df9]/5 to-[#1e3a8a]/5 rounded-xl p-6 border border-[#325df9]/20">
               <p className="text-center text-sm text-gray-700 leading-relaxed">
-                <span className="font-semibold text-[#325df9]">Agradecemos</span> por manter seu imóvel com <span className="font-semibold">exclusividade</span> na <span className="font-semibold text-[#325df9]">Imobiliária Geum</span>.
+                <span className="font-semibold text-[#325df9]">Agradecemos</span> por escolher a <span className="font-semibold">Exclusividade Geum</span>.
               </p>
             </div>
           </div>
