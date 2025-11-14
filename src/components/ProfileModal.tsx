@@ -30,7 +30,7 @@ export const ProfileModal = ({ open, onOpenChange }: ProfileModalProps) => {
   const fetchProfile = async () => {
     if (!user) return;
 
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from('profiles')
       .select('*')
       .eq('id', user.id)
@@ -42,9 +42,10 @@ export const ProfileModal = ({ open, onOpenChange }: ProfileModalProps) => {
     }
 
     if (data) {
-      setProfile(data);
-      setNomeCompleto(data.nome_completo || '');
-      setCargo(data.cargo || '');
+      const profileData = data as Profile;
+      setProfile(profileData);
+      setNomeCompleto(profileData.nome_completo || '');
+      setCargo(profileData.cargo || '');
     }
   };
 
@@ -53,7 +54,7 @@ export const ProfileModal = ({ open, onOpenChange }: ProfileModalProps) => {
 
     setLoading(true);
 
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('profiles')
       .update({
         nome_completo: nomeCompleto,
