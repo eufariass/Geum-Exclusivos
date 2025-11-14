@@ -54,10 +54,17 @@ export const MetricasTab = ({ onToast }: MetricasTabProps) => {
       return;
     }
 
+    if (!user) {
+      onToast('Usuário não autenticado', 'error');
+      return;
+    }
+
     try {
       const leads = parseInt(formData.leads) || 0;
       const visualizacoes = parseInt(formData.visualizacoes) || 0;
       const visitas_realizadas = parseInt(formData.visitasRealizadas) || 0;
+
+      console.log('Salvando métrica com user:', user.id);
 
       const existing = await supabaseStorageService.getMetricaByImovelMes(formData.imovelId, formData.mes);
 
@@ -68,7 +75,7 @@ export const MetricasTab = ({ onToast }: MetricasTabProps) => {
             visualizacoes,
             visitas_realizadas,
             data_registro: new Date().toISOString(),
-            updated_by: user?.id,
+            updated_by: user.id,
           });
           onToast('Métrica atualizada com sucesso!', 'success');
         } else {
@@ -82,8 +89,8 @@ export const MetricasTab = ({ onToast }: MetricasTabProps) => {
           visualizacoes,
           visitas_realizadas,
           data_registro: new Date().toISOString(),
-          created_by: user?.id,
-          updated_by: user?.id,
+          created_by: user.id,
+          updated_by: user.id,
         });
         onToast('Métrica adicionada com sucesso!', 'success');
       }
@@ -97,8 +104,9 @@ export const MetricasTab = ({ onToast }: MetricasTabProps) => {
         visitasRealizadas: '',
       });
     } catch (error) {
-      console.error('Erro ao salvar métrica:', error);
-      onToast('Erro ao salvar métrica', 'error');
+      console.error('Erro detalhado ao salvar métrica:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+      onToast(`Erro ao salvar métrica: ${errorMessage}`, 'error');
     }
   };
 
