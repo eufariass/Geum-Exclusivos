@@ -398,9 +398,6 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
               {leadsChartData && (
                 <div className="rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-lg bg-[#325df9]/10 flex items-center justify-center">
-                      <span className="text-xl">📧</span>
-                    </div>
                     <h3 className="text-base font-bold text-black">Acompanhamento Mensal de Leads</h3>
                   </div>
                   <div className="h-[280px]">
@@ -434,9 +431,6 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
               {visitasChartData && (
                 <div className="rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-lg bg-orange-100 flex items-center justify-center">
-                      <span className="text-xl">🕵🏻</span>
-                    </div>
                     <h3 className="text-base font-bold text-black">Acompanhamento Mensal de Visitas</h3>
                   </div>
                   <div className="h-[280px]">
