@@ -262,7 +262,7 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
               <img src={logoBlack} alt="Geum" className="h-12 w-auto brightness-0 invert" />
               <div className="text-right">
                 <h1 className="text-3xl font-bold">Relatório Mensal</h1>
-                <p className="text-sm opacity-90 capitalize mt-1">{getMonthName(selectedMes)}</p>
+                <p className="text-sm opacity-90 mt-1">{getMonthName(selectedMes)}</p>
               </div>
             </div>
 
