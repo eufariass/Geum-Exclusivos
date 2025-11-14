@@ -312,8 +312,8 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
                 <div className="absolute top-0 right-0 w-24 h-24 bg-[#325df9]/5 rounded-full -mr-12 -mt-12"></div>
                 <div className="relative">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-[#325df9]/10 flex items-center justify-center p-2">
-                      <img src={leadsIcon} alt="Leads" className="w-full h-full object-contain" />
+                    <div className="w-12 h-12 flex items-center justify-center">
+                      <img src={leadsIcon} alt="Leads" className="w-10 h-10 object-contain" />
                     </div>
                     <span
                       className={`text-xs font-bold px-3 py-1.5 rounded-full ${
@@ -340,8 +340,8 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
                 <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-full -mr-12 -mt-12"></div>
                 <div className="relative">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center p-2">
-                      <img src={visualizacoesIcon} alt="Visualizações" className="w-full h-full object-contain" />
+                    <div className="w-12 h-12 flex items-center justify-center">
+                      <img src={visualizacoesIcon} alt="Visualizações" className="w-10 h-10 object-contain" />
                     </div>
                     <span
                       className={`text-xs font-bold px-3 py-1.5 rounded-full ${
@@ -368,8 +368,8 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
                 <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/5 rounded-full -mr-12 -mt-12"></div>
                 <div className="relative">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-orange-100 flex items-center justify-center p-2">
-                      <img src={visitasIcon} alt="Visitas" className="w-full h-full object-contain" />
+                    <div className="w-12 h-12 flex items-center justify-center">
+                      <img src={visitasIcon} alt="Visitas" className="w-10 h-10 object-contain" />
                     </div>
                     <span
                       className={`text-xs font-bold px-3 py-1.5 rounded-full ${
