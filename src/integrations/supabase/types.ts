@@ -22,6 +22,7 @@ export type Database = {
           codigo: string
           cover_image_index: number | null
           created_at: string | null
+          created_by: string | null
           data_cadastro: string | null
           descricao: string | null
           endereco: string
@@ -30,6 +31,7 @@ export type Database = {
           quartos: number | null
           tipo: string
           titulo: string | null
+          updated_by: string | null
           vagas: number | null
           valor: number | null
         }
@@ -40,6 +42,7 @@ export type Database = {
           codigo: string
           cover_image_index?: number | null
           created_at?: string | null
+          created_by?: string | null
           data_cadastro?: string | null
           descricao?: string | null
           endereco: string
@@ -48,6 +51,7 @@ export type Database = {
           quartos?: number | null
           tipo: string
           titulo?: string | null
+          updated_by?: string | null
           vagas?: number | null
           valor?: number | null
         }
@@ -58,6 +62,7 @@ export type Database = {
           codigo?: string
           cover_image_index?: number | null
           created_at?: string | null
+          created_by?: string | null
           data_cadastro?: string | null
           descricao?: string | null
           endereco?: string
@@ -66,6 +71,7 @@ export type Database = {
           quartos?: number | null
           tipo?: string
           titulo?: string | null
+          updated_by?: string | null
           vagas?: number | null
           valor?: number | null
         }
@@ -74,31 +80,37 @@ export type Database = {
       metricas: {
         Row: {
           created_at: string | null
+          created_by: string | null
           data_registro: string | null
           id: string
           imovel_id: string
           leads: number
           mes: string
+          updated_by: string | null
           visitas_realizadas: number
           visualizacoes: number
         }
         Insert: {
           created_at?: string | null
+          created_by?: string | null
           data_registro?: string | null
           id?: string
           imovel_id: string
           leads?: number
           mes: string
+          updated_by?: string | null
           visitas_realizadas?: number
           visualizacoes?: number
         }
         Update: {
           created_at?: string | null
+          created_by?: string | null
           data_registro?: string | null
           id?: string
           imovel_id?: string
           leads?: number
           mes?: string
+          updated_by?: string | null
           visitas_realizadas?: number
           visualizacoes?: number
         }
@@ -111,6 +123,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          cargo: string | null
+          created_at: string | null
+          id: string
+          nome_completo: string
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          cargo?: string | null
+          created_at?: string | null
+          id: string
+          nome_completo: string
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          cargo?: string | null
+          created_at?: string | null
+          id?: string
+          nome_completo?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {
