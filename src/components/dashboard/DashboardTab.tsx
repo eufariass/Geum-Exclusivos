@@ -79,7 +79,7 @@ export const DashboardTab = () => {
     const last6Months = getLast6Months();
     const labels = last6Months.map((month) => {
       const [, m] = month.split('-');
-      return new Date(2000, parseInt(m) - 1).toLocaleDateString('pt-BR', { month: 'short' });
+      return new Date(2000, parseInt(m) - 1).toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '').toUpperCase();
     });
 
     const leadsData = last6Months.map((month) => {
@@ -96,18 +96,30 @@ export const DashboardTab = () => {
         {
           label: 'Leads',
           data: leadsData,
-          borderColor: 'hsl(150, 100%, 50%)',
-          backgroundColor: 'hsla(150, 100%, 50%, 0.1)',
+          borderColor: 'hsl(217, 91%, 60%)',
+          backgroundColor: 'hsla(217, 91%, 60%, 0.08)',
           fill: true,
           tension: 0.4,
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          pointBackgroundColor: 'hsl(217, 91%, 60%)',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
         },
         {
           label: 'Visitas',
           data: visitsData,
-          borderColor: 'hsl(220, 100%, 50%)',
-          backgroundColor: 'hsla(220, 100%, 50%, 0.1)',
+          borderColor: 'hsl(215, 20%, 40%)',
+          backgroundColor: 'hsla(215, 20%, 40%, 0.08)',
           fill: true,
           tension: 0.4,
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          pointBackgroundColor: 'hsl(215, 20%, 40%)',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
         },
       ],
     };
@@ -217,36 +229,75 @@ export const DashboardTab = () => {
       </div>
 
       {/* Chart */}
-      <Card className="p-6">
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold">Evolução - Últimos 6 Meses</h2>
+      <Card className="p-6 border-border/50">
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold tracking-tight">Evolução - Últimos 6 Meses</h2>
           <p className="text-sm text-muted-foreground mt-1">Acompanhamento de leads e visitas</p>
         </div>
-        <div className="h-[300px]">
+        <div className="h-[320px]">
           <Line
             data={chartData}
             options={{
               responsive: true,
               maintainAspectRatio: false,
+              interaction: {
+                mode: 'index',
+                intersect: false,
+              },
               plugins: {
                 legend: { 
                   position: 'top',
+                  align: 'end',
                   labels: {
                     usePointStyle: true,
-                    padding: 15
+                    padding: 20,
+                    font: {
+                      size: 12,
+                      weight: 500
+                    },
+                    boxWidth: 8,
+                    boxHeight: 8,
                   }
                 },
+                tooltip: {
+                  backgroundColor: 'hsl(var(--popover))',
+                  titleColor: 'hsl(var(--popover-foreground))',
+                  bodyColor: 'hsl(var(--popover-foreground))',
+                  borderColor: 'hsl(var(--border))',
+                  borderWidth: 1,
+                  padding: 12,
+                  displayColors: true,
+                  boxPadding: 6,
+                }
               },
               scales: {
                 y: { 
                   beginAtZero: true,
                   grid: {
-                    color: 'hsl(var(--border))'
+                    color: 'hsl(var(--border) / 0.3)',
+                  },
+                  border: {
+                    display: false
+                  },
+                  ticks: {
+                    padding: 8,
+                    font: {
+                      size: 11
+                    }
                   }
                 },
                 x: {
                   grid: {
                     display: false
+                  },
+                  border: {
+                    display: false
+                  },
+                  ticks: {
+                    padding: 8,
+                    font: {
+                      size: 11
+                    }
                   }
                 }
               },
