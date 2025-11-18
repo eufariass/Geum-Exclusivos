@@ -12,14 +12,15 @@ interface LeadFormProps {
   imovelId: string;
   imovelCodigo: string;
   imovelValor?: number;
+  tiposDisponiveis?: ('Venda' | 'Locação')[];
 }
 
-export const LeadForm = ({ imovelId, imovelCodigo, imovelValor }: LeadFormProps) => {
+export const LeadForm = ({ imovelId, imovelCodigo, imovelValor, tiposDisponiveis = ['Venda', 'Locação'] }: LeadFormProps) => {
   const [formData, setFormData] = useState({
     nome: '',
     telefone: '',
     email: '',
-    tipo_interesse: 'Venda' as 'Venda' | 'Locação',
+    tipo_interesse: (tiposDisponiveis.length === 1 ? tiposDisponiveis[0] : 'Venda') as 'Venda' | 'Locação',
     termos: false,
   });
   const [loading, setLoading] = useState(false);
@@ -166,27 +167,33 @@ export const LeadForm = ({ imovelId, imovelCodigo, imovelValor }: LeadFormProps)
             />
           </div>
 
-          <div className="space-y-2">
-            <Label className="font-semibold">Que tipo de negócio você procura?</Label>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant={formData.tipo_interesse === 'Venda' ? 'default' : 'outline'}
-                className="flex-1"
-                onClick={() => setFormData({ ...formData, tipo_interesse: 'Venda' })}
-              >
-                Venda
-              </Button>
-              <Button
-                type="button"
-                variant={formData.tipo_interesse === 'Locação' ? 'default' : 'outline'}
-                className="flex-1"
-                onClick={() => setFormData({ ...formData, tipo_interesse: 'Locação' })}
-              >
-                Locação
-              </Button>
+          {tiposDisponiveis.length > 1 && (
+            <div className="space-y-2">
+              <Label className="font-semibold">Que tipo de negócio você procura?</Label>
+              <div className="flex gap-2">
+                {tiposDisponiveis.includes('Venda') && (
+                  <Button
+                    type="button"
+                    variant={formData.tipo_interesse === 'Venda' ? 'default' : 'outline'}
+                    className="flex-1"
+                    onClick={() => setFormData({ ...formData, tipo_interesse: 'Venda' })}
+                  >
+                    Venda
+                  </Button>
+                )}
+                {tiposDisponiveis.includes('Locação') && (
+                  <Button
+                    type="button"
+                    variant={formData.tipo_interesse === 'Locação' ? 'default' : 'outline'}
+                    className="flex-1"
+                    onClick={() => setFormData({ ...formData, tipo_interesse: 'Locação' })}
+                  >
+                    Locação
+                  </Button>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="flex items-center gap-2">
             <Checkbox

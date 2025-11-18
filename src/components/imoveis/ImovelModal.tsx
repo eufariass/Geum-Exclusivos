@@ -33,6 +33,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
     banheiros: '',
     area_m2: '',
     vagas: '',
+    tipos_disponiveis: ['Venda', 'Locação'] as ('Venda' | 'Locação')[],
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -55,6 +56,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
         banheiros: editingImovel.banheiros ? String(editingImovel.banheiros) : '',
         area_m2: editingImovel.area_m2 ? String(editingImovel.area_m2) : '',
         vagas: editingImovel.vagas ? String(editingImovel.vagas) : '',
+        tipos_disponiveis: editingImovel.tipos_disponiveis || ['Venda', 'Locação'],
       });
       setCoverImageIndex(editingImovel.cover_image_index || 0);
       setImageOrder(editingImovel.image_urls || []);
@@ -71,6 +73,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
         banheiros: '',
         area_m2: '',
         vagas: '',
+        tipos_disponiveis: ['Venda', 'Locação'],
       });
       setCoverImageIndex(0);
       setImageOrder([]);
@@ -164,6 +167,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
         vagas: formData.vagas ? parseInt(formData.vagas) : undefined,
         image_urls: imageUrls,
         cover_image_index: coverImageIndex,
+        tipos_disponiveis: formData.tipos_disponiveis,
         data_cadastro: editingImovel?.data_cadastro || new Date().toISOString(),
         updated_by: user?.id,
         ...(editingImovel ? {} : { created_by: user?.id }),
@@ -249,6 +253,45 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div>
+            <Label>Tipos de Negócio Disponíveis *</Label>
+            <div className="flex gap-4 mt-2">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="tipo-venda"
+                  checked={formData.tipos_disponiveis.includes('Venda')}
+                  onChange={(e) => {
+                    const newTipos = e.target.checked
+                      ? [...formData.tipos_disponiveis, 'Venda']
+                      : formData.tipos_disponiveis.filter(t => t !== 'Venda');
+                    setFormData((prev) => ({ ...prev, tipos_disponiveis: newTipos as ('Venda' | 'Locação')[] }));
+                  }}
+                  className="w-4 h-4"
+                />
+                <Label htmlFor="tipo-venda" className="cursor-pointer">Venda</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="tipo-locacao"
+                  checked={formData.tipos_disponiveis.includes('Locação')}
+                  onChange={(e) => {
+                    const newTipos = e.target.checked
+                      ? [...formData.tipos_disponiveis, 'Locação']
+                      : formData.tipos_disponiveis.filter(t => t !== 'Locação');
+                    setFormData((prev) => ({ ...prev, tipos_disponiveis: newTipos as ('Venda' | 'Locação')[] }));
+                  }}
+                  className="w-4 h-4"
+                />
+                <Label htmlFor="tipo-locacao" className="cursor-pointer">Locação</Label>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Selecione os tipos de negócio disponíveis para este imóvel
+            </p>
           </div>
 
           <div>
