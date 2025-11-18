@@ -10,12 +10,27 @@ interface LeadsTabProps {
 }
 
 const statusColumns = [
-  { id: 'Aguardando', label: 'Aguardando', color: 'bg-gray-100' },
-  { id: 'Em Atendimento', label: 'Em Atendimento', color: 'bg-blue-50' },
-  { id: 'Visita', label: 'Visita', color: 'bg-purple-50' },
-  { id: 'Proposta', label: 'Proposta', color: 'bg-orange-50' },
-  { id: 'Fechado', label: 'Fechado', color: 'bg-green-50' },
-  { id: 'Inativo', label: 'Inativo', color: 'bg-red-50' },
+  { 
+    id: 'Aguardando', 
+    label: 'Aguardando', 
+    color: 'bg-amber-50 dark:bg-amber-950/20',
+    icon: '⏳',
+    description: 'Novos leads'
+  },
+  { 
+    id: 'Enviado ao corretor', 
+    label: 'Enviado ao corretor', 
+    color: 'bg-blue-50 dark:bg-blue-950/20',
+    icon: '📤',
+    description: 'Em atendimento'
+  },
+  { 
+    id: 'Follow up', 
+    label: 'Follow up', 
+    color: 'bg-purple-50 dark:bg-purple-950/20',
+    icon: '🔄',
+    description: 'Acompanhamento'
+  },
 ] as const;
 
 export const LeadsTab = ({ onToast }: LeadsTabProps) => {
@@ -124,40 +139,61 @@ export const LeadsTab = ({ onToast }: LeadsTabProps) => {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-foreground">Gestão de Leads</h1>
-        <div className="text-sm text-muted-foreground">
-          Total: {leads.length} leads
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Gestão de Leads</h1>
+          <p className="text-muted-foreground mt-1">Acompanhe seus leads do primeiro contato ao fechamento</p>
+        </div>
+        <div className="text-right">
+          <p className="text-2xl font-bold text-foreground">{leads.length}</p>
+          <p className="text-sm text-muted-foreground">Leads totais</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {statusColumns.map((column) => {
           const columnLeads = getLeadsByStatus(column.id as Lead['status']);
           return (
             <div key={column.id} className="flex flex-col">
-              <div className={`${column.color} rounded-t-lg p-3 border-b-2 border-border`}>
-                <h3 className="font-semibold text-sm text-foreground">
-                  {column.label}
-                </h3>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {columnLeads.length}/{leads.length}
-                </p>
+              <div className={`${column.color} rounded-t-xl p-4 border-b-2 border-primary/10`}>
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-2xl">{column.icon}</span>
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-base text-foreground">
+                      {column.label}
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      {column.description}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between mt-3">
+                  <span className="text-2xl font-bold text-foreground">{columnLeads.length}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {columnLeads.length === 0 ? 'Nenhum lead' : columnLeads.length === 1 ? '1 lead' : `${columnLeads.length} leads`}
+                  </span>
+                </div>
               </div>
               <div 
-                className="bg-card border border-t-0 rounded-b-lg p-2 space-y-2 min-h-[200px] transition-colors"
+                className="bg-card/50 border border-t-0 rounded-b-xl p-3 space-y-3 min-h-[400px] transition-all hover:bg-card/80"
                 onDragOver={handleDragOver}
                 onDrop={(e) => handleDrop(e, column.id as Lead['status'])}
               >
-                {columnLeads.map((lead) => (
-                  <LeadCard
-                    key={lead.id}
-                    lead={lead}
-                    imovel={getImovelByCodigo(lead.imovel_id)}
-                    onStatusChange={handleStatusChange}
-                    onDelete={handleDelete}
-                    onDragStart={handleDragStart}
-                  />
-                ))}
+                {columnLeads.length === 0 ? (
+                  <div className="flex items-center justify-center h-32 text-muted-foreground text-sm">
+                    Arraste leads para cá
+                  </div>
+                ) : (
+                  columnLeads.map((lead) => (
+                    <LeadCard
+                      key={lead.id}
+                      lead={lead}
+                      imovel={getImovelByCodigo(lead.imovel_id)}
+                      onStatusChange={handleStatusChange}
+                      onDelete={handleDelete}
+                      onDragStart={handleDragStart}
+                    />
+                  ))
+                )}
               </div>
             </div>
           );

@@ -11,6 +11,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 
 interface LeadModalProps {
@@ -18,14 +19,16 @@ interface LeadModalProps {
   imovel?: Imovel;
   isOpen: boolean;
   onClose: () => void;
+  onStatusChange: (leadId: string, newStatus: Lead['status']) => void;
 }
 
-export const LeadModal = ({ lead, imovel, isOpen, onClose }: LeadModalProps) => {
+export const LeadModal = ({ lead, imovel, isOpen, onClose, onStatusChange }: LeadModalProps) => {
   const [formData, setFormData] = useState({
     nome: lead.nome,
     telefone: lead.telefone,
     email: lead.email,
     observacoes: lead.observacoes || '',
+    status: lead.status,
   });
   const [comments, setComments] = useState<LeadComment[]>([]);
   const [newComment, setNewComment] = useState('');
@@ -38,6 +41,7 @@ export const LeadModal = ({ lead, imovel, isOpen, onClose }: LeadModalProps) => 
       telefone: lead.telefone,
       email: lead.email,
       observacoes: lead.observacoes || '',
+      status: lead.status,
     });
     
     if (isOpen) {
@@ -173,6 +177,44 @@ export const LeadModal = ({ lead, imovel, isOpen, onClose }: LeadModalProps) => 
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   required
                 />
+              </div>
+
+              <div>
+                <Label htmlFor="status">Status do Lead *</Label>
+                <Select 
+                  value={formData.status} 
+                  onValueChange={(value) => {
+                    setFormData({ ...formData, status: value as Lead['status'] });
+                    onStatusChange(lead.id, value as Lead['status']);
+                  }}
+                >
+                  <SelectTrigger id="status">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Aguardando">
+                      <div className="flex items-center gap-2">
+                        <span>⏳</span>
+                        <span>Aguardando</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="Enviado ao corretor">
+                      <div className="flex items-center gap-2">
+                        <span>📤</span>
+                        <span>Enviado ao corretor</span>
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="Follow up">
+                      <div className="flex items-center gap-2">
+                        <span>🔄</span>
+                        <span>Follow up</span>
+                      </div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Alterar o status move o lead para outra coluna
+                </p>
               </div>
 
               <div>
