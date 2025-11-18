@@ -34,21 +34,21 @@ export function AppSidebar({ activeTab, onTabChange }: AppSidebarProps) {
       <div className="h-full bg-primary flex flex-col">
         {/* Logo */}
         <div className={`p-4 border-b border-primary-foreground/10 ${isCollapsed ? 'px-2' : ''}`}>
-          {isCollapsed ? (
-            <div className="flex justify-center">
-              <img src={logoWhite} alt="Geum" className="h-8 w-auto" />
-            </div>
-          ) : (
-            <div className="flex flex-col gap-1">
-              <img src={logoWhite} alt="Geum" className="h-8 w-auto mb-2" />
-              <h2 className="text-primary-foreground font-bold text-sm leading-tight">
-                CRM GEUM
-              </h2>
-              <p className="text-primary-foreground/70 text-xs">
-                INTELLIGENCE
-              </p>
-            </div>
-          )}
+        {isCollapsed ? (
+          <div className="flex justify-center">
+            <img src={logoWhite} alt="Geum" className="h-6 w-auto object-contain" />
+          </div>
+        ) : (
+          <div className="flex flex-col gap-1">
+            <img src={logoWhite} alt="Geum" className="h-6 w-auto object-contain mb-2" />
+            <h2 className="text-primary-foreground font-bold text-xs leading-tight tracking-wide">
+              CRM GEUM
+            </h2>
+            <p className="text-primary-foreground/70 text-[10px] tracking-wider">
+              INTELLIGENCE
+            </p>
+          </div>
+        )}
         </div>
 
         {/* Menu */}
