@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { Lead, Imovel } from '@/types';
 import { LeadCard } from './LeadCard';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Clock, Send, RotateCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface LeadsTabProps {
@@ -13,22 +13,22 @@ const statusColumns = [
   { 
     id: 'Aguardando', 
     label: 'Aguardando', 
-    color: 'bg-amber-50 dark:bg-amber-950/20',
-    icon: '⏳',
+    color: 'bg-muted/50',
+    icon: Clock,
     description: 'Novos leads'
   },
   { 
     id: 'Enviado ao corretor', 
     label: 'Enviado ao corretor', 
-    color: 'bg-blue-50 dark:bg-blue-950/20',
-    icon: '📤',
+    color: 'bg-muted/50',
+    icon: Send,
     description: 'Em atendimento'
   },
   { 
     id: 'Follow up', 
     label: 'Follow up', 
-    color: 'bg-purple-50 dark:bg-purple-950/20',
-    icon: '🔄',
+    color: 'bg-muted/50',
+    icon: RotateCw,
     description: 'Acompanhamento'
   },
 ] as const;
@@ -154,9 +154,11 @@ export const LeadsTab = ({ onToast }: LeadsTabProps) => {
           const columnLeads = getLeadsByStatus(column.id as Lead['status']);
           return (
             <div key={column.id} className="flex flex-col">
-              <div className={`${column.color} rounded-t-xl p-4 border-b-2 border-primary/10`}>
+              <div className={`${column.color} rounded-t-xl p-4 border-b-2 border-border/30`}>
                 <div className="flex items-center gap-3 mb-2">
-                  <span className="text-2xl">{column.icon}</span>
+                  <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
+                    <column.icon className="h-5 w-5 text-muted-foreground" />
+                  </div>
                   <div className="flex-1">
                     <h3 className="font-semibold text-base text-foreground">
                       {column.label}
