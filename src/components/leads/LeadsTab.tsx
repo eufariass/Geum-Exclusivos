@@ -13,21 +13,21 @@ const statusColumns = [
   { 
     id: 'Aguardando', 
     label: 'Aguardando', 
-    color: 'bg-muted/50',
+    color: 'bg-muted',
     icon: Clock,
     description: 'Novos leads'
   },
   { 
     id: 'Enviado ao corretor', 
     label: 'Enviado ao corretor', 
-    color: 'bg-muted/50',
+    color: 'bg-muted',
     icon: Send,
     description: 'Em atendimento'
   },
   { 
     id: 'Follow up', 
     label: 'Follow up', 
-    color: 'bg-muted/50',
+    color: 'bg-muted',
     icon: RotateCw,
     description: 'Acompanhamento'
   },
