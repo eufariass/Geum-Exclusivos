@@ -65,4 +65,12 @@ export interface Lead {
   updated_by?: string;
 }
 
+export interface LeadComment {
+  id: string;
+  lead_id: string;
+  comment: string;
+  created_by?: string;
+  created_at: string;
+}
+
 export type TabType = 'dashboard' | 'imoveis' | 'leads' | 'metricas' | 'relatorios';

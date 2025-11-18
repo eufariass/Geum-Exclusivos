@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Lead, Imovel } from '@/types';
 import { LeadCard } from './LeadCard';
 import { Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface LeadsTabProps {
   onToast: (message: string, type: 'success' | 'error') => void;
@@ -21,6 +22,7 @@ export const LeadsTab = ({ onToast }: LeadsTabProps) => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [imoveis, setImoveis] = useState<Imovel[]>([]);
   const [loading, setLoading] = useState(true);
+  const [draggedLead, setDraggedLead] = useState<Lead | null>(null);
 
   useEffect(() => {
     loadData();
@@ -91,6 +93,26 @@ export const LeadsTab = ({ onToast }: LeadsTabProps) => {
     return imoveis.find(i => i.id === imovelId);
   };
 
+  const handleDragStart = (lead: Lead) => {
+    setDraggedLead(lead);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = async (e: React.DragEvent, newStatus: Lead['status']) => {
+    e.preventDefault();
+    
+    if (!draggedLead || draggedLead.status === newStatus) {
+      setDraggedLead(null);
+      return;
+    }
+
+    await handleStatusChange(draggedLead.id, newStatus);
+    setDraggedLead(null);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -121,7 +143,11 @@ export const LeadsTab = ({ onToast }: LeadsTabProps) => {
                   {columnLeads.length}/{leads.length}
                 </p>
               </div>
-              <div className="bg-card border border-t-0 rounded-b-lg p-2 space-y-2 min-h-[200px]">
+              <div 
+                className="bg-card border border-t-0 rounded-b-lg p-2 space-y-2 min-h-[200px] transition-colors"
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, column.id as Lead['status'])}
+              >
                 {columnLeads.map((lead) => (
                   <LeadCard
                     key={lead.id}
@@ -129,6 +155,7 @@ export const LeadsTab = ({ onToast }: LeadsTabProps) => {
                     imovel={getImovelByCodigo(lead.imovel_id)}
                     onStatusChange={handleStatusChange}
                     onDelete={handleDelete}
+                    onDragStart={handleDragStart}
                   />
                 ))}
               </div>
