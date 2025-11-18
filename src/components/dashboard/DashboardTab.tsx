@@ -1,5 +1,6 @@
 import { useMemo, useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
+import { Building2, Users, FileText, BarChart3 } from 'lucide-react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -127,16 +128,64 @@ export const DashboardTab = () => {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KPICard title="Total de Imóveis" value={stats.totalImoveis} icon="🏘️" />
-        <KPICard title="Leads do Mês" value={stats.leads.value} icon="📧" trend={stats.leads.trend} />
-        <KPICard
-          title="Visualizações"
-          value={stats.views.value.toLocaleString('pt-BR')}
-          icon="👁️"
-          trend={stats.views.trend}
-        />
-        <KPICard title="Visitas Realizadas" value={stats.visits.value} icon="🚗" trend={stats.visits.trend} />
+      {/* Welcome Section */}
+      <div className="bg-gradient-to-r from-primary to-primary/80 rounded-xl p-6 text-primary-foreground">
+        <h1 className="text-2xl font-bold mb-2">Bem-vindo de volta!</h1>
+        <p className="text-primary-foreground/90 text-sm">
+          Hoje é o dia de transformar oportunidades! Use nossa Inteligência de Marketing e alcance resultados extraordinários.
+        </p>
+      </div>
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <button className="bg-card hover:bg-card/80 border border-border rounded-xl p-4 text-left transition-all hover:shadow-md">
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <Building2 className="h-6 w-6 text-primary" />
+            </div>
+            <span className="text-sm font-medium">Imóveis</span>
+          </div>
+        </button>
+        <button className="bg-card hover:bg-card/80 border border-border rounded-xl p-4 text-left transition-all hover:shadow-md">
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center">
+              <Users className="h-6 w-6 text-blue-500" />
+            </div>
+            <span className="text-sm font-medium">Ver Leads</span>
+          </div>
+        </button>
+        <button className="bg-card hover:bg-card/80 border border-border rounded-xl p-4 text-left transition-all hover:shadow-md">
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center">
+              <FileText className="h-6 w-6 text-purple-500" />
+            </div>
+            <span className="text-sm font-medium">Propostas</span>
+          </div>
+        </button>
+        <button className="bg-card hover:bg-card/80 border border-border rounded-xl p-4 text-left transition-all hover:shadow-md">
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center">
+              <BarChart3 className="h-6 w-6 text-green-500" />
+            </div>
+            <span className="text-sm font-medium">Times</span>
+          </div>
+        </button>
+      </div>
+
+      {/* KPI Cards */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4">Métricas Principais</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <KPICard title="Total de Imóveis" value={stats.totalImoveis} icon="🏘️" />
+          <KPICard title="Leads do Mês" value={stats.leads.value} icon="📧" trend={stats.leads.trend} />
+          <KPICard
+            title="Visualizações"
+            value={stats.views.value.toLocaleString('pt-BR')}
+            icon="👁️"
+            trend={stats.views.trend}
+          />
+          <KPICard title="Visitas Realizadas" value={stats.visits.value} icon="🚗" trend={stats.visits.trend} />
+        </div>
       </div>
 
       <div className="bg-card rounded-xl p-6 shadow-sm border border-border">
@@ -159,37 +208,57 @@ export const DashboardTab = () => {
       </div>
 
       <div className="bg-card rounded-xl p-6 shadow-sm border border-border">
-        <h2 className="text-lg font-semibold mb-4">Imóveis Recentes</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">Lista de Imóveis</h2>
+          <a href="#" className="text-sm text-primary hover:underline">Ver todos os imóveis</a>
+        </div>
+        <div className="text-xs text-muted-foreground mb-4">
+          Atualizado em: {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+        </div>
         {recentImoveis.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <p className="text-4xl mb-2">🏠</p>
             <p>Nenhum imóvel cadastrado ainda</p>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {recentImoveis.map((imovel) => {
-              const metricaAtual = metricas.find((m) => m.imovel_id === imovel.id && m.mes === currentMonth);
-              return (
-                <div key={imovel.id} className="border border-border rounded-lg p-4 card-hover">
-                  <div className="flex items-start justify-between mb-2">
-                    <span className="text-xs font-semibold text-muted-foreground bg-muted px-2 py-1 rounded">
-                      {imovel.codigo}
-                    </span>
-                    <span className="text-xs text-muted-foreground">{imovel.tipo}</span>
-                  </div>
-                  <h3 className="font-semibold text-sm mb-1">{imovel.endereco}</h3>
-                  <p className="text-xs text-muted-foreground mb-3">{imovel.cliente}</p>
-                  {metricaAtual ? (
-                    <div className="flex gap-3 text-xs">
-                      <span>📧 {metricaAtual.leads}</span>
-                      <span>👁️ {metricaAtual.visualizacoes.toLocaleString('pt-BR')}</span>
-                    </div>
-                  ) : (
-                    <p className="text-xs text-muted-foreground italic">Sem métricas este mês</p>
-                  )}
-                </div>
-              );
-            })}
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b text-left text-xs text-muted-foreground">
+                  <th className="pb-3 font-medium">Imóvel</th>
+                  <th className="pb-3 font-medium">Angariador</th>
+                  <th className="pb-3 font-medium text-right">Valor (R$)</th>
+                  <th className="pb-3 font-medium">Status</th>
+                  <th className="pb-3 font-medium">Tipo de negócio</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentImoveis.map((imovel) => (
+                  <tr key={imovel.id} className="border-b hover:bg-muted/30 transition-colors">
+                    <td className="py-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-primary">{imovel.codigo}</span>
+                      </div>
+                    </td>
+                    <td className="py-3 text-sm">{imovel.cliente}</td>
+                    <td className="py-3 text-sm text-right">
+                      {imovel.valor ? new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(imovel.valor) : '-'}
+                    </td>
+                    <td className="py-3">
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
+                        Em aprovação
+                      </span>
+                    </td>
+                    <td className="py-3 text-sm">
+                      {imovel.tipos_disponiveis?.join(', ') || 'Venda'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <div className="mt-4 text-xs text-muted-foreground text-right">
+              Exibindo {recentImoveis.length} de {imoveis.length} imóveis ativos
+            </div>
           </div>
         )}
       </div>
