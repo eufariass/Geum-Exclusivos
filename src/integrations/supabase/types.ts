@@ -77,6 +77,59 @@ export type Database = {
         }
         Relationships: []
       }
+      leads: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          email: string
+          id: string
+          imovel_id: string
+          nome: string
+          observacoes: string | null
+          status: string
+          telefone: string
+          tipo_interesse: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          email: string
+          id?: string
+          imovel_id: string
+          nome: string
+          observacoes?: string | null
+          status?: string
+          telefone: string
+          tipo_interesse: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          email?: string
+          id?: string
+          imovel_id?: string
+          nome?: string
+          observacoes?: string | null
+          status?: string
+          telefone?: string
+          tipo_interesse?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_imovel_id_fkey"
+            columns: ["imovel_id"]
+            isOneToOne: false
+            referencedRelation: "imoveis"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       metricas: {
         Row: {
           created_at: string | null

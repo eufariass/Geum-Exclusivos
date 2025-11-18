@@ -50,4 +50,19 @@ export interface ExportData {
   versao: string;
 }
 
-export type TabType = 'dashboard' | 'imoveis' | 'metricas' | 'relatorios';
+export interface Lead {
+  id: string;
+  imovel_id: string;
+  nome: string;
+  telefone: string;
+  email: string;
+  tipo_interesse: 'Venda' | 'Locação';
+  status: 'Aguardando' | 'Em Atendimento' | 'Visita' | 'Proposta' | 'Fechado' | 'Inativo';
+  observacoes?: string;
+  created_at?: string;
+  updated_at?: string;
+  created_by?: string;
+  updated_by?: string;
+}
+
+export type TabType = 'dashboard' | 'imoveis' | 'leads' | 'metricas' | 'relatorios';
