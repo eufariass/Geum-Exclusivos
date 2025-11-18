@@ -274,7 +274,7 @@ export const DashboardTab = () => {
                 y: { 
                   beginAtZero: true,
                   grid: {
-                    color: 'hsl(var(--border) / 0.3)',
+                    display: false,
                   },
                   border: {
                     display: false
