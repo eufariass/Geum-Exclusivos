@@ -85,7 +85,7 @@ export const LeadForm = ({ imovelId, imovelCodigo, imovelValor }: LeadFormProps)
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full">
       <CardContent className="p-6 space-y-6">
         {/* Título e Valor */}
         <div className="flex items-center justify-between">
@@ -211,6 +211,19 @@ export const LeadForm = ({ imovelId, imovelCodigo, imovelValor }: LeadFormProps)
             disabled={loading}
           >
             {loading ? 'Enviando...' : 'Enviar ao corretor'}
+          </Button>
+
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full text-base py-6 font-semibold"
+            onClick={() => {
+              const whatsappMessage = `Olá, gostaria de agendar uma visita ao imóvel ${imovelCodigo}`;
+              const whatsappLink = `https://wa.me/554333413000?text=${encodeURIComponent(whatsappMessage)}`;
+              window.open(whatsappLink, '_blank');
+            }}
+          >
+            Agendar visita
           </Button>
         </form>
       </CardContent>

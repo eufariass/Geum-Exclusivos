@@ -95,8 +95,8 @@ const ImovelLanding = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-5xl">
-        {/* Galeria de Imagens */}
+      <main className="container mx-auto px-4 py-8 max-w-7xl">
+        {/* Galeria de Imagens - Full Width */}
         {imovel.image_urls && imovel.image_urls.length > 0 && (
           <Card className="mb-6 overflow-hidden">
             <CardContent className="p-0 relative">
@@ -107,30 +107,34 @@ const ImovelLanding = () => {
                   className="w-full h-full object-cover"
                 />
                 
+                {/* Botões de navegação */}
                 {imovel.image_urls.length > 1 && (
                   <>
-                    <button
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full shadow-lg"
                       onClick={prevImage}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background text-foreground rounded-full p-2 transition-colors"
-                      aria-label="Imagem anterior"
                     >
-                      <ChevronLeft className="h-6 w-6" />
-                    </button>
-                    <button
+                      <ChevronLeft className="h-5 w-5" />
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full shadow-lg"
                       onClick={nextImage}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-background/80 hover:bg-background text-foreground rounded-full p-2 transition-colors"
-                      aria-label="Próxima imagem"
                     >
-                      <ChevronRight className="h-6 w-6" />
-                    </button>
-                    
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-background/80 px-3 py-1 rounded-full text-sm">
-                      {currentImageIndex + 1} / {imovel.image_urls.length}
-                    </div>
+                      <ChevronRight className="h-5 w-5" />
+                    </Button>
                   </>
                 )}
+
+                {/* Contador de imagens */}
+                <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded-full text-sm">
+                  {currentImageIndex + 1} / {imovel.image_urls.length}
+                </div>
               </div>
-              
+
               {/* Miniaturas */}
               {imovel.image_urls.length > 1 && (
                 <div className="p-4 flex gap-2 overflow-x-auto">
@@ -157,100 +161,108 @@ const ImovelLanding = () => {
           </Card>
         )}
 
-        {/* Informações do Imóvel */}
-        <Card className="mb-6">
-          <CardContent className="p-6 space-y-4">
-            {imovel.titulo && (
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">{imovel.titulo}</h1>
-              </div>
-            )}
-            
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Código</p>
-              <p className="text-lg font-semibold text-foreground">{imovel.codigo}</p>
-            </div>
-            
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Endereço</p>
-              <p className="text-lg text-foreground">{imovel.endereco}</p>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="flex gap-6">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Tipo</p>
-                  <p className="text-base text-foreground">{imovel.tipo}</p>
-                </div>
-                
-                {imovel.valor && (
+        {/* Layout de 2 Colunas */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Coluna Esquerda - Informações do Imóvel */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Informações Principais */}
+            <Card>
+              <CardContent className="p-6 space-y-4">
+                {imovel.titulo && (
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">Valor</p>
-                    <p className="text-xl font-bold text-primary">
-                      {new Intl.NumberFormat('pt-BR', {
-                        style: 'currency',
-                        currency: 'BRL',
-                      }).format(imovel.valor)}
-                    </p>
+                    <h1 className="text-2xl font-bold text-foreground">{imovel.titulo}</h1>
                   </div>
                 )}
-              </div>
+                
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Código</p>
+                  <p className="text-lg font-semibold text-foreground">{imovel.codigo}</p>
+                </div>
+                
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Endereço</p>
+                  <p className="text-lg text-foreground">{imovel.endereco}</p>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="flex gap-6">
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-1">Tipo</p>
+                      <p className="text-base text-foreground">{imovel.tipo}</p>
+                    </div>
+                    
+                    {imovel.valor && (
+                      <div>
+                        <p className="text-sm text-muted-foreground mb-1">Valor</p>
+                        <p className="text-xl font-bold text-primary">
+                          {new Intl.NumberFormat('pt-BR', {
+                            style: 'currency',
+                            currency: 'BRL',
+                          }).format(imovel.valor)}
+                        </p>
+                      </div>
+                    )}
+                  </div>
 
-              {/* Características */}
-              {(imovel.quartos || imovel.banheiros || imovel.area_m2 || imovel.vagas) && (
-                <div className="flex flex-wrap gap-4 pt-2">
-                  {imovel.quartos && (
-                    <div className="flex items-center gap-2 text-foreground">
-                      <BedDouble className="h-5 w-5 text-muted-foreground" />
-                      <span>{imovel.quartos} {imovel.quartos === 1 ? 'Quarto' : 'Quartos'}</span>
-                    </div>
-                  )}
-                  {imovel.banheiros && (
-                    <div className="flex items-center gap-2 text-foreground">
-                      <Bath className="h-5 w-5 text-muted-foreground" />
-                      <span>{imovel.banheiros} {imovel.banheiros === 1 ? 'Banheiro' : 'Banheiros'}</span>
-                    </div>
-                  )}
-                  {imovel.area_m2 && (
-                    <div className="flex items-center gap-2 text-foreground">
-                      <Maximize className="h-5 w-5 text-muted-foreground" />
-                      <span>{imovel.area_m2} m²</span>
-                    </div>
-                  )}
-                  {imovel.vagas && (
-                    <div className="flex items-center gap-2 text-foreground">
-                      <Car className="h-5 w-5 text-muted-foreground" />
-                      <span>{imovel.vagas} {imovel.vagas === 1 ? 'Vaga' : 'Vagas'}</span>
+                  {/* Características */}
+                  {(imovel.quartos || imovel.banheiros || imovel.area_m2 || imovel.vagas) && (
+                    <div className="flex flex-wrap gap-4 pt-2">
+                      {imovel.quartos && (
+                        <div className="flex items-center gap-2 text-foreground">
+                          <BedDouble className="h-5 w-5 text-muted-foreground" />
+                          <span>{imovel.quartos} {imovel.quartos === 1 ? 'Quarto' : 'Quartos'}</span>
+                        </div>
+                      )}
+                      {imovel.banheiros && (
+                        <div className="flex items-center gap-2 text-foreground">
+                          <Bath className="h-5 w-5 text-muted-foreground" />
+                          <span>{imovel.banheiros} {imovel.banheiros === 1 ? 'Banheiro' : 'Banheiros'}</span>
+                        </div>
+                      )}
+                      {imovel.area_m2 && (
+                        <div className="flex items-center gap-2 text-foreground">
+                          <Maximize className="h-5 w-5 text-muted-foreground" />
+                          <span>{imovel.area_m2} m²</span>
+                        </div>
+                      )}
+                      {imovel.vagas && (
+                        <div className="flex items-center gap-2 text-foreground">
+                          <Car className="h-5 w-5 text-muted-foreground" />
+                          <span>{imovel.vagas} {imovel.vagas === 1 ? 'Vaga' : 'Vagas'}</span>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-              )}
+              </CardContent>
+            </Card>
+
+            {/* Descrição */}
+            {imovel.descricao && (
+              <Card>
+                <CardContent className="p-6">
+                  <h2 className="text-xl font-semibold text-foreground mb-4">Sobre o Imóvel</h2>
+                  <p 
+                    className="text-[15px] leading-[1.7] text-foreground whitespace-pre-wrap"
+                    style={{ textAlign: 'justify', fontFamily: 'Inter, sans-serif' }}
+                  >
+                    {imovel.descricao}
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Coluna Direita - Formulário Fixo */}
+          <div className="lg:col-span-1">
+            <div className="lg:sticky lg:top-24">
+              <LeadForm 
+                imovelId={imovel.id}
+                imovelCodigo={imovel.codigo}
+                imovelValor={imovel.valor}
+              />
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Descrição */}
-        {imovel.descricao && (
-          <Card className="mb-6">
-            <CardContent className="p-6">
-              <h2 className="text-xl font-semibold text-foreground mb-4">Sobre o Imóvel</h2>
-              <p 
-                className="text-[15px] leading-[1.7] text-foreground whitespace-pre-wrap"
-                style={{ textAlign: 'justify', fontFamily: 'Inter, sans-serif' }}
-              >
-                {imovel.descricao}
-              </p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Formulário de Lead */}
-        <div className="mb-6">
-          <LeadForm 
-            imovelId={imovel.id}
-            imovelCodigo={imovel.codigo}
-            imovelValor={imovel.valor}
-          />
+          </div>
         </div>
       </main>
 
