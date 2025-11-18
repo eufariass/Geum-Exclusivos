@@ -260,6 +260,7 @@ const ImovelLanding = () => {
                 imovelId={imovel.id}
                 imovelCodigo={imovel.codigo}
                 imovelValor={imovel.valor}
+                tiposDisponiveis={imovel.tipos_disponiveis}
               />
             </div>
           </div>

@@ -24,6 +24,7 @@ export interface Imovel {
   vagas?: number;
   image_urls?: string[];
   cover_image_index?: number;
+  tipos_disponiveis?: ('Venda' | 'Locação')[];
   data_cadastro: string;
   created_at?: string;
   created_by?: string;
