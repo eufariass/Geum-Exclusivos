@@ -58,7 +58,7 @@ export interface Lead {
   telefone: string;
   email: string;
   tipo_interesse: 'Venda' | 'Locação';
-  status: 'Aguardando' | 'Em Atendimento' | 'Visita' | 'Proposta' | 'Fechado' | 'Inativo';
+  status: 'Aguardando' | 'Enviado ao corretor' | 'Follow up';
   observacoes?: string;
   created_at?: string;
   updated_at?: string;

@@ -22,15 +22,6 @@ interface LeadCardProps {
   onDragStart: (lead: Lead) => void;
 }
 
-const statusOptions: Lead['status'][] = [
-  'Aguardando',
-  'Em Atendimento',
-  'Visita',
-  'Proposta',
-  'Fechado',
-  'Inativo',
-];
-
 export const LeadCard = ({ lead, imovel, onStatusChange, onDelete, onDragStart }: LeadCardProps) => {
   const [showModal, setShowModal] = useState(false);
 
@@ -41,35 +32,46 @@ export const LeadCard = ({ lead, imovel, onStatusChange, onDelete, onDragStart }
   return (
     <>
       <Card 
-        className="hover:shadow-md transition-shadow cursor-move"
+        className="group hover:shadow-lg transition-all duration-200 cursor-move border-l-4 border-l-primary/20 hover:border-l-primary hover:scale-[1.02]"
         draggable
         onDragStart={() => onDragStart(lead)}
       >
-        <CardContent className="p-3 space-y-2">
+        <CardContent className="p-4 space-y-3">
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
-              <Badge className={`${getInterestBadgeColor(lead.tipo_interesse)} text-xs mb-1`}>
-                {lead.tipo_interesse.toUpperCase()}
-              </Badge>
-              <p className="font-semibold text-sm text-foreground truncate">
+              <div className="flex items-center gap-2 mb-2">
+                <Badge className={`${getInterestBadgeColor(lead.tipo_interesse)} text-xs font-medium`}>
+                  {lead.tipo_interesse}
+                </Badge>
+                {lead.created_at && (
+                  <span className="text-xs text-muted-foreground">
+                    {format(new Date(lead.created_at), "dd/MM", { locale: ptBR })}
+                  </span>
+                )}
+              </div>
+              <h4 className="font-semibold text-base text-foreground truncate">
                 {lead.nome}
-              </p>
+              </h4>
               {imovel && (
-                <p className="text-xs text-muted-foreground truncate">
-                  {imovel.codigo}
+                <p className="text-xs text-muted-foreground truncate mt-1">
+                  📍 {imovel.codigo}
                 </p>
               )}
             </div>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
                   <MoreVertical className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => setShowModal(true)}>
                   <Edit className="h-4 w-4 mr-2" />
-                  Editar
+                  Editar lead
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onDelete(lead.id)} className="text-destructive">
                   <Trash2 className="h-4 w-4 mr-2" />
@@ -79,51 +81,38 @@ export const LeadCard = ({ lead, imovel, onStatusChange, onDelete, onDragStart }
             </DropdownMenu>
           </div>
 
-          <div className="space-y-1 text-xs">
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <Phone className="h-3 w-3" />
-              <a href={`tel:${lead.telefone}`} className="hover:text-primary truncate">
-                {lead.telefone}
-              </a>
-            </div>
-            <div className="flex items-center gap-1 text-muted-foreground">
-              <Mail className="h-3 w-3" />
-              <a href={`mailto:${lead.email}`} className="hover:text-primary truncate">
-                {lead.email}
-              </a>
-            </div>
+          <div className="space-y-2">
+            <a 
+              href={`tel:${lead.telefone}`} 
+              className="flex items-center gap-2 text-sm text-foreground hover:text-primary transition-colors group/link"
+            >
+              <Phone className="h-3.5 w-3.5 text-muted-foreground group-hover/link:text-primary" />
+              <span className="truncate">{lead.telefone}</span>
+            </a>
+            <a 
+              href={`mailto:${lead.email}`} 
+              className="flex items-center gap-2 text-sm text-foreground hover:text-primary transition-colors group/link"
+            >
+              <Mail className="h-3.5 w-3.5 text-muted-foreground group-hover/link:text-primary" />
+              <span className="truncate">{lead.email}</span>
+            </a>
           </div>
 
-          {lead.created_at && (
-            <p className="text-xs text-muted-foreground">
-              {format(new Date(lead.created_at), "dd/MM/yyyy - HH:mm", { locale: ptBR })}
-            </p>
-          )}
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="w-full text-xs">
-                Alterar Status
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-48">
-              {statusOptions.map((status) => (
-                <DropdownMenuItem
-                  key={status}
-                  onClick={() => onStatusChange(lead.id, status)}
-                  disabled={status === lead.status}
-                >
-                  {status}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
           {lead.observacoes && (
-            <div className="bg-muted/50 rounded p-2 text-xs text-muted-foreground">
-              {lead.observacoes}
+            <div className="bg-muted/30 rounded-md p-2 text-xs text-muted-foreground line-clamp-2">
+              💬 {lead.observacoes}
             </div>
           )}
+
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="w-full text-xs font-medium hover:bg-primary/10"
+            onClick={() => setShowModal(true)}
+          >
+            <Edit className="h-3 w-3 mr-1" />
+            Abrir lead
+          </Button>
         </CardContent>
       </Card>
 
@@ -132,6 +121,7 @@ export const LeadCard = ({ lead, imovel, onStatusChange, onDelete, onDragStart }
         imovel={imovel}
         isOpen={showModal}
         onClose={() => setShowModal(false)}
+        onStatusChange={onStatusChange}
       />
     </>
   );
