@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
-import { Header } from '@/components/Header';
-import { TabNavigation } from '@/components/TabNavigation';
+import { TopHeader } from '@/components/TopHeader';
+import { AppSidebar } from '@/components/AppSidebar';
+import { SidebarProvider } from '@/components/ui/sidebar';
 import { DashboardTab } from '@/components/dashboard/DashboardTab';
 import { ImoveisTab } from '@/components/imoveis/ImoveisTab';
 import { LeadsTab } from '@/components/leads/LeadsTab';
@@ -19,26 +20,31 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted">
-      <Header />
-      <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
-      
-      <main className="container mx-auto px-6 py-8">
-        {activeTab === 'dashboard' && <DashboardTab key={refreshKey} />}
-        {activeTab === 'imoveis' && (
-          <ImoveisTab onToast={showToast} key={refreshKey} />
-        )}
-        {activeTab === 'leads' && (
-          <LeadsTab onToast={showToast} key={refreshKey} />
-        )}
-        {activeTab === 'metricas' && (
-          <MetricasTab onToast={showToast} key={refreshKey} />
-        )}
-        {activeTab === 'relatorios' && <RelatoriosTab showToast={showToast} key={refreshKey} />}
-      </main>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-background">
+        <AppSidebar activeTab={activeTab} onTabChange={setActiveTab} />
+        
+        <div className="flex-1 flex flex-col">
+          <TopHeader />
+          
+          <main className="flex-1 p-6 overflow-auto">
+            {activeTab === 'dashboard' && <DashboardTab key={refreshKey} />}
+            {activeTab === 'imoveis' && (
+              <ImoveisTab onToast={showToast} key={refreshKey} />
+            )}
+            {activeTab === 'leads' && (
+              <LeadsTab onToast={showToast} key={refreshKey} />
+            )}
+            {activeTab === 'metricas' && (
+              <MetricasTab onToast={showToast} key={refreshKey} />
+            )}
+            {activeTab === 'relatorios' && <RelatoriosTab showToast={showToast} key={refreshKey} />}
+          </main>
+        </div>
 
-      <ToastContainer />
-    </div>
+        <ToastContainer />
+      </div>
+    </SidebarProvider>
   );
 };
 
