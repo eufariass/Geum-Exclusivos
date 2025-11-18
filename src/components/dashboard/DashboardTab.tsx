@@ -1,6 +1,6 @@
 import { useMemo, useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
-import { Building2, Users, FileText, BarChart3 } from 'lucide-react';
+import { Building2, TrendingUp, Eye, Calendar, Plus, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -13,8 +13,9 @@ import {
   Filler,
 } from 'chart.js';
 import { supabaseStorageService } from '@/lib/supabaseStorage';
-import { getCurrentMonth, getPreviousMonth, getLast6Months, getMonthName } from '@/lib/dateUtils';
-import { KPICard } from './KPICard';
+import { getCurrentMonth, getPreviousMonth, getLast6Months } from '@/lib/dateUtils';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import type { Imovel, Metrica } from '@/types';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
@@ -115,81 +116,112 @@ export const DashboardTab = () => {
   const recentImoveis = useMemo(() => {
     return [...imoveis]
       .sort((a, b) => new Date(b.data_cadastro).getTime() - new Date(a.data_cadastro).getTime())
-      .slice(0, 3);
+      .slice(0, 5);
   }, [imoveis]);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">Carregando dashboard...</div>
+        <div className="text-muted-foreground">Carregando...</div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-primary to-primary/80 rounded-xl p-6 text-primary-foreground">
-        <h1 className="text-2xl font-bold mb-2">Bem-vindo de volta!</h1>
-        <p className="text-primary-foreground/90 text-sm">
-          Hoje é o dia de transformar oportunidades! Use nossa Inteligência de Marketing e alcance resultados extraordinários.
-        </p>
+      {/* Header */}
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        <p className="text-muted-foreground mt-1">Visão geral das suas métricas e imóveis</p>
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <button className="bg-card hover:bg-card/80 border border-border rounded-xl p-4 text-left transition-all hover:shadow-md">
-          <div className="flex flex-col items-center gap-2">
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+      {/* Stats Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card className="p-6 hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Total de Imóveis</p>
+              <p className="text-3xl font-bold mt-2">{stats.totalImoveis}</p>
+            </div>
+            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
               <Building2 className="h-6 w-6 text-primary" />
             </div>
-            <span className="text-sm font-medium">Imóveis</span>
           </div>
-        </button>
-        <button className="bg-card hover:bg-card/80 border border-border rounded-xl p-4 text-left transition-all hover:shadow-md">
-          <div className="flex flex-col items-center gap-2">
-            <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center">
-              <Users className="h-6 w-6 text-blue-500" />
+        </Card>
+
+        <Card className="p-6 hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Leads do Mês</p>
+              <p className="text-3xl font-bold mt-2">{stats.leads.value}</p>
+              {stats.leads.trend.direction !== 'neutral' && (
+                <div className={`flex items-center gap-1 mt-1 text-sm ${stats.leads.trend.direction === 'up' ? 'text-green-600' : 'text-red-600'}`}>
+                  {stats.leads.trend.direction === 'up' ? (
+                    <ArrowUpRight className="h-4 w-4" />
+                  ) : (
+                    <ArrowDownRight className="h-4 w-4" />
+                  )}
+                  <span>{stats.leads.trend.value}%</span>
+                </div>
+              )}
             </div>
-            <span className="text-sm font-medium">Ver Leads</span>
-          </div>
-        </button>
-        <button className="bg-card hover:bg-card/80 border border-border rounded-xl p-4 text-left transition-all hover:shadow-md">
-          <div className="flex flex-col items-center gap-2">
-            <div className="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center">
-              <FileText className="h-6 w-6 text-purple-500" />
+            <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
+              <TrendingUp className="h-6 w-6 text-blue-600" />
             </div>
-            <span className="text-sm font-medium">Propostas</span>
           </div>
-        </button>
-        <button className="bg-card hover:bg-card/80 border border-border rounded-xl p-4 text-left transition-all hover:shadow-md">
-          <div className="flex flex-col items-center gap-2">
-            <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center">
-              <BarChart3 className="h-6 w-6 text-green-500" />
+        </Card>
+
+        <Card className="p-6 hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Visualizações</p>
+              <p className="text-3xl font-bold mt-2">{stats.views.value.toLocaleString('pt-BR')}</p>
+              {stats.views.trend.direction !== 'neutral' && (
+                <div className={`flex items-center gap-1 mt-1 text-sm ${stats.views.trend.direction === 'up' ? 'text-green-600' : 'text-red-600'}`}>
+                  {stats.views.trend.direction === 'up' ? (
+                    <ArrowUpRight className="h-4 w-4" />
+                  ) : (
+                    <ArrowDownRight className="h-4 w-4" />
+                  )}
+                  <span>{stats.views.trend.value}%</span>
+                </div>
+              )}
             </div>
-            <span className="text-sm font-medium">Times</span>
+            <div className="h-12 w-12 rounded-full bg-purple-500/10 flex items-center justify-center">
+              <Eye className="h-6 w-6 text-purple-600" />
+            </div>
           </div>
-        </button>
+        </Card>
+
+        <Card className="p-6 hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">Visitas Realizadas</p>
+              <p className="text-3xl font-bold mt-2">{stats.visits.value}</p>
+              {stats.visits.trend.direction !== 'neutral' && (
+                <div className={`flex items-center gap-1 mt-1 text-sm ${stats.visits.trend.direction === 'up' ? 'text-green-600' : 'text-red-600'}`}>
+                  {stats.visits.trend.direction === 'up' ? (
+                    <ArrowUpRight className="h-4 w-4" />
+                  ) : (
+                    <ArrowDownRight className="h-4 w-4" />
+                  )}
+                  <span>{stats.visits.trend.value}%</span>
+                </div>
+              )}
+            </div>
+            <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
+              <Calendar className="h-6 w-6 text-green-600" />
+            </div>
+          </div>
+        </Card>
       </div>
 
-      {/* KPI Cards */}
-      <div>
-        <h2 className="text-lg font-semibold mb-4">Métricas Principais</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <KPICard title="Total de Imóveis" value={stats.totalImoveis} icon="🏘️" />
-          <KPICard title="Leads do Mês" value={stats.leads.value} icon="📧" trend={stats.leads.trend} />
-          <KPICard
-            title="Visualizações"
-            value={stats.views.value.toLocaleString('pt-BR')}
-            icon="👁️"
-            trend={stats.views.trend}
-          />
-          <KPICard title="Visitas Realizadas" value={stats.visits.value} icon="🚗" trend={stats.visits.trend} />
+      {/* Chart */}
+      <Card className="p-6">
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold">Evolução - Últimos 6 Meses</h2>
+          <p className="text-sm text-muted-foreground mt-1">Acompanhamento de leads e visitas</p>
         </div>
-      </div>
-
-      <div className="bg-card rounded-xl p-6 shadow-sm border border-border">
-        <h2 className="text-lg font-semibold mb-4">Evolução - Últimos 6 Meses</h2>
         <div className="h-[300px]">
           <Line
             data={chartData}
@@ -197,71 +229,87 @@ export const DashboardTab = () => {
               responsive: true,
               maintainAspectRatio: false,
               plugins: {
-                legend: { position: 'top' },
+                legend: { 
+                  position: 'top',
+                  labels: {
+                    usePointStyle: true,
+                    padding: 15
+                  }
+                },
               },
               scales: {
-                y: { beginAtZero: true },
+                y: { 
+                  beginAtZero: true,
+                  grid: {
+                    color: 'hsl(var(--border))'
+                  }
+                },
+                x: {
+                  grid: {
+                    display: false
+                  }
+                }
               },
             }}
           />
         </div>
-      </div>
+      </Card>
 
-      <div className="bg-card rounded-xl p-6 shadow-sm border border-border">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">Lista de Imóveis</h2>
-          <a href="#" className="text-sm text-primary hover:underline">Ver todos os imóveis</a>
+      {/* Recent Properties Table */}
+      <Card className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-xl font-semibold">Imóveis Recentes</h2>
+            <p className="text-sm text-muted-foreground mt-1">Últimos imóveis cadastrados</p>
+          </div>
+          <Button variant="outline" size="sm" className="gap-2">
+            <Plus className="h-4 w-4" />
+            Novo Imóvel
+          </Button>
         </div>
-        <div className="text-xs text-muted-foreground mb-4">
-          Atualizado em: {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-        </div>
+        
         {recentImoveis.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <p className="text-4xl mb-2">🏠</p>
-            <p>Nenhum imóvel cadastrado ainda</p>
+          <div className="text-center py-12 text-muted-foreground">
+            <Building2 className="h-12 w-12 mx-auto mb-3 opacity-50" />
+            <p>Nenhum imóvel cadastrado</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b text-left text-xs text-muted-foreground">
-                  <th className="pb-3 font-medium">Imóvel</th>
-                  <th className="pb-3 font-medium">Angariador</th>
-                  <th className="pb-3 font-medium text-right">Valor (R$)</th>
-                  <th className="pb-3 font-medium">Status</th>
-                  <th className="pb-3 font-medium">Tipo de negócio</th>
+                <tr className="border-b text-left">
+                  <th className="pb-3 font-semibold text-sm text-muted-foreground">Código</th>
+                  <th className="pb-3 font-semibold text-sm text-muted-foreground">Cliente</th>
+                  <th className="pb-3 font-semibold text-sm text-muted-foreground text-right">Valor</th>
+                  <th className="pb-3 font-semibold text-sm text-muted-foreground">Tipo</th>
+                  <th className="pb-3 font-semibold text-sm text-muted-foreground">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {recentImoveis.map((imovel) => (
-                  <tr key={imovel.id} className="border-b hover:bg-muted/30 transition-colors">
-                    <td className="py-3">
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm font-medium text-primary">{imovel.codigo}</span>
-                      </div>
+                  <tr key={imovel.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
+                    <td className="py-4">
+                      <span className="font-medium">{imovel.codigo}</span>
                     </td>
-                    <td className="py-3 text-sm">{imovel.cliente}</td>
-                    <td className="py-3 text-sm text-right">
-                      {imovel.valor ? new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(imovel.valor) : '-'}
+                    <td className="py-4 text-sm text-muted-foreground">{imovel.cliente}</td>
+                    <td className="py-4 text-sm text-right font-medium">
+                      {imovel.valor ? `R$ ${new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2 }).format(imovel.valor)}` : '-'}
                     </td>
-                    <td className="py-3">
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
-                        Em aprovação
-                      </span>
-                    </td>
-                    <td className="py-3 text-sm">
+                    <td className="py-4 text-sm text-muted-foreground">
                       {imovel.tipos_disponiveis?.join(', ') || 'Venda'}
+                    </td>
+                    <td className="py-4">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                        Ativo
+                      </span>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            <div className="mt-4 text-xs text-muted-foreground text-right">
-              Exibindo {recentImoveis.length} de {imoveis.length} imóveis ativos
-            </div>
           </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 };
