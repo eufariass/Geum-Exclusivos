@@ -3,6 +3,7 @@ import { Header } from '@/components/Header';
 import { TabNavigation } from '@/components/TabNavigation';
 import { DashboardTab } from '@/components/dashboard/DashboardTab';
 import { ImoveisTab } from '@/components/imoveis/ImoveisTab';
+import { LeadsTab } from '@/components/leads/LeadsTab';
 import { MetricasTab } from '@/components/metricas/MetricasTab';
 import { RelatoriosTab } from '@/components/relatorios/RelatoriosTab';
 import { useToastManager } from '@/components/Toast';
@@ -26,6 +27,9 @@ const Index = () => {
         {activeTab === 'dashboard' && <DashboardTab key={refreshKey} />}
         {activeTab === 'imoveis' && (
           <ImoveisTab onToast={showToast} key={refreshKey} />
+        )}
+        {activeTab === 'leads' && (
+          <LeadsTab onToast={showToast} key={refreshKey} />
         )}
         {activeTab === 'metricas' && (
           <MetricasTab onToast={showToast} key={refreshKey} />

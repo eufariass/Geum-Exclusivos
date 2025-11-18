@@ -5,6 +5,7 @@ import type { Imovel } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Home, BedDouble, Bath, Car, Maximize } from 'lucide-react';
+import { LeadForm } from '@/components/leads/LeadForm';
 import logoBlack from '@/assets/logo-geum-black.png';
 import logoWhite from '@/assets/logo-geum-white.png';
 
@@ -72,9 +73,6 @@ const ImovelLanding = () => {
       </div>
     );
   }
-
-  const whatsappMessage = `Olá, vim da página exclusivos e gostaria de saber mais sobre o imóvel ${imovel.codigo}`;
-  const whatsappLink = `https://wa.me/554333413000?text=${encodeURIComponent(whatsappMessage)}`;
 
   return (
     <div className="min-h-screen bg-background">
@@ -246,17 +244,13 @@ const ImovelLanding = () => {
           </Card>
         )}
 
-        {/* Botão WhatsApp */}
-        <div className="flex justify-center">
-          <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto">
-            <Button 
-              size="lg"
-              className="w-full sm:w-auto text-base px-8 py-6 font-semibold"
-              style={{ backgroundColor: '#00ff88', color: '#000' }}
-            >
-              Saber mais sobre este imóvel
-            </Button>
-          </a>
+        {/* Formulário de Lead */}
+        <div className="mb-6">
+          <LeadForm 
+            imovelId={imovel.id}
+            imovelCodigo={imovel.codigo}
+            imovelValor={imovel.valor}
+          />
         </div>
       </main>
 
