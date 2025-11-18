@@ -19,6 +19,7 @@ interface LeadCardProps {
   imovel?: Imovel;
   onStatusChange: (leadId: string, newStatus: Lead['status']) => void;
   onDelete: (leadId: string) => void;
+  onDragStart: (lead: Lead) => void;
 }
 
 const statusOptions: Lead['status'][] = [
@@ -30,7 +31,7 @@ const statusOptions: Lead['status'][] = [
   'Inativo',
 ];
 
-export const LeadCard = ({ lead, imovel, onStatusChange, onDelete }: LeadCardProps) => {
+export const LeadCard = ({ lead, imovel, onStatusChange, onDelete, onDragStart }: LeadCardProps) => {
   const [showModal, setShowModal] = useState(false);
 
   const getInterestBadgeColor = (tipo: string) => {
@@ -39,7 +40,11 @@ export const LeadCard = ({ lead, imovel, onStatusChange, onDelete }: LeadCardPro
 
   return (
     <>
-      <Card className="hover:shadow-md transition-shadow">
+      <Card 
+        className="hover:shadow-md transition-shadow cursor-move"
+        draggable
+        onDragStart={() => onDragStart(lead)}
+      >
         <CardContent className="p-3 space-y-2">
           <div className="flex items-start justify-between gap-2">
             <div className="flex-1 min-w-0">
