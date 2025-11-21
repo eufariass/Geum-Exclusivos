@@ -254,7 +254,7 @@ const ImovelLanding = () => {
             )}
 
             {/* Mapa de Localização */}
-            <LocationMap endereco={imovel.endereco} />
+            <LocationMap cep={(imovel as any).cep} endereco={imovel.endereco} />
           </div>
 
           {/* Coluna Direita - Formulário Fixo */}
