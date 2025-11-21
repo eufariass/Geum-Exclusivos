@@ -3,6 +3,10 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
+// Token público do Mapbox para exibir o mapa na landing page
+// Este token pode ser rotacionado a qualquer momento na sua conta Mapbox
+const MAPBOX_TOKEN = 'pk.eyJ1IjoiZmVsaXBlZmFyaWFzMzYyOSIsImEiOiJjbWk5NnU5b2swazQ4MmxvYWd0a2xoNmV5In0.vVK5Q-UMqPUTiyJ17cI72w';
+
 interface LocationMapProps {
   cep?: string;
   endereco: string;
@@ -96,14 +100,7 @@ export const LocationMap = ({ cep, endereco }: LocationMapProps) => {
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current || !coordinates || loading) return;
 
-    // Usar token configurado pelo usuário
-    const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
-    
-    if (!MAPBOX_TOKEN) {
-      console.error('Token do Mapbox não configurado. Configure VITE_MAPBOX_TOKEN nos secrets.');
-      return;
-    }
-    
+    // Configura o token do Mapbox (público)
     mapboxgl.accessToken = MAPBOX_TOKEN;
 
     // Criar mapa com estilo moderno
