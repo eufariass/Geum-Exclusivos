@@ -52,8 +52,8 @@ Deno.serve(async (req) => {
 
     console.log('Sending to n8n webhook:', webhookData);
 
-    // Enviar para o webhook da n8n
-    const webhookResponse = await fetch('https://n8n.foradacasa.com/webhook-test/exclusivos', {
+    // Enviar para o webhook
+    const webhookResponse = await fetch('https://webhook.foradacasa.com/webhook/exclusivos', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
