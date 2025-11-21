@@ -42,16 +42,31 @@ export const LeadForm = ({ imovelId, imovelCodigo, imovelValor, tiposDisponiveis
     setLoading(true);
 
     try {
-      const { error } = await supabase.from('leads').insert({
+      const { data: leadData, error } = await supabase.from('leads').insert({
         imovel_id: imovelId,
         nome: formData.nome.trim(),
         telefone: formData.telefone.trim(),
         email: formData.email.trim(),
         tipo_interesse: formData.tipo_interesse,
         status: 'Aguardando',
-      });
+      }).select().single();
 
       if (error) throw error;
+
+      // Enviar webhook para n8n
+      try {
+        await supabase.functions.invoke('send-lead-webhook', {
+          body: {
+            lead_id: leadData.id,
+            nome: formData.nome.trim(),
+            telefone: formData.telefone.trim(),
+            imovel_id: imovelId,
+          },
+        });
+      } catch (webhookError) {
+        console.error('Erro ao enviar webhook:', webhookError);
+        // Não interrompe o fluxo se o webhook falhar
+      }
 
       toast.success('Sua mensagem foi enviada ao corretor!');
       setFormData({
