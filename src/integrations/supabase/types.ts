@@ -17,8 +17,10 @@ export type Database = {
       imoveis: {
         Row: {
           area_m2: number | null
+          bairro: string | null
           banheiros: number | null
           cep: string | null
+          cidade: string | null
           cliente: string
           codigo: string
           cover_image_index: number | null
@@ -27,10 +29,13 @@ export type Database = {
           data_cadastro: string | null
           descricao: string | null
           endereco: string
+          estado: string | null
           id: string
           image_urls: string[] | null
+          numero: string | null
           plataformas_anuncio: string[] | null
           quartos: number | null
+          rua: string | null
           tipo: string
           tipos_disponiveis: string[] | null
           titulo: string | null
@@ -40,8 +45,10 @@ export type Database = {
         }
         Insert: {
           area_m2?: number | null
+          bairro?: string | null
           banheiros?: number | null
           cep?: string | null
+          cidade?: string | null
           cliente: string
           codigo: string
           cover_image_index?: number | null
@@ -50,10 +57,13 @@ export type Database = {
           data_cadastro?: string | null
           descricao?: string | null
           endereco: string
+          estado?: string | null
           id?: string
           image_urls?: string[] | null
+          numero?: string | null
           plataformas_anuncio?: string[] | null
           quartos?: number | null
+          rua?: string | null
           tipo: string
           tipos_disponiveis?: string[] | null
           titulo?: string | null
@@ -63,8 +73,10 @@ export type Database = {
         }
         Update: {
           area_m2?: number | null
+          bairro?: string | null
           banheiros?: number | null
           cep?: string | null
+          cidade?: string | null
           cliente?: string
           codigo?: string
           cover_image_index?: number | null
@@ -73,10 +85,13 @@ export type Database = {
           data_cadastro?: string | null
           descricao?: string | null
           endereco?: string
+          estado?: string | null
           id?: string
           image_urls?: string[] | null
+          numero?: string | null
           plataformas_anuncio?: string[] | null
           quartos?: number | null
+          rua?: string | null
           tipo?: string
           tipos_disponiveis?: string[] | null
           titulo?: string | null

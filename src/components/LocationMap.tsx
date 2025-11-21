@@ -23,38 +23,50 @@ export const LocationMap = ({ cep, endereco }: LocationMapProps) => {
   const [coordinates, setCoordinates] = useState<Coordinates | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Função para buscar coordenadas usando o Mapbox Geocoding SOMENTE pelo CEP
-  const fetchCoordinatesFromCEP = async (cep?: string): Promise<Coordinates | null> => {
+  // Função para buscar coordenadas usando endereço completo no Mapbox
+  const fetchCoordinatesFromAddress = async (endereco: string, cep?: string): Promise<Coordinates | null> => {
     try {
-      if (!cep) {
-        console.warn('[Mapbox] CEP não informado, impossível localizar imóvel.');
-        return null;
+      // Tentar buscar pelo endereço completo primeiro
+      if (endereco) {
+        const enderecoCompleto = `${endereco}, Londrina, Paraná, Brasil`;
+        const addressQuery = encodeURIComponent(enderecoCompleto);
+        const addressUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${addressQuery}.json?access_token=${MAPBOX_TOKEN}&country=br&limit=1&language=pt-BR`;
+
+        console.log('[Mapbox] Buscando coordenadas por endereço:', enderecoCompleto);
+        const responseAddress = await fetch(addressUrl);
+        const dataAddress = await responseAddress.json();
+
+        if (dataAddress && Array.isArray(dataAddress.features) && dataAddress.features.length > 0) {
+          const [lng, lat] = dataAddress.features[0].center;
+          console.log('[Mapbox] Coordenadas encontradas por endereço:', { lat, lng });
+          return { lat, lng };
+        }
       }
 
-      const cleanCEP = cep.replace(/\D/g, '');
+      // Fallback: tentar pelo CEP
+      if (cep) {
+        const cleanCEP = cep.replace(/\D/g, '');
 
-      if (cleanCEP.length !== 8) {
-        console.warn('[Mapbox] CEP inválido:', cep);
-        return null;
+        if (cleanCEP.length === 8) {
+          const cepQuery = encodeURIComponent(cleanCEP);
+          const cepUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${cepQuery}.json?access_token=${MAPBOX_TOKEN}&country=br&types=postcode&limit=1&language=pt-BR`;
+
+          console.log('[Mapbox] Fallback: Buscando coordenadas por CEP:', cleanCEP);
+          const responseCEP = await fetch(cepUrl);
+          const dataCEP = await responseCEP.json();
+
+          if (dataCEP && Array.isArray(dataCEP.features) && dataCEP.features.length > 0) {
+            const [lng, lat] = dataCEP.features[0].center;
+            console.log('[Mapbox] Coordenadas encontradas por CEP:', { lat, lng });
+            return { lat, lng };
+          }
+        }
       }
 
-      const cepQuery = encodeURIComponent(cleanCEP);
-      const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${cepQuery}.json?access_token=${MAPBOX_TOKEN}&country=br&types=postcode&limit=1&language=pt-BR`;
-
-      console.log('[Mapbox] Buscando coordenadas por CEP:', cleanCEP, url);
-      const response = await fetch(url);
-      const data = await response.json();
-
-      if (data && Array.isArray(data.features) && data.features.length > 0) {
-        const [lng, lat] = data.features[0].center;
-        console.log('[Mapbox] Coordenadas encontradas para CEP:', cleanCEP, { lat, lng });
-        return { lat, lng };
-      }
-
-      console.warn('[Mapbox] Nenhuma coordenada retornada para CEP:', cleanCEP);
+      console.warn('[Mapbox] Nenhuma coordenada encontrada');
       return null;
     } catch (error) {
-      console.error('Erro ao buscar coordenadas no Mapbox pelo CEP:', error);
+      console.error('Erro ao buscar coordenadas no Mapbox:', error);
       return null;
     }
   };
@@ -63,7 +75,7 @@ export const LocationMap = ({ cep, endereco }: LocationMapProps) => {
     const loadCoordinates = async () => {
       setLoading(true);
       
-      const coords = await fetchCoordinatesFromCEP(cep);
+      const coords = await fetchCoordinatesFromAddress(endereco, cep);
       
       if (coords) {
         setCoordinates(coords);
@@ -75,7 +87,7 @@ export const LocationMap = ({ cep, endereco }: LocationMapProps) => {
     };
 
     loadCoordinates();
-  }, [cep]);
+  }, [endereco, cep]);
 
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current || !coordinates || loading) return;
