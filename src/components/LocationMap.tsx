@@ -100,8 +100,8 @@ export const LocationMap = ({ cep, endereco }: LocationMapProps) => {
       container: mapContainerRef.current,
       style: 'mapbox://styles/mapbox/light-v11', // Estilo clean e moderno
       center: [coordinates.lng, coordinates.lat],
-      zoom: 13, // Zoom mais distante para mostrar região ampla
-      pitch: 30, // Inclinação 3D mais suave
+      zoom: 11, // Zoom ainda mais distante para mostrar círculo maior
+      pitch: 20, // Inclinação 3D mais suave
       bearing: 0,
       antialias: true
     });
@@ -177,12 +177,12 @@ export const LocationMap = ({ cep, endereco }: LocationMapProps) => {
           'circle-radius': {
             stops: [
               [0, 0],
-              [20, 500] // Círculo maior (era 300)
+              [20, 5000] // Círculo 10x maior
             ],
             base: 2
           },
           'circle-color': '#8B5CF6',
-          'circle-opacity': 0.2, // Mais transparente
+          'circle-opacity': 0.2,
           'circle-blur': 0.6
         }
       });
@@ -196,7 +196,7 @@ export const LocationMap = ({ cep, endereco }: LocationMapProps) => {
           'circle-radius': {
             stops: [
               [0, 0],
-              [20, 300]
+              [20, 3000] // Círculo 10x maior
             ],
             base: 2
           },
@@ -215,7 +215,7 @@ export const LocationMap = ({ cep, endereco }: LocationMapProps) => {
           'circle-radius': {
             stops: [
               [0, 0],
-              [20, 180] // Círculo maior (era 150)
+              [20, 1800] // Círculo 10x maior
             ],
             base: 2
           },
