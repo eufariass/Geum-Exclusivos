@@ -23,86 +23,59 @@ export const LocationMap = ({ cep, endereco }: LocationMapProps) => {
   const [coordinates, setCoordinates] = useState<Coordinates | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Função para buscar coordenadas usando o Mapbox Geocoding
-  // 1º tenta pelo CEP; se não encontrar, usa o endereço completo do imóvel
-  const fetchCoordinatesFromAddress = async (endereco: string, cep?: string): Promise<Coordinates | null> => {
+  // Função para buscar coordenadas usando o Mapbox Geocoding SOMENTE pelo CEP
+  const fetchCoordinatesFromCEP = async (cep?: string): Promise<Coordinates | null> => {
     try {
-      // Tentar buscar por CEP primeiro se disponível
-      if (cep) {
-        const cleanCEP = cep.replace(/\D/g, '');
-
-        if (cleanCEP.length === 8) {
-          const cepQuery = encodeURIComponent(`${cleanCEP}, Brasil`);
-          const cepUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${cepQuery}.json?access_token=${MAPBOX_TOKEN}&limit=1&language=pt-BR`;
-
-          const responseCEP = await fetch(cepUrl);
-          const dataCEP = await responseCEP.json();
-
-          if (dataCEP && Array.isArray(dataCEP.features) && dataCEP.features.length > 0) {
-            const [lng, lat] = dataCEP.features[0].center;
-            return { lat, lng };
-          }
-        }
+      if (!cep) {
+        console.warn('[Mapbox] CEP não informado, impossível localizar imóvel.');
+        return null;
       }
 
-      // Se não encontrou por CEP, buscar pelo endereço completo incluindo cidade/estado
-      const enderecoCompleto = `${endereco}, Londrina, Paraná, Brasil`;
-      const addressQuery = encodeURIComponent(enderecoCompleto);
-      const addressUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${addressQuery}.json?access_token=${MAPBOX_TOKEN}&limit=1&language=pt-BR`;
+      const cleanCEP = cep.replace(/\D/g, '');
 
-      const responseAddress = await fetch(addressUrl);
-      const dataAddress = await responseAddress.json();
+      if (cleanCEP.length !== 8) {
+        console.warn('[Mapbox] CEP inválido:', cep);
+        return null;
+      }
 
-      if (dataAddress && Array.isArray(dataAddress.features) && dataAddress.features.length > 0) {
-        const [lng, lat] = dataAddress.features[0].center;
+      const cepQuery = encodeURIComponent(cleanCEP);
+      const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${cepQuery}.json?access_token=${MAPBOX_TOKEN}&country=br&types=postcode&limit=1&language=pt-BR`;
+
+      console.log('[Mapbox] Buscando coordenadas por CEP:', cleanCEP, url);
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (data && Array.isArray(data.features) && data.features.length > 0) {
+        const [lng, lat] = data.features[0].center;
+        console.log('[Mapbox] Coordenadas encontradas para CEP:', cleanCEP, { lat, lng });
         return { lat, lng };
       }
 
+      console.warn('[Mapbox] Nenhuma coordenada retornada para CEP:', cleanCEP);
       return null;
     } catch (error) {
-      console.error('Erro ao buscar coordenadas no Mapbox:', error);
+      console.error('Erro ao buscar coordenadas no Mapbox pelo CEP:', error);
       return null;
     }
-  };
-
-  // Coordenadas aproximadas do centro de Londrina como fallback
-  const getApproximateCoordinates = (endereco: string): Coordinates => {
-    const regioes: { [key: string]: Coordinates } = {
-      'centro': { lat: -23.3045, lng: -51.1696 },
-      'gleba': { lat: -23.3350, lng: -51.1900 },
-      'jardim': { lat: -23.2900, lng: -51.1500 },
-      'lago': { lat: -23.3200, lng: -51.1400 },
-    };
-    
-    const enderecoLower = endereco.toLowerCase();
-    for (const [key, coords] of Object.entries(regioes)) {
-      if (enderecoLower.includes(key)) {
-        return coords;
-      }
-    }
-    
-    return { lat: -23.3045, lng: -51.1696 };
   };
 
   useEffect(() => {
     const loadCoordinates = async () => {
       setLoading(true);
       
-      // Buscar coordenadas pelo endereço completo (e CEP se disponível)
-      const coords = await fetchCoordinatesFromAddress(endereco, cep);
+      const coords = await fetchCoordinatesFromCEP(cep);
       
       if (coords) {
         setCoordinates(coords);
       } else {
-        // Fallback para centro de Londrina se não encontrar
-        setCoordinates(getApproximateCoordinates(endereco));
+        setCoordinates(null);
       }
       
       setLoading(false);
     };
 
     loadCoordinates();
-  }, [cep, endereco]);
+  }, [cep]);
 
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current || !coordinates || loading) return;
