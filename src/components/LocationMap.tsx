@@ -24,16 +24,37 @@ export const LocationMap = ({ cep, endereco }: LocationMapProps) => {
   const [loading, setLoading] = useState(true);
 
   // Função para buscar coordenadas usando Nominatim (OpenStreetMap)
-  const fetchCoordinatesFromCEP = async (cep: string): Promise<Coordinates | null> => {
+  const fetchCoordinatesFromAddress = async (endereco: string, cep?: string): Promise<Coordinates | null> => {
     try {
-      const cleanCEP = cep.replace(/\D/g, '');
-      
-      if (cleanCEP.length !== 8) {
-        return null;
+      // Tentar buscar por CEP primeiro se disponível
+      if (cep) {
+        const cleanCEP = cep.replace(/\D/g, '');
+        
+        if (cleanCEP.length === 8) {
+          const responseCEP = await fetch(
+            `https://nominatim.openstreetmap.org/search?postalcode=${cleanCEP}&country=Brazil&format=json&limit=1`,
+            {
+              headers: {
+                'User-Agent': 'Geum Imoveis App'
+              }
+            }
+          );
+
+          const dataCEP = await responseCEP.json();
+
+          if (dataCEP && dataCEP.length > 0) {
+            return {
+              lat: parseFloat(dataCEP[0].lat),
+              lng: parseFloat(dataCEP[0].lon)
+            };
+          }
+        }
       }
 
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?postalcode=${cleanCEP}&country=Brazil&format=json&limit=1`,
+      // Se não encontrou por CEP, buscar pelo endereço completo
+      const enderecoCompleto = `${endereco}, Londrina, Paraná, Brasil`;
+      const responseAddress = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(enderecoCompleto)}&format=json&limit=1`,
         {
           headers: {
             'User-Agent': 'Geum Imoveis App'
@@ -41,18 +62,18 @@ export const LocationMap = ({ cep, endereco }: LocationMapProps) => {
         }
       );
 
-      const data = await response.json();
+      const dataAddress = await responseAddress.json();
 
-      if (data && data.length > 0) {
+      if (dataAddress && dataAddress.length > 0) {
         return {
-          lat: parseFloat(data[0].lat),
-          lng: parseFloat(data[0].lon)
+          lat: parseFloat(dataAddress[0].lat),
+          lng: parseFloat(dataAddress[0].lon)
         };
       }
 
       return null;
     } catch (error) {
-      console.error('Erro ao buscar coordenadas do CEP:', error);
+      console.error('Erro ao buscar coordenadas:', error);
       return null;
     }
   };
@@ -80,14 +101,13 @@ export const LocationMap = ({ cep, endereco }: LocationMapProps) => {
     const loadCoordinates = async () => {
       setLoading(true);
       
-      if (cep) {
-        const coords = await fetchCoordinatesFromCEP(cep);
-        if (coords) {
-          setCoordinates(coords);
-        } else {
-          setCoordinates(getApproximateCoordinates(endereco));
-        }
+      // Buscar coordenadas pelo endereço completo (e CEP se disponível)
+      const coords = await fetchCoordinatesFromAddress(endereco, cep);
+      
+      if (coords) {
+        setCoordinates(coords);
       } else {
+        // Fallback para centro de Londrina se não encontrar
         setCoordinates(getApproximateCoordinates(endereco));
       }
       
