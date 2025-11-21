@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, Home, BedDouble, Bath, Car, Maximize } from 'lucide-react';
 import { LeadForm } from '@/components/leads/LeadForm';
+import { LocationMap } from '@/components/LocationMap';
 import logoBlack from '@/assets/logo-geum-black.png';
 import logoWhite from '@/assets/logo-geum-white.png';
 
@@ -251,6 +252,9 @@ const ImovelLanding = () => {
                 </CardContent>
               </Card>
             )}
+
+            {/* Mapa de Localização */}
+            <LocationMap endereco={imovel.endereco} />
           </div>
 
           {/* Coluna Direita - Formulário Fixo */}
