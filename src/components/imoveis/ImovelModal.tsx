@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import type { Imovel, TipoImovel } from '@/types';
 import { supabaseStorageService } from '@/lib/supabaseStorage';
 import { ImageUpload } from './ImageUpload';
@@ -34,6 +35,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
     area_m2: '',
     vagas: '',
     tipos_disponiveis: ['Venda', 'Locação'] as ('Venda' | 'Locação')[],
+    plataformas_anuncio: [] as string[],
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -57,6 +59,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
         area_m2: editingImovel.area_m2 ? String(editingImovel.area_m2) : '',
         vagas: editingImovel.vagas ? String(editingImovel.vagas) : '',
         tipos_disponiveis: editingImovel.tipos_disponiveis || ['Venda', 'Locação'],
+        plataformas_anuncio: editingImovel.plataformas_anuncio || [],
       });
       setCoverImageIndex(editingImovel.cover_image_index || 0);
       setImageOrder(editingImovel.image_urls || []);
@@ -74,6 +77,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
         area_m2: '',
         vagas: '',
         tipos_disponiveis: ['Venda', 'Locação'],
+        plataformas_anuncio: [],
       });
       setCoverImageIndex(0);
       setImageOrder([]);
@@ -168,6 +172,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
         image_urls: imageUrls,
         cover_image_index: coverImageIndex,
         tipos_disponiveis: formData.tipos_disponiveis,
+        plataformas_anuncio: formData.plataformas_anuncio,
         data_cadastro: editingImovel?.data_cadastro || new Date().toISOString(),
         updated_by: user?.id,
         ...(editingImovel ? {} : { created_by: user?.id }),
@@ -291,6 +296,41 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               Selecione os tipos de negócio disponíveis para este imóvel
+            </p>
+          </div>
+
+          <div>
+            <Label>Em Anúncio</Label>
+            <div className="flex gap-4 mt-2">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="plataforma-meta"
+                  checked={formData.plataformas_anuncio.includes('Meta')}
+                  onCheckedChange={(checked) => {
+                    const newPlataformas = checked
+                      ? [...formData.plataformas_anuncio, 'Meta']
+                      : formData.plataformas_anuncio.filter(p => p !== 'Meta');
+                    setFormData((prev) => ({ ...prev, plataformas_anuncio: newPlataformas }));
+                  }}
+                />
+                <Label htmlFor="plataforma-meta" className="cursor-pointer">Meta</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="plataforma-google"
+                  checked={formData.plataformas_anuncio.includes('Google')}
+                  onCheckedChange={(checked) => {
+                    const newPlataformas = checked
+                      ? [...formData.plataformas_anuncio, 'Google']
+                      : formData.plataformas_anuncio.filter(p => p !== 'Google');
+                    setFormData((prev) => ({ ...prev, plataformas_anuncio: newPlataformas }));
+                  }}
+                />
+                <Label htmlFor="plataforma-google" className="cursor-pointer">Google</Label>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              Marque as plataformas onde este imóvel está sendo anunciado (apenas para controle interno)
             </p>
           </div>
 
