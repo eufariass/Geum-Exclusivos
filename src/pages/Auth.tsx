@@ -24,7 +24,7 @@ const Auth = () => {
 
   useEffect(() => {
     if (user) {
-      navigate('/', { replace: true });
+      navigate('/sistema', { replace: true });
     }
   }, [user, navigate]);
 
@@ -46,7 +46,7 @@ const Auth = () => {
       setLoading(false);
     } else {
       toast.success('Login realizado com sucesso!');
-      navigate('/', { replace: true });
+      navigate('/sistema', { replace: true });
     }
   };
 
@@ -78,7 +78,7 @@ const Auth = () => {
       setLoading(false);
     } else {
       toast.success('Conta criada com sucesso!');
-      navigate('/', { replace: true });
+      navigate('/sistema', { replace: true });
     }
   };
 

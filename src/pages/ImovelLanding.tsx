@@ -79,7 +79,7 @@ const ImovelLanding = () => {
       {/* Header */}
       <header className="border-b border-border bg-card sticky top-0 z-10 shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/imoveis" className="cursor-pointer">
+          <Link to="/" className="cursor-pointer">
             <img 
               src={logoBlack} 
               alt="Imobiliária Geum" 
