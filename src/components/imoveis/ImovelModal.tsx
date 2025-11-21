@@ -26,8 +26,13 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
     codigo: '',
     titulo: '',
     cliente: '',
-    endereco: '',
     cep: '',
+    rua: '',
+    numero: '',
+    bairro: '',
+    cidade: 'Londrina',
+    estado: 'PR',
+    endereco: '',
     tipo: 'Casa' as TipoImovel,
     valor: '',
     descricao: '',
@@ -38,6 +43,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
     tipos_disponiveis: ['Venda', 'Locação'] as ('Venda' | 'Locação')[],
     plataformas_anuncio: [] as string[],
   });
+  const [loadingCep, setLoadingCep] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [removedImageIndices, setRemovedImageIndices] = useState<number[]>([]);
@@ -47,12 +53,18 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
 
   useEffect(() => {
     if (editingImovel) {
+      const imovelAny = editingImovel as any;
       setFormData({
         codigo: editingImovel.codigo,
         titulo: editingImovel.titulo || '',
         cliente: editingImovel.cliente,
+        cep: imovelAny.cep || '',
+        rua: imovelAny.rua || '',
+        numero: imovelAny.numero || '',
+        bairro: imovelAny.bairro || '',
+        cidade: imovelAny.cidade || 'Londrina',
+        estado: imovelAny.estado || 'PR',
         endereco: editingImovel.endereco,
-        cep: (editingImovel as any).cep || '',
         tipo: editingImovel.tipo,
         valor: editingImovel.valor ? String(editingImovel.valor) : '',
         descricao: editingImovel.descricao || '',
@@ -70,8 +82,13 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
         codigo: '',
         titulo: '',
         cliente: '',
-        endereco: '',
         cep: '',
+        rua: '',
+        numero: '',
+        bairro: '',
+        cidade: 'Londrina',
+        estado: 'PR',
+        endereco: '',
         tipo: 'Casa',
         valor: '',
         descricao: '',
@@ -105,6 +122,44 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
     if (!formatted) return undefined;
     const numbers = formatted.replace(/\D/g, '');
     return parseInt(numbers) / 100;
+  };
+
+  const buscarCEP = async (cep: string) => {
+    const cleanCEP = cep.replace(/\D/g, '');
+    
+    if (cleanCEP.length !== 8) {
+      return;
+    }
+
+    setLoadingCep(true);
+    try {
+      const response = await fetch(`https://viacep.com.br/ws/${cleanCEP}/json/`);
+      const data = await response.json();
+
+      if (data && !data.erro) {
+        setFormData(prev => ({
+          ...prev,
+          rua: data.logradouro || '',
+          bairro: data.bairro || '',
+          cidade: data.localidade || 'Londrina',
+          estado: data.uf || 'PR',
+        }));
+      }
+    } catch (error) {
+      console.error('Erro ao buscar CEP:', error);
+    } finally {
+      setLoadingCep(false);
+    }
+  };
+
+  const handleCepChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '');
+    const formatted = value.replace(/^(\d{5})(\d)/, '$1-$2');
+    setFormData(prev => ({ ...prev, cep: formatted }));
+    
+    if (value.length === 8) {
+      buscarCEP(value);
+    }
   };
 
   const validate = async (): Promise<boolean> => {
@@ -160,12 +215,22 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
         imageUrls = imageOrder;
       }
 
+      // Montar endereço completo
+      const enderecoCompleto = formData.numero 
+        ? `${formData.rua}, ${formData.numero}${formData.bairro ? ` - ${formData.bairro}` : ''}`
+        : formData.rua;
+
       const imovelData = {
         codigo: formData.codigo.trim(),
         titulo: formData.titulo.trim() || undefined,
         cliente: formData.cliente.trim(),
-        endereco: formData.endereco.trim(),
         cep: formData.cep.trim() || undefined,
+        rua: formData.rua.trim() || undefined,
+        numero: formData.numero.trim() || undefined,
+        bairro: formData.bairro.trim() || undefined,
+        cidade: formData.cidade.trim() || undefined,
+        estado: formData.estado.trim() || undefined,
+        endereco: enderecoCompleto,
         tipo: formData.tipo,
         valor: parseValor(formData.valor),
         descricao: formData.descricao.trim() || undefined,
@@ -238,33 +303,59 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
           </div>
 
           <div>
-            <Label htmlFor="endereco">Endereço *</Label>
-            <Input
-              id="endereco"
-              value={formData.endereco}
-              onChange={(e) => setFormData((prev) => ({ ...prev, endereco: e.target.value }))}
-              className={errors.endereco ? 'border-destructive' : ''}
-              placeholder="Rua, número, bairro"
-            />
-            {errors.endereco && <p className="text-xs text-destructive mt-1">{errors.endereco}</p>}
-          </div>
-
-          <div>
-            <Label htmlFor="cep">CEP (para localização no mapa)</Label>
+            <Label htmlFor="cep">CEP *</Label>
             <Input
               id="cep"
               value={formData.cep}
-              onChange={(e) => {
-                const value = e.target.value.replace(/\D/g, '');
-                const formatted = value.replace(/^(\d{5})(\d)/, '$1-$2');
-                setFormData((prev) => ({ ...prev, cep: formatted }));
-              }}
+              onChange={handleCepChange}
               placeholder="00000-000"
               maxLength={9}
+              disabled={loadingCep}
             />
-            <p className="text-xs text-muted-foreground mt-1">
-              CEP usado para mostrar localização aproximada na landing page
-            </p>
+            {loadingCep && <p className="text-xs text-muted-foreground mt-1">Buscando endereço...</p>}
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="col-span-2 sm:col-span-1">
+              <Label htmlFor="rua">Rua/Avenida</Label>
+              <Input
+                id="rua"
+                value={formData.rua}
+                onChange={(e) => setFormData((prev) => ({ ...prev, rua: e.target.value }))}
+                placeholder="Preenchido automaticamente pelo CEP"
+              />
+            </div>
+
+            <div className="col-span-2 sm:col-span-1">
+              <Label htmlFor="numero">Número *</Label>
+              <Input
+                id="numero"
+                value={formData.numero}
+                onChange={(e) => setFormData((prev) => ({ ...prev, numero: e.target.value }))}
+                placeholder="Ex: 123, S/N"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="bairro">Bairro</Label>
+              <Input
+                id="bairro"
+                value={formData.bairro}
+                onChange={(e) => setFormData((prev) => ({ ...prev, bairro: e.target.value }))}
+                placeholder="Preenchido automaticamente pelo CEP"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="cidade">Cidade</Label>
+              <Input
+                id="cidade"
+                value={formData.cidade}
+                onChange={(e) => setFormData((prev) => ({ ...prev, cidade: e.target.value }))}
+              />
+            </div>
           </div>
 
           <div>
