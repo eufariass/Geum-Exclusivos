@@ -28,6 +28,7 @@ export type Database = {
           endereco: string
           id: string
           image_urls: string[] | null
+          plataformas_anuncio: string[] | null
           quartos: number | null
           tipo: string
           tipos_disponiveis: string[] | null
@@ -49,6 +50,7 @@ export type Database = {
           endereco: string
           id?: string
           image_urls?: string[] | null
+          plataformas_anuncio?: string[] | null
           quartos?: number | null
           tipo: string
           tipos_disponiveis?: string[] | null
@@ -70,6 +72,7 @@ export type Database = {
           endereco?: string
           id?: string
           image_urls?: string[] | null
+          plataformas_anuncio?: string[] | null
           quartos?: number | null
           tipo?: string
           tipos_disponiveis?: string[] | null
