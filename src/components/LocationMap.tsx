@@ -23,57 +23,44 @@ export const LocationMap = ({ cep, endereco }: LocationMapProps) => {
   const [coordinates, setCoordinates] = useState<Coordinates | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Função para buscar coordenadas usando Nominatim (OpenStreetMap)
+  // Função para buscar coordenadas usando o Mapbox Geocoding
+  // 1º tenta pelo CEP; se não encontrar, usa o endereço completo do imóvel
   const fetchCoordinatesFromAddress = async (endereco: string, cep?: string): Promise<Coordinates | null> => {
     try {
       // Tentar buscar por CEP primeiro se disponível
       if (cep) {
         const cleanCEP = cep.replace(/\D/g, '');
-        
-        if (cleanCEP.length === 8) {
-          const responseCEP = await fetch(
-            `https://nominatim.openstreetmap.org/search?postalcode=${cleanCEP}&country=Brazil&format=json&limit=1`,
-            {
-              headers: {
-                'User-Agent': 'Geum Imoveis App'
-              }
-            }
-          );
 
+        if (cleanCEP.length === 8) {
+          const cepQuery = encodeURIComponent(`${cleanCEP}, Brasil`);
+          const cepUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${cepQuery}.json?access_token=${MAPBOX_TOKEN}&limit=1&language=pt-BR`;
+
+          const responseCEP = await fetch(cepUrl);
           const dataCEP = await responseCEP.json();
 
-          if (dataCEP && dataCEP.length > 0) {
-            return {
-              lat: parseFloat(dataCEP[0].lat),
-              lng: parseFloat(dataCEP[0].lon)
-            };
+          if (dataCEP && Array.isArray(dataCEP.features) && dataCEP.features.length > 0) {
+            const [lng, lat] = dataCEP.features[0].center;
+            return { lat, lng };
           }
         }
       }
 
-      // Se não encontrou por CEP, buscar pelo endereço completo
+      // Se não encontrou por CEP, buscar pelo endereço completo incluindo cidade/estado
       const enderecoCompleto = `${endereco}, Londrina, Paraná, Brasil`;
-      const responseAddress = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(enderecoCompleto)}&format=json&limit=1`,
-        {
-          headers: {
-            'User-Agent': 'Geum Imoveis App'
-          }
-        }
-      );
+      const addressQuery = encodeURIComponent(enderecoCompleto);
+      const addressUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${addressQuery}.json?access_token=${MAPBOX_TOKEN}&limit=1&language=pt-BR`;
 
+      const responseAddress = await fetch(addressUrl);
       const dataAddress = await responseAddress.json();
 
-      if (dataAddress && dataAddress.length > 0) {
-        return {
-          lat: parseFloat(dataAddress[0].lat),
-          lng: parseFloat(dataAddress[0].lon)
-        };
+      if (dataAddress && Array.isArray(dataAddress.features) && dataAddress.features.length > 0) {
+        const [lng, lat] = dataAddress.features[0].center;
+        return { lat, lng };
       }
 
       return null;
     } catch (error) {
-      console.error('Erro ao buscar coordenadas:', error);
+      console.error('Erro ao buscar coordenadas no Mapbox:', error);
       return null;
     }
   };
