@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           area_m2: number | null
           banheiros: number | null
+          cep: string | null
           cliente: string
           codigo: string
           cover_image_index: number | null
@@ -40,6 +41,7 @@ export type Database = {
         Insert: {
           area_m2?: number | null
           banheiros?: number | null
+          cep?: string | null
           cliente: string
           codigo: string
           cover_image_index?: number | null
@@ -62,6 +64,7 @@ export type Database = {
         Update: {
           area_m2?: number | null
           banheiros?: number | null
+          cep?: string | null
           cliente?: string
           codigo?: string
           cover_image_index?: number | null

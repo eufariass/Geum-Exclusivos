@@ -27,6 +27,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
     titulo: '',
     cliente: '',
     endereco: '',
+    cep: '',
     tipo: 'Casa' as TipoImovel,
     valor: '',
     descricao: '',
@@ -51,6 +52,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
         titulo: editingImovel.titulo || '',
         cliente: editingImovel.cliente,
         endereco: editingImovel.endereco,
+        cep: (editingImovel as any).cep || '',
         tipo: editingImovel.tipo,
         valor: editingImovel.valor ? String(editingImovel.valor) : '',
         descricao: editingImovel.descricao || '',
@@ -69,6 +71,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
         titulo: '',
         cliente: '',
         endereco: '',
+        cep: '',
         tipo: 'Casa',
         valor: '',
         descricao: '',
@@ -162,6 +165,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
         titulo: formData.titulo.trim() || undefined,
         cliente: formData.cliente.trim(),
         endereco: formData.endereco.trim(),
+        cep: formData.cep.trim() || undefined,
         tipo: formData.tipo,
         valor: parseValor(formData.valor),
         descricao: formData.descricao.trim() || undefined,
@@ -240,8 +244,27 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
               value={formData.endereco}
               onChange={(e) => setFormData((prev) => ({ ...prev, endereco: e.target.value }))}
               className={errors.endereco ? 'border-destructive' : ''}
+              placeholder="Rua, número, bairro"
             />
             {errors.endereco && <p className="text-xs text-destructive mt-1">{errors.endereco}</p>}
+          </div>
+
+          <div>
+            <Label htmlFor="cep">CEP (para localização no mapa)</Label>
+            <Input
+              id="cep"
+              value={formData.cep}
+              onChange={(e) => {
+                const value = e.target.value.replace(/\D/g, '');
+                const formatted = value.replace(/^(\d{5})(\d)/, '$1-$2');
+                setFormData((prev) => ({ ...prev, cep: formatted }));
+              }}
+              placeholder="00000-000"
+              maxLength={9}
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              CEP usado para mostrar localização aproximada na landing page
+            </p>
           </div>
 
           <div>
