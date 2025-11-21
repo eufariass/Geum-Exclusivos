@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface LocationMapProps {
@@ -14,22 +14,20 @@ interface Coordinates {
 }
 
 export const LocationMap = ({ cep, endereco }: LocationMapProps) => {
-  const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
   const [coordinates, setCoordinates] = useState<Coordinates | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Função para buscar coordenadas usando Nominatim (OpenStreetMap)
   const fetchCoordinatesFromCEP = async (cep: string): Promise<Coordinates | null> => {
     try {
-      // Remove caracteres não numéricos do CEP
       const cleanCEP = cep.replace(/\D/g, '');
       
       if (cleanCEP.length !== 8) {
         return null;
       }
 
-      // Usar Nominatim do OpenStreetMap para geocoding
       const response = await fetch(
         `https://nominatim.openstreetmap.org/search?postalcode=${cleanCEP}&country=Brazil&format=json&limit=1`,
         {
@@ -96,35 +94,143 @@ export const LocationMap = ({ cep, endereco }: LocationMapProps) => {
   }, [cep, endereco]);
 
   useEffect(() => {
-    if (!mapRef.current || mapInstanceRef.current || !coordinates || loading) return;
+    if (!mapContainerRef.current || mapRef.current || !coordinates || loading) return;
 
-    const radius = 300; // Raio em metros
+    // Configurar token do Mapbox
+    mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
 
-    // Criar o mapa
-    const map = L.map(mapRef.current).setView([coordinates.lat, coordinates.lng], 15);
-    mapInstanceRef.current = map;
+    // Criar mapa com estilo moderno
+    const map = new mapboxgl.Map({
+      container: mapContainerRef.current,
+      style: 'mapbox://styles/mapbox/light-v11', // Estilo clean e moderno
+      center: [coordinates.lng, coordinates.lat],
+      zoom: 14.5,
+      pitch: 45, // Inclinação 3D
+      bearing: 0,
+      antialias: true
+    });
 
-    // Adicionar camada de tiles do OpenStreetMap
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      maxZoom: 19,
-    }).addTo(map);
+    mapRef.current = map;
 
-    // Adicionar círculo para mostrar área aproximada
-    L.circle([coordinates.lat, coordinates.lng], {
-      radius: radius,
-      fillColor: '#8B5CF6',
-      fillOpacity: 0.35,
-      color: '#8B5CF6',
-      weight: 2,
-      opacity: 0.7,
-    }).addTo(map);
+    // Adicionar controles de navegação
+    map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
+    // Quando o mapa carregar, adicionar círculo e efeitos
+    map.on('load', () => {
+      // Adicionar layer 3D de prédios
+      const layers = map.getStyle().layers;
+      const labelLayerId = layers?.find(
+        (layer) => layer.type === 'symbol' && layer.layout && (layer.layout as any)['text-field']
+      )?.id;
+
+      if (labelLayerId) {
+        map.addLayer(
+          {
+            id: 'add-3d-buildings',
+            source: 'composite',
+            'source-layer': 'building',
+            filter: ['==', 'extrude', 'true'],
+            type: 'fill-extrusion',
+            minzoom: 15,
+            paint: {
+              'fill-extrusion-color': '#aaa',
+              'fill-extrusion-height': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                15,
+                0,
+                15.05,
+                ['get', 'height']
+              ],
+              'fill-extrusion-base': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                15,
+                0,
+                15.05,
+                ['get', 'min_height']
+              ],
+              'fill-extrusion-opacity': 0.6
+            }
+          },
+          labelLayerId
+        );
+      }
+
+      // Adicionar fonte de dados para o círculo
+      map.addSource('location-circle', {
+        type: 'geojson',
+        data: {
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [coordinates.lng, coordinates.lat]
+          },
+          properties: {}
+        }
+      });
+
+      // Adicionar círculo com gradiente
+      map.addLayer({
+        id: 'location-circle-outer',
+        type: 'circle',
+        source: 'location-circle',
+        paint: {
+          'circle-radius': {
+            stops: [
+              [0, 0],
+              [20, 300]
+            ],
+            base: 2
+          },
+          'circle-color': '#8B5CF6',
+          'circle-opacity': 0.15,
+          'circle-blur': 0.5
+        }
+      });
+
+      // Adicionar círculo interno
+      map.addLayer({
+        id: 'location-circle-inner',
+        type: 'circle',
+        source: 'location-circle',
+        paint: {
+          'circle-radius': {
+            stops: [
+              [0, 0],
+              [20, 150]
+            ],
+            base: 2
+          },
+          'circle-color': '#8B5CF6',
+          'circle-opacity': 0.3,
+          'circle-blur': 0.3
+        }
+      });
+
+      // Adicionar ponto central
+      map.addLayer({
+        id: 'location-point',
+        type: 'circle',
+        source: 'location-circle',
+        paint: {
+          'circle-radius': 8,
+          'circle-color': '#8B5CF6',
+          'circle-opacity': 1,
+          'circle-stroke-width': 3,
+          'circle-stroke-color': '#ffffff',
+          'circle-stroke-opacity': 1
+        }
+      });
+    });
 
     // Cleanup
     return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
       }
     };
   }, [coordinates, loading]);
@@ -154,8 +260,8 @@ export const LocationMap = ({ cep, endereco }: LocationMapProps) => {
       </CardHeader>
       <CardContent className="p-0">
         <div 
-          ref={mapRef} 
-          className="w-full h-[400px] rounded-b-lg"
+          ref={mapContainerRef} 
+          className="w-full h-[450px] rounded-b-lg"
           style={{ zIndex: 0 }}
         />
       </CardContent>
