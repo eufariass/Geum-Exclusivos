@@ -21,17 +21,17 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/imoveis" element={<ImoveisPublic />} />
-            <Route path="/:codigo" element={<ImovelLanding />} />
+            <Route path="/" element={<ImoveisPublic />} />
+            <Route path="/login" element={<Auth />} />
             <Route
-              path="/"
+              path="/sistema"
               element={
                 <ProtectedRoute>
                   <Index />
                 </ProtectedRoute>
               }
             />
+            <Route path="/:codigo" element={<ImovelLanding />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
