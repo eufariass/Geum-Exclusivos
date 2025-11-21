@@ -100,8 +100,8 @@ export const LocationMap = ({ cep, endereco }: LocationMapProps) => {
       container: mapContainerRef.current,
       style: 'mapbox://styles/mapbox/light-v11', // Estilo clean e moderno
       center: [coordinates.lng, coordinates.lat],
-      zoom: 14.5,
-      pitch: 45, // Inclinação 3D
+      zoom: 13, // Zoom mais distante para mostrar região ampla
+      pitch: 30, // Inclinação 3D mais suave
       bearing: 0,
       antialias: true
     });
@@ -168,9 +168,28 @@ export const LocationMap = ({ cep, endereco }: LocationMapProps) => {
         }
       });
 
-      // Adicionar círculo com gradiente
+      // Adicionar círculo grande para mostrar região aproximada
       map.addLayer({
         id: 'location-circle-outer',
+        type: 'circle',
+        source: 'location-circle',
+        paint: {
+          'circle-radius': {
+            stops: [
+              [0, 0],
+              [20, 500] // Círculo maior (era 300)
+            ],
+            base: 2
+          },
+          'circle-color': '#8B5CF6',
+          'circle-opacity': 0.2, // Mais transparente
+          'circle-blur': 0.6
+        }
+      });
+
+      // Adicionar círculo médio
+      map.addLayer({
+        id: 'location-circle-middle',
         type: 'circle',
         source: 'location-circle',
         paint: {
@@ -182,8 +201,8 @@ export const LocationMap = ({ cep, endereco }: LocationMapProps) => {
             base: 2
           },
           'circle-color': '#8B5CF6',
-          'circle-opacity': 0.15,
-          'circle-blur': 0.5
+          'circle-opacity': 0.25,
+          'circle-blur': 0.4
         }
       });
 
@@ -196,7 +215,7 @@ export const LocationMap = ({ cep, endereco }: LocationMapProps) => {
           'circle-radius': {
             stops: [
               [0, 0],
-              [20, 150]
+              [20, 180] // Círculo maior (era 150)
             ],
             base: 2
           },
@@ -206,20 +225,8 @@ export const LocationMap = ({ cep, endereco }: LocationMapProps) => {
         }
       });
 
-      // Adicionar ponto central
-      map.addLayer({
-        id: 'location-point',
-        type: 'circle',
-        source: 'location-circle',
-        paint: {
-          'circle-radius': 8,
-          'circle-color': '#8B5CF6',
-          'circle-opacity': 1,
-          'circle-stroke-width': 3,
-          'circle-stroke-color': '#ffffff',
-          'circle-stroke-opacity': 1
-        }
-      });
+      // Remover ponto central para não mostrar localização exata
+      // (comentado para manter área genérica)
     });
 
     // Cleanup
