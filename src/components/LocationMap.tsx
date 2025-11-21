@@ -96,12 +96,11 @@ export const LocationMap = ({ cep, endereco }: LocationMapProps) => {
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current || !coordinates || loading) return;
 
-    // Configurar token público do Mapbox
-    // Obtenha seu token em: https://account.mapbox.com/access-tokens/
-    const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN || 'pk.eyJ1IjoiZ2V1bWltb2JpbGlhcmlhIiwiYSI6ImNtNWh1cGFkMjAwZWkyanF6bGpmMnl4NWcifQ.8rZYvQYwKWJYz7Rn9Y-kIw';
+    // Usar token configurado pelo usuário
+    const MAPBOX_TOKEN = import.meta.env.VITE_MAPBOX_TOKEN;
     
-    if (!MAPBOX_TOKEN || MAPBOX_TOKEN === '') {
-      console.error('Token do Mapbox não configurado');
+    if (!MAPBOX_TOKEN) {
+      console.error('Token do Mapbox não configurado. Configure VITE_MAPBOX_TOKEN nos secrets.');
       return;
     }
     
