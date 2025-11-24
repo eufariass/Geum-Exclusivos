@@ -3,8 +3,7 @@ import { Link } from 'react-router-dom';
 import { supabaseStorageService } from '@/lib/supabaseStorage';
 import type { Imovel } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { BedDouble, Bath, Car, Maximize, Home, Search, Phone, Mail, Clock, MapPin } from 'lucide-react';
+import { BedDouble, Bath, Car, Maximize, Home, MapPin, Phone, Mail, ArrowRight } from 'lucide-react';
 import logoBlack from '@/assets/logo-geum-black.png';
 import logoWhite from '@/assets/logo-geum-white.png';
 
@@ -13,7 +12,7 @@ const ImoveisPublic = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    document.title = 'Imóveis Exclusivos Geum.';
+    document.title = 'Exclusividades Geum.';
   }, []);
 
   useEffect(() => {
@@ -34,153 +33,146 @@ const ImoveisPublic = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Carregando imóveis...</p>
+        <div className="animate-pulse flex flex-col items-center gap-4">
+          <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <p className="text-muted-foreground font-medium tracking-wide">Carregando exclusividades...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col font-sans">
       {/* Header */}
-      <header className="border-b border-border bg-card sticky top-0 z-10 shadow-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-center">
-          <img 
-            src={logoBlack} 
-            alt="Imobiliária Geum" 
-            className="h-10 dark:hidden"
-          />
-          <img 
-            src={logoWhite} 
-            alt="Imobiliária Geum" 
-            className="h-10 hidden dark:block"
-          />
+      <header className="border-b border-border/40 bg-background/95 backdrop-blur-sm sticky top-0 z-50 transition-all duration-300">
+        <div className="container mx-auto px-6 py-5 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <img
+              src={logoBlack}
+              alt="Imobiliária Geum"
+              className="h-10 dark:hidden"
+            />
+            <img
+              src={logoWhite}
+              alt="Imobiliária Geum"
+              className="h-10 hidden dark:block"
+            />
+          </div>
+
+          <nav className="hidden md:flex items-center gap-8">
+            <a href="#" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Imóveis</a>
+            <a href="#" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Sobre</a>
+            <a href="#" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Contato</a>
+          </nav>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="bg-gradient-to-b from-accent/10 via-background to-background py-16 md:py-24">
-        <div className="container mx-auto px-4 max-w-7xl">
-          <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6">
-              Encontre o Imóvel dos seus Sonhos
+      <main className="flex-grow container mx-auto px-6 py-16 max-w-7xl">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+          <div className="space-y-4 max-w-2xl">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-primary tracking-tight">
+              Exclusividades Geum
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground mb-8">
-              Imóveis selecionados com excelência para você e sua família
+            <p className="text-lg text-muted-foreground font-normal max-w-xl leading-relaxed">
+              Uma curadoria de imóveis selecionados pela Imobiliária Geum.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="gap-2">
-                <Search className="h-5 w-5" />
-                Ver Todos os Imóveis
-              </Button>
-              <Button size="lg" variant="outline" className="gap-2">
-                <Phone className="h-5 w-5" />
-                Fale Conosco
-              </Button>
-            </div>
           </div>
-        </div>
-      </section>
-
-      <main className="container mx-auto px-4 py-12 max-w-7xl">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">Imóveis Exclusivos</h2>
-          <p className="text-lg text-muted-foreground">Conheça nossa seleção de imóveis premium</p>
+          <div className="hidden md:block h-px flex-grow bg-border/60 ml-8 mb-4" />
         </div>
 
         {imoveis.length === 0 ? (
-          <Card className="p-12 text-center">
-            <Home className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Nenhum imóvel disponível</h2>
-            <p className="text-muted-foreground">Em breve teremos novidades</p>
-          </Card>
+          <div className="flex flex-col items-center justify-center py-24 text-center border border-dashed border-border rounded-xl bg-card/50">
+            <Home className="h-16 w-16 text-muted-foreground/20 mb-6" />
+            <h2 className="text-2xl font-bold text-primary mb-2">Nenhum imóvel disponível</h2>
+            <p className="text-muted-foreground">Em breve teremos novidades em nossa coleção.</p>
+          </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
             {imoveis.map((imovel) => (
-              <Link 
-                key={imovel.id} 
+              <Link
+                key={imovel.id}
                 to={`/${imovel.codigo}`}
-                className="group"
+                className="group block h-full"
               >
-                <Card className="overflow-hidden card-hover h-full transition-all hover:shadow-lg">
-                  <div className="relative h-56 bg-muted overflow-hidden">
+                <article className="h-full bg-card border border-border/40 rounded-lg overflow-hidden transition-all duration-500 hover:shadow-xl hover:-translate-y-1 flex flex-col">
+                  <div className="relative aspect-[4/3] overflow-hidden bg-muted">
                     {imovel.image_urls && imovel.image_urls.length > 0 ? (
-                      <>
-                        <img
-                          src={imovel.image_urls[imovel.cover_image_index || 0]}
-                          alt={imovel.endereco}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                        {imovel.image_urls.length > 1 && (
-                          <div className="absolute bottom-3 left-3 px-2 py-1 bg-background/90 backdrop-blur-sm rounded text-xs font-medium">
-                            {imovel.image_urls.length} fotos
-                          </div>
-                        )}
-                      </>
+                      <img
+                        src={imovel.image_urls[imovel.cover_image_index || 0]}
+                        alt={imovel.endereco}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                      />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-muted to-muted-foreground/10">
-                        <Home className="h-20 w-20 text-muted-foreground/40" />
+                      <div className="w-full h-full flex items-center justify-center bg-muted">
+                        <Home className="h-12 w-12 text-muted-foreground/20" />
                       </div>
                     )}
-                    <div className="absolute top-3 left-3 px-3 py-1 bg-background/90 backdrop-blur-sm rounded-full text-xs font-medium">
-                      {imovel.tipo}
-                    </div>
-                    <div className="absolute top-3 right-3 px-3 py-1 bg-primary text-primary-foreground rounded-full text-xs font-bold">
-                      {imovel.codigo}
-                    </div>
-                  </div>
 
-                  <CardContent className="p-4 space-y-3">
-                    {imovel.titulo && (
-                      <h2 className="text-lg font-semibold line-clamp-2 mb-2">{imovel.titulo}</h2>
-                    )}
-                    
-                    <div>
-                      <p className="text-sm text-muted-foreground mb-1">Endereço</p>
-                      <p className="font-medium line-clamp-2">{imovel.endereco}</p>
+                    {/* Badges */}
+                    <div className="absolute top-4 left-4 flex gap-2">
+                      <span className="px-3 py-1 bg-white/90 backdrop-blur-md text-primary text-xs font-bold uppercase tracking-wider rounded-sm shadow-sm">
+                        {imovel.tipo}
+                      </span>
                     </div>
 
+                    {/* Price Tag */}
                     {imovel.valor && (
-                      <div className="pt-2 border-t">
-                        <p className="text-xl font-bold text-primary">
+                      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent pt-12">
+                        <p className="text-white font-bold text-xl md:text-2xl">
                           {new Intl.NumberFormat('pt-BR', {
                             style: 'currency',
                             currency: 'BRL',
+                            maximumFractionDigits: 0,
                           }).format(imovel.valor)}
                         </p>
                       </div>
                     )}
+                  </div>
 
-                    {/* Características */}
-                    {(imovel.quartos || imovel.banheiros || imovel.area_m2 || imovel.vagas) && (
-                      <div className="flex flex-wrap gap-3 pt-2 border-t">
+                  <CardContent className="p-6 flex flex-col flex-grow gap-4">
+                    <div className="space-y-2">
+                      {imovel.titulo && (
+                        <h2 className="text-lg font-bold text-primary line-clamp-1 group-hover:text-accent transition-colors">
+                          {imovel.titulo}
+                        </h2>
+                      )}
+
+                      <div className="flex items-start gap-2 text-muted-foreground">
+                        <MapPin className="h-4 w-4 mt-1 flex-shrink-0 text-primary/60" />
+                        <p className="text-sm font-medium line-clamp-2 leading-relaxed">
+                          {imovel.endereco}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-auto pt-4 border-t border-border/40 flex items-center justify-between text-sm text-muted-foreground">
+                      <div className="flex gap-4">
                         {imovel.quartos && (
-                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1.5" title={`${imovel.quartos} Quartos`}>
                             <BedDouble className="h-4 w-4" />
                             <span>{imovel.quartos}</span>
                           </div>
                         )}
                         {imovel.banheiros && (
-                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1.5" title={`${imovel.banheiros} Banheiros`}>
                             <Bath className="h-4 w-4" />
                             <span>{imovel.banheiros}</span>
                           </div>
                         )}
                         {imovel.area_m2 && (
-                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1.5" title={`${imovel.area_m2}m²`}>
                             <Maximize className="h-4 w-4" />
-                            <span>{imovel.area_m2}m²</span>
-                          </div>
-                        )}
-                        {imovel.vagas && (
-                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                            <Car className="h-4 w-4" />
-                            <span>{imovel.vagas}</span>
+                            <span>{imovel.area_m2}</span>
                           </div>
                         )}
                       </div>
-                    )}
+
+                      <div className="text-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-x-2 group-hover:translate-x-0">
+                        <ArrowRight className="h-5 w-5" />
+                      </div>
+                    </div>
                   </CardContent>
-                </Card>
+                </article>
               </Link>
             ))}
           </div>
@@ -188,94 +180,61 @@ const ImoveisPublic = () => {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border mt-20 bg-card">
-        <div className="container mx-auto px-4 py-12 max-w-7xl">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
-            {/* Logo e CRECI */}
-            <div className="space-y-4">
-              <img 
-                src={logoBlack} 
-                alt="Imobiliária Geum" 
-                className="h-12 dark:hidden"
-              />
-              <img 
-                src={logoWhite} 
-                alt="Imobiliária Geum" 
-                className="h-12 hidden dark:block"
-              />
-              <p className="text-sm text-muted-foreground font-medium">
+      <footer className="bg-primary text-primary-foreground mt-auto">
+        <div className="container mx-auto px-6 py-16 max-w-7xl">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-24">
+            {/* Brand */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-2">
+                <img
+                  src={logoWhite}
+                  alt="Imobiliária Geum"
+                  className="h-10 opacity-90"
+                />
+              </div>
+              <p className="text-primary-foreground/60 text-sm leading-relaxed max-w-xs">
+                Gente em primeiro lugar.
+                Imobiliária Geum.
+              </p>
+              <p className="text-xs text-primary-foreground/40 font-bold tracking-widest uppercase">
                 CRECI: 7997
               </p>
             </div>
 
-            {/* Conheça */}
+            {/* Navigation */}
             <div>
-              <h3 className="text-lg font-semibold text-foreground mb-4">Conheça</h3>
-              <ul className="space-y-3">
-                <li>
-                  <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                    Estância Albatroz
-                  </a>
-                </li>
-                <li>
-                  <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                    Greenwich Park
-                  </a>
-                </li>
+              <h3 className="text-lg font-bold mb-6 text-white">Navegação</h3>
+              <ul className="space-y-4 text-sm text-primary-foreground/70">
+                <li><a href="#" className="hover:text-white transition-colors">Início</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Imóveis</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Sobre Nós</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Contato</a></li>
               </ul>
             </div>
 
-            {/* Contato */}
+            {/* Contact */}
             <div>
-              <h3 className="text-lg font-semibold text-foreground mb-4">Contato</h3>
-              <div className="space-y-4">
-                {/* Sede Geum */}
-                <div className="space-y-2">
-                  <h4 className="font-semibold text-foreground text-sm">Sede Geum</h4>
-                  <div className="space-y-2 text-sm text-muted-foreground">
-                    <p className="flex items-start gap-2">
-                      <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                      <span>Rua Senador Souza Naves, 2245 - Londrilar, Paraná</span>
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <Phone className="h-4 w-4 flex-shrink-0" />
-                      <a href="tel:+554333413000" className="hover:text-foreground transition-colors">
-                        (43) 3341-3000
-                      </a>
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 flex-shrink-0" />
-                      <a href="mailto:contato@geumimob.com" className="hover:text-foreground transition-colors">
-                        contato@geumimob.com
-                      </a>
-                    </p>
-                    <p className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 flex-shrink-0" />
-                      <span>Segunda à Sexta - 08h30 às 18h</span>
-                    </p>
-                  </div>
-                </div>
-
-                {/* Geum Carbamall */}
-                <div className="space-y-2 pt-4 border-t border-border/50">
-                  <h4 className="font-semibold text-foreground text-sm">Geum Carbamall</h4>
-                  <p className="flex items-start gap-2 text-sm text-muted-foreground">
-                    <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
-                    <span>Rod. Mábio Gonçalves Palhano, 200 - Gleba Palhano, PR - Paraná</span>
-                  </p>
-                  <a href="#" className="inline-block text-sm text-accent hover:text-accent/80 transition-colors">
-                    Fale conosco
-                  </a>
-                </div>
+              <h3 className="text-lg font-bold mb-6 text-white">Contato</h3>
+              <div className="space-y-4 text-sm text-primary-foreground/70">
+                <p className="flex items-start gap-3">
+                  <MapPin className="h-5 w-5 text-white/80 flex-shrink-0" />
+                  <span>Rua Senador Souza Naves, 2245<br />Londrilar, Paraná</span>
+                </p>
+                <p className="flex items-center gap-3">
+                  <Phone className="h-5 w-5 text-white/80 flex-shrink-0" />
+                  <a href="tel:+554333413000" className="hover:text-white transition-colors">(43) 3341-3000</a>
+                </p>
+                <p className="flex items-center gap-3">
+                  <Mail className="h-5 w-5 text-white/80 flex-shrink-0" />
+                  <a href="mailto:contato@geumimob.com" className="hover:text-white transition-colors">contato@geumimob.com</a>
+                </p>
               </div>
             </div>
           </div>
 
-          {/* Copyright */}
-          <div className="mt-12 pt-8 border-t border-border text-center">
-            <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} Imobiliária Geum. Todos os direitos reservados.
-            </p>
+          <div className="mt-16 pt-8 border-t border-primary-foreground/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-primary-foreground/40">
+            <p>© {new Date().getFullYear()} Imobiliária Geum. Todos os direitos reservados.</p>
+            <p>Desenvolvido por Felipe Farias.</p>
           </div>
         </div>
       </footer>
