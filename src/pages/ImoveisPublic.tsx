@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { supabaseStorageService } from '@/lib/supabaseStorage';
 import type { Imovel } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
-import { BedDouble, Bath, Car, Maximize, Home } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { BedDouble, Bath, Car, Maximize, Home, Search, Phone, Mail, Clock, MapPin } from 'lucide-react';
 import logoBlack from '@/assets/logo-geum-black.png';
 import logoWhite from '@/assets/logo-geum-white.png';
 
@@ -56,10 +57,34 @@ const ImoveisPublic = () => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Imóveis Exclusivos</h1>
-          <p className="text-muted-foreground">Conheça nossa seleção de imóveis exclusivos</p>
+      {/* Hero Section */}
+      <section className="bg-gradient-to-b from-accent/10 via-background to-background py-16 md:py-24">
+        <div className="container mx-auto px-4 max-w-7xl">
+          <div className="text-center max-w-3xl mx-auto">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6">
+              Encontre o Imóvel dos seus Sonhos
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground mb-8">
+              Imóveis selecionados com excelência para você e sua família
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" className="gap-2">
+                <Search className="h-5 w-5" />
+                Ver Todos os Imóveis
+              </Button>
+              <Button size="lg" variant="outline" className="gap-2">
+                <Phone className="h-5 w-5" />
+                Fale Conosco
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <main className="container mx-auto px-4 py-12 max-w-7xl">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">Imóveis Exclusivos</h2>
+          <p className="text-lg text-muted-foreground">Conheça nossa seleção de imóveis premium</p>
         </div>
 
         {imoveis.length === 0 ? (
@@ -163,11 +188,95 @@ const ImoveisPublic = () => {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border mt-12 py-6">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} Imobiliária Geum. Todos os direitos reservados.
-          </p>
+      <footer className="border-t border-border mt-20 bg-card">
+        <div className="container mx-auto px-4 py-12 max-w-7xl">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+            {/* Logo e CRECI */}
+            <div className="space-y-4">
+              <img 
+                src={logoBlack} 
+                alt="Imobiliária Geum" 
+                className="h-12 dark:hidden"
+              />
+              <img 
+                src={logoWhite} 
+                alt="Imobiliária Geum" 
+                className="h-12 hidden dark:block"
+              />
+              <p className="text-sm text-muted-foreground font-medium">
+                CRECI: 7997
+              </p>
+            </div>
+
+            {/* Conheça */}
+            <div>
+              <h3 className="text-lg font-semibold text-foreground mb-4">Conheça</h3>
+              <ul className="space-y-3">
+                <li>
+                  <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                    Estância Albatroz
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                    Greenwich Park
+                  </a>
+                </li>
+              </ul>
+            </div>
+
+            {/* Contato */}
+            <div>
+              <h3 className="text-lg font-semibold text-foreground mb-4">Contato</h3>
+              <div className="space-y-4">
+                {/* Sede Geum */}
+                <div className="space-y-2">
+                  <h4 className="font-semibold text-foreground text-sm">Sede Geum</h4>
+                  <div className="space-y-2 text-sm text-muted-foreground">
+                    <p className="flex items-start gap-2">
+                      <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                      <span>Rua Senador Souza Naves, 2245 - Londrilar, Paraná</span>
+                    </p>
+                    <p className="flex items-center gap-2">
+                      <Phone className="h-4 w-4 flex-shrink-0" />
+                      <a href="tel:+554333413000" className="hover:text-foreground transition-colors">
+                        (43) 3341-3000
+                      </a>
+                    </p>
+                    <p className="flex items-center gap-2">
+                      <Mail className="h-4 w-4 flex-shrink-0" />
+                      <a href="mailto:contato@geumimob.com" className="hover:text-foreground transition-colors">
+                        contato@geumimob.com
+                      </a>
+                    </p>
+                    <p className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 flex-shrink-0" />
+                      <span>Segunda à Sexta - 08h30 às 18h</span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Geum Carbamall */}
+                <div className="space-y-2 pt-4 border-t border-border/50">
+                  <h4 className="font-semibold text-foreground text-sm">Geum Carbamall</h4>
+                  <p className="flex items-start gap-2 text-sm text-muted-foreground">
+                    <MapPin className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                    <span>Rod. Mábio Gonçalves Palhano, 200 - Gleba Palhano, PR - Paraná</span>
+                  </p>
+                  <a href="#" className="inline-block text-sm text-accent hover:text-accent/80 transition-colors">
+                    Fale conosco
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Copyright */}
+          <div className="mt-12 pt-8 border-t border-border text-center">
+            <p className="text-sm text-muted-foreground">
+              © {new Date().getFullYear()} Imobiliária Geum. Todos os direitos reservados.
+            </p>
+          </div>
         </div>
       </footer>
     </div>
