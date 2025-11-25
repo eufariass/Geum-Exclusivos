@@ -15,8 +15,16 @@ export const MetaAdsConnect = () => {
   const [accounts, setAccounts] = useState<MetaAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const [connecting, setConnecting] = useState(false);
+  const [configError, setConfigError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Check if Facebook App ID is configured
+    if (!FACEBOOK_APP_ID) {
+      setConfigError('VITE_FACEBOOK_APP_ID não encontrado no arquivo .env');
+      setLoading(false);
+      return;
+    }
+
     loadAccounts();
   }, []);
 
@@ -35,7 +43,7 @@ export const MetaAdsConnect = () => {
 
   const handleConnect = () => {
     if (!FACEBOOK_APP_ID) {
-      toast.error('Facebook App ID não configurado');
+      toast.error('Configure o VITE_FACEBOOK_APP_ID no arquivo .env e reinicie o servidor');
       return;
     }
 
@@ -138,14 +146,40 @@ export const MetaAdsConnect = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {accounts.length === 0 ? (
+          {configError && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                <div className="space-y-2">
+                  <p className="font-semibold">⚠️ Configuração Necessária</p>
+                  <p>{configError}</p>
+                  <p className="text-sm mt-2">
+                    <strong>Como resolver:</strong>
+                  </p>
+                  <ol className="text-sm list-decimal list-inside ml-2 space-y-1">
+                    <li>Crie um Facebook App em: <a href="https://developers.facebook.com/apps" target="_blank" rel="noopener noreferrer" className="underline">developers.facebook.com</a></li>
+                    <li>Copie o ID do App</li>
+                    <li>Adicione no arquivo <code className="bg-muted px-1 rounded">.env</code>: <code className="bg-muted px-1 rounded">VITE_FACEBOOK_APP_ID=seu_id_aqui</code></li>
+                    <li>Reinicie o servidor de desenvolvimento</li>
+                  </ol>
+                  <p className="text-sm mt-2">
+                    📖 Veja o guia completo em: <code className="bg-muted px-1 rounded">FACEBOOK_APP_SETUP.md</code>
+                  </p>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {!configError && accounts.length === 0 && (
             <Alert>
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
                 Nenhuma conta conectada. Conecte sua conta do Facebook Business para começar.
               </AlertDescription>
             </Alert>
-          ) : (
+          )}
+
+          {!configError && accounts.length > 0 && (
             <div className="space-y-3">
               {accounts.map((account) => (
                 <div
@@ -185,7 +219,7 @@ export const MetaAdsConnect = () => {
 
           <Button
             onClick={handleConnect}
-            disabled={connecting}
+            disabled={connecting || !!configError}
             className="w-full gap-2"
           >
             {connecting ? (
