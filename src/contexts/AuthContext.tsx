@@ -21,23 +21,43 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Set up auth state listener FIRST
+    let mounted = true;
+
+    // Initialize session
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (mounted) {
+          setSession(session);
+          setUser(session?.user ?? null);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
+      async (event, session) => {
+        if (mounted) {
+          setSession(session);
+          setUser(session?.user ?? null);
+          setLoading(false);
+        }
       }
     );
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    initializeAuth();
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = async (email: string, password: string) => {
