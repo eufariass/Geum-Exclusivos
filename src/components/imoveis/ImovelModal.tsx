@@ -53,8 +53,19 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
   const [coverImageIndex, setCoverImageIndex] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageOrder, setImageOrder] = useState<string[]>([]);
+  const [zipUrl, setZipUrl] = useState<string | null>(null);
+  const [zipName, setZipName] = useState<string | null>(null);
 
   useEffect(() => {
+    // Limpa URL de ZIP sempre que o modal abrir/fechar ou o imóvel mudar
+    setZipUrl((prev) => {
+      if (prev) {
+        window.URL.revokeObjectURL(prev);
+      }
+      return null;
+    });
+    setZipName(null);
+
     if (editingImovel) {
       const imovelAny = editingImovel as any;
       setFormData({
@@ -191,6 +202,15 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
       return;
     }
 
+    // Limpa ZIP anterior, se existir
+    setZipUrl((prev) => {
+      if (prev) {
+        window.URL.revokeObjectURL(prev);
+      }
+      return null;
+    });
+    setZipName(null);
+
     toast.info('Preparando download das imagens...');
 
     try {
@@ -221,25 +241,20 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
 
       // Gera o arquivo ZIP
       toast.info('Gerando arquivo ZIP...');
+      const nomeArquivo = `${editingImovel.codigo}_fotos.zip`;
       const zipBlob = await zip.generateAsync({ 
         type: 'blob',
         compression: 'DEFLATE',
         compressionOptions: {
-          level: 6
-        }
+          level: 6,
+        },
       });
 
-      // Faz o download do ZIP
       const url = window.URL.createObjectURL(zipBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${editingImovel.codigo}_fotos.zip`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      setZipUrl(url);
+      setZipName(nomeArquivo);
 
-      toast.success(`${editingImovel.image_urls.length} imagens baixadas em ZIP!`);
+      toast.success('ZIP gerado! Clique no botão "Baixar ZIP" para fazer o download.');
     } catch (error) {
       console.error('Erro ao baixar imagens:', error);
       toast.error('Erro ao gerar arquivo ZIP');
@@ -603,10 +618,22 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
                   className="gap-2"
                 >
                   <Download className="h-4 w-4" />
-                  Baixar Fotos
+                  Gerar ZIP
                 </Button>
               )}
             </div>
+
+            {zipUrl && (
+              <div className="flex justify-end mb-2">
+                <Button asChild size="sm" className="gap-2">
+                  <a href={zipUrl} download={zipName || `${editingImovel?.codigo}_fotos.zip`}>
+                    <Download className="h-4 w-4" />
+                    Baixar ZIP
+                  </a>
+                </Button>
+              </div>
+            )}
+
             <ImageUpload
               currentImages={imageOrder.length > 0 ? imageOrder : editingImovel?.image_urls}
               coverIndex={coverImageIndex}
