@@ -127,11 +127,16 @@ Este documento detalha as melhorias implementadas no sistema Geum Exclusivos con
 - **Arquivos**:
   - `src/components/ThemeProvider.tsx`
   - `src/components/ThemeToggle.tsx`
+  - `src/components/TopHeader.tsx`
 - **Implementação**:
   - Temas: Light, Dark, System
   - Persiste preferência no localStorage
   - Transições suaves
-- **Benefício**: Conforto visual, economia de bateria (OLED)
+  - **Disponível APENAS no sistema administrativo (/sistema)**
+  - **Páginas públicas sempre em modo claro** (/, /login, /:codigo)
+  - Botão de toggle no header do sistema
+- **Benefício**: Conforto visual para admins, economia de bateria (OLED)
+- **Nota**: Páginas públicas mantêm design profissional em branco
 
 #### ✓ Skeleton Loaders
 - **Arquivos**:
