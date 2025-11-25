@@ -6,6 +6,12 @@ Esta integração permite conectar contas do Facebook Business Manager ao sistem
 
 ---
 
+## 🚀 Começando Rápido
+
+**⚡ Problemas para conectar?** Veja o **[Guia Rápido de Configuração](./FACEBOOK_APP_SETUP.md)** com passo a passo ilustrado (15-20 min).
+
+---
+
 ## ⚙️ Configuração Inicial
 
 ### 1. Criar App no Facebook Developers
