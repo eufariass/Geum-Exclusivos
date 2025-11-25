@@ -7,6 +7,7 @@ import { ImoveisTab } from '@/components/imoveis/ImoveisTab';
 import { LeadsTab } from '@/components/leads/LeadsTab';
 import { MetricasTab } from '@/components/metricas/MetricasTab';
 import { RelatoriosTab } from '@/components/relatorios/RelatoriosTab';
+import { MetaAdsReportsTab } from '@/components/metaAds/MetaAdsReportsTab';
 import { useToastManager } from '@/components/Toast';
 import type { TabType } from '@/types';
 
@@ -39,6 +40,7 @@ const Index = () => {
               <MetricasTab onToast={showToast} key={refreshKey} />
             )}
             {activeTab === 'relatorios' && <RelatoriosTab showToast={showToast} key={refreshKey} />}
+            {activeTab === 'metaads' && <MetaAdsReportsTab key={refreshKey} />}
           </main>
         </div>
 
