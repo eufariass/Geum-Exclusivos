@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { Lock, Mail, User } from 'lucide-react';
 import logoBlack from '@/assets/logo-geum-black.png';
@@ -19,7 +20,10 @@ const Auth = () => {
   const [signupNome, setSignupNome] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signIn, signUp, user } = useAuth();
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
+  const { signIn, signUp, user, resetPassword } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -79,6 +83,29 @@ const Auth = () => {
     } else {
       toast.success('Conta criada com sucesso!');
       navigate('/sistema', { replace: true });
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResetLoading(true);
+
+    if (!resetEmail) {
+      toast.error('Por favor, informe seu email');
+      setResetLoading(false);
+      return;
+    }
+
+    const { error } = await resetPassword(resetEmail);
+
+    if (error) {
+      toast.error('Erro ao enviar email de recuperação');
+      setResetLoading(false);
+    } else {
+      toast.success('Email de recuperação enviado! Verifique sua caixa de entrada.');
+      setShowForgotPassword(false);
+      setResetEmail('');
+      setResetLoading(false);
     }
   };
 
@@ -147,6 +174,14 @@ const Auth = () => {
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? 'Entrando...' : 'Entrar'}
               </Button>
+
+              <button
+                type="button"
+                onClick={() => setShowForgotPassword(true)}
+                className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors text-center"
+              >
+                Esqueci minha senha
+              </button>
             </form>
           </TabsContent>
 
@@ -218,6 +253,49 @@ const Auth = () => {
           Sistema de Gestão de Imóveis GEUM
         </p>
       </Card>
+
+      {/* Dialog de Recuperação de Senha */}
+      <Dialog open={showForgotPassword} onOpenChange={setShowForgotPassword}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Recuperar Senha</DialogTitle>
+            <DialogDescription>
+              Informe seu email cadastrado. Enviaremos um link para redefinir sua senha.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleResetPassword} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="reset-email">Email</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="reset-email"
+                  type="email"
+                  placeholder="seu@email.com"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  className="pl-10"
+                  disabled={resetLoading}
+                />
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowForgotPassword(false)}
+                className="flex-1"
+                disabled={resetLoading}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" className="flex-1" disabled={resetLoading}>
+                {resetLoading ? 'Enviando...' : 'Enviar Email'}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

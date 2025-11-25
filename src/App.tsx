@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import ImovelLanding from "./pages/ImovelLanding";
 import ImoveisPublic from "./pages/ImoveisPublic";
 import NotFound from "./pages/NotFound";
@@ -23,6 +24,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<ImoveisPublic />} />
             <Route path="/login" element={<Auth />} />
+            <Route path="/redefinir-senha" element={<ResetPassword />} />
             <Route
               path="/sistema"
               element={
