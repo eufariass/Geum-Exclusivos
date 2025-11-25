@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { LogOut, User, Menu } from 'lucide-react';
 import { ProfileModal } from './ProfileModal';
 import { SidebarTrigger } from './ui/sidebar';
+import { ThemeToggle } from './ThemeToggle';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,6 +47,9 @@ export const TopHeader = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Theme Toggle - Dark Mode */}
+            <ThemeToggle />
+
             {user && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

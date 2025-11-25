@@ -38,36 +38,40 @@ const queryClient = new QueryClient({
 
 const App = () => (
   <ErrorBoundary>
-    <ThemeProvider defaultTheme="system" storageKey="geum-ui-theme">
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <AuthProvider>
-              <Suspense fallback={<PageLoader />}>
-                <Routes>
-                  <Route path="/" element={<ImoveisPublic />} />
-                  <Route path="/login" element={<Auth />} />
-                  <Route path="/redefinir-senha" element={<ResetPassword />} />
-                  <Route
-                    path="/sistema"
-                    element={
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <Suspense fallback={<PageLoader />}>
+              <Routes>
+                {/* Public routes - always light mode */}
+                <Route path="/" element={<ImoveisPublic />} />
+                <Route path="/login" element={<Auth />} />
+                <Route path="/redefinir-senha" element={<ResetPassword />} />
+                <Route path="/:codigo" element={<ImovelLanding />} />
+
+                {/* Protected routes - with dark mode support */}
+                <Route
+                  path="/sistema"
+                  element={
+                    <ThemeProvider defaultTheme="light" storageKey="geum-ui-theme">
                       <ProtectedRoute>
                         <Index />
                       </ProtectedRoute>
-                    }
-                  />
-                  <Route path="/:codigo" element={<ImovelLanding />} />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
-            </AuthProvider>
-          </BrowserRouter>
-        </TooltipProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
+                    </ThemeProvider>
+                  }
+                />
+
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
   </ErrorBoundary>
 );
 
