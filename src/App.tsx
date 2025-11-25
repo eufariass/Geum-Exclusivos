@@ -7,7 +7,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { ThemeProvider } from "@/components/ThemeProvider";
 
 // Lazy load pages for better performance
 const Index = lazy(() => import("./pages/Index"));
@@ -46,24 +45,18 @@ const App = () => (
           <AuthProvider>
             <Suspense fallback={<PageLoader />}>
               <Routes>
-                {/* Public routes - always light mode */}
                 <Route path="/" element={<ImoveisPublic />} />
                 <Route path="/login" element={<Auth />} />
                 <Route path="/redefinir-senha" element={<ResetPassword />} />
                 <Route path="/:codigo" element={<ImovelLanding />} />
-
-                {/* Protected routes - with dark mode support */}
                 <Route
                   path="/sistema"
                   element={
-                    <ThemeProvider defaultTheme="light" storageKey="geum-ui-theme">
-                      <ProtectedRoute>
-                        <Index />
-                      </ProtectedRoute>
-                    </ThemeProvider>
+                    <ProtectedRoute>
+                      <Index />
+                    </ProtectedRoute>
                   }
                 />
-
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
