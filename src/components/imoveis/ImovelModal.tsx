@@ -195,21 +195,39 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
 
     try {
       const zip = new JSZip();
-      const imgFolder = zip.folder('fotos');
 
       // Download todas as imagens e adiciona ao ZIP
       for (let i = 0; i < editingImovel.image_urls.length; i++) {
         const imageUrl = editingImovel.image_urls[i];
-        const response = await fetch(imageUrl);
-        const blob = await response.blob();
         
-        // Adiciona ao ZIP com nome formatado
-        imgFolder?.file(`${editingImovel.codigo}_foto_${i + 1}.jpg`, blob);
+        try {
+          const response = await fetch(imageUrl, {
+            mode: 'cors',
+          });
+          
+          if (!response.ok) {
+            throw new Error(`Erro ao baixar imagem ${i + 1}`);
+          }
+          
+          const arrayBuffer = await response.arrayBuffer();
+          
+          // Adiciona ao ZIP com nome formatado
+          zip.file(`${editingImovel.codigo}_foto_${i + 1}.jpg`, arrayBuffer);
+        } catch (imgError) {
+          console.error(`Erro na imagem ${i + 1}:`, imgError);
+          toast.error(`Erro ao processar imagem ${i + 1}`);
+        }
       }
 
       // Gera o arquivo ZIP
       toast.info('Gerando arquivo ZIP...');
-      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const zipBlob = await zip.generateAsync({ 
+        type: 'blob',
+        compression: 'DEFLATE',
+        compressionOptions: {
+          level: 6
+        }
+      });
 
       // Faz o download do ZIP
       const url = window.URL.createObjectURL(zipBlob);
