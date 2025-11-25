@@ -12,6 +12,7 @@ import { ImageUpload } from './ImageUpload';
 import { useAuth } from '@/contexts/AuthContext';
 import { Download } from 'lucide-react';
 import { toast } from 'sonner';
+import JSZip from 'jszip';
 
 interface ImovelModalProps {
   isOpen: boolean;
@@ -190,30 +191,40 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
       return;
     }
 
-    toast.info('Baixando imagens...');
+    toast.info('Preparando download das imagens...');
 
     try {
+      const zip = new JSZip();
+      const imgFolder = zip.folder('fotos');
+
+      // Download todas as imagens e adiciona ao ZIP
       for (let i = 0; i < editingImovel.image_urls.length; i++) {
         const imageUrl = editingImovel.image_urls[i];
         const response = await fetch(imageUrl);
         const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${editingImovel.codigo}_foto_${i + 1}.jpg`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);
         
-        // Small delay between downloads to avoid browser blocking
-        await new Promise(resolve => setTimeout(resolve, 300));
+        // Adiciona ao ZIP com nome formatado
+        imgFolder?.file(`${editingImovel.codigo}_foto_${i + 1}.jpg`, blob);
       }
-      
-      toast.success(`${editingImovel.image_urls.length} imagens baixadas com sucesso!`);
+
+      // Gera o arquivo ZIP
+      toast.info('Gerando arquivo ZIP...');
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+
+      // Faz o download do ZIP
+      const url = window.URL.createObjectURL(zipBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${editingImovel.codigo}_fotos.zip`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      toast.success(`${editingImovel.image_urls.length} imagens baixadas em ZIP!`);
     } catch (error) {
       console.error('Erro ao baixar imagens:', error);
-      toast.error('Erro ao baixar algumas imagens');
+      toast.error('Erro ao gerar arquivo ZIP');
     }
   };
 
