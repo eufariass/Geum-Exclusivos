@@ -10,6 +10,8 @@ import type { Imovel, TipoImovel } from '@/types';
 import { supabaseStorageService } from '@/lib/supabaseStorage';
 import { ImageUpload } from './ImageUpload';
 import { useAuth } from '@/contexts/AuthContext';
+import { Download } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface ImovelModalProps {
   isOpen: boolean;
@@ -180,6 +182,39 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  const handleDownloadImages = async () => {
+    if (!editingImovel?.image_urls || editingImovel.image_urls.length === 0) {
+      toast.error('Nenhuma imagem disponível para download');
+      return;
+    }
+
+    toast.info('Baixando imagens...');
+
+    try {
+      for (let i = 0; i < editingImovel.image_urls.length; i++) {
+        const imageUrl = editingImovel.image_urls[i];
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${editingImovel.codigo}_foto_${i + 1}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+        
+        // Small delay between downloads to avoid browser blocking
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+      
+      toast.success(`${editingImovel.image_urls.length} imagens baixadas com sucesso!`);
+    } catch (error) {
+      console.error('Erro ao baixar imagens:', error);
+      toast.error('Erro ao baixar algumas imagens');
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -525,8 +560,24 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
           </div>
 
           <div>
-            <Label>Imagens do Imóvel (até 10 fotos de 15MB cada)</Label>
-            <p className="text-xs text-muted-foreground mb-2">Arraste para reordenar • Clique para definir capa</p>
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <Label>Imagens do Imóvel (até 10 fotos de 15MB cada)</Label>
+                <p className="text-xs text-muted-foreground mt-1">Arraste para reordenar • Clique para definir capa</p>
+              </div>
+              {editingImovel && editingImovel.image_urls && editingImovel.image_urls.length > 0 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDownloadImages}
+                  className="gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  Baixar Fotos
+                </Button>
+              )}
+            </div>
             <ImageUpload
               currentImages={imageOrder.length > 0 ? imageOrder : editingImovel?.image_urls}
               coverIndex={coverImageIndex}
