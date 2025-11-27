@@ -75,4 +75,4 @@ export interface LeadComment {
   created_at: string;
 }
 
-export type TabType = 'dashboard' | 'imoveis' | 'leads' | 'metricas' | 'relatorios' | 'metaads';
+export type TabType = 'dashboard' | 'imoveis' | 'leads' | 'metricas' | 'relatorios';
