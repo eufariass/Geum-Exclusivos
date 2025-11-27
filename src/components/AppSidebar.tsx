@@ -1,4 +1,4 @@
-import { Home, Building2, Users, BarChart3, FileText } from 'lucide-react';
+import { Home, Building2, Users, CheckSquare, BarChart3, FileText } from 'lucide-react';
 import logoWhite from '@/assets/logo-geum-white.png';
 import type { TabType } from '@/types';
 import {
@@ -21,6 +21,7 @@ const menuItems = [
   { id: 'dashboard' as TabType, label: 'Dashboard', icon: Home },
   { id: 'imoveis' as TabType, label: 'Imóveis', icon: Building2 },
   { id: 'leads' as TabType, label: 'Leads', icon: Users },
+  { id: 'tasks' as TabType, label: 'Tarefas', icon: CheckSquare },
   { id: 'metricas' as TabType, label: 'Métricas', icon: BarChart3 },
   { id: 'relatorios' as TabType, label: 'Relatórios', icon: FileText },
 ];

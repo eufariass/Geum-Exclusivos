@@ -119,4 +119,47 @@ export interface LeadComment {
   created_at: string;
 }
 
-export type TabType = 'dashboard' | 'imoveis' | 'leads' | 'metricas' | 'relatorios';
+export type TabType = 'dashboard' | 'imoveis' | 'leads' | 'tasks' | 'metricas' | 'relatorios';
+
+// Tarefas
+export type TaskType = 'call' | 'email' | 'whatsapp' | 'meeting' | 'visit' | 'follow_up' | 'other';
+export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
+export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
+
+export interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  lead_id?: string;
+  imovel_id?: string;
+  type: TaskType;
+  status: TaskStatus;
+  priority: TaskPriority;
+  due_date?: string;
+  completed_at?: string;
+  assigned_to?: string;
+  created_by?: string;
+  created_at?: string;
+  updated_at?: string;
+  // Relações populadas
+  lead?: Lead;
+  imovel?: Imovel;
+  checklist?: TaskChecklistItem[];
+}
+
+export interface TaskChecklistItem {
+  id: string;
+  task_id: string;
+  item_text: string;
+  is_completed: boolean;
+  order_index?: number;
+  created_at?: string;
+}
+
+export interface TaskSummary {
+  pending_count: number;
+  in_progress_count: number;
+  completed_count: number;
+  overdue_count: number;
+  due_today_count: number;
+}

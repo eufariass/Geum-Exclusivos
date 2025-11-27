@@ -5,6 +5,7 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import { DashboardTab } from '@/components/dashboard/DashboardTab';
 import { ImoveisTab } from '@/components/imoveis/ImoveisTab';
 import { LeadsTab } from '@/components/leads/LeadsTab';
+import { TasksTab } from '@/components/tasks/TasksTab';
 import { MetricasTab } from '@/components/metricas/MetricasTab';
 import { RelatoriosTab } from '@/components/relatorios/RelatoriosTab';
 import { useToastManager } from '@/components/Toast';
@@ -35,6 +36,7 @@ const Index = () => {
             {activeTab === 'leads' && (
               <LeadsTab onToast={showToast} key={refreshKey} />
             )}
+            {activeTab === 'tasks' && <TasksTab key={refreshKey} />}
             {activeTab === 'metricas' && (
               <MetricasTab onToast={showToast} key={refreshKey} />
             )}
