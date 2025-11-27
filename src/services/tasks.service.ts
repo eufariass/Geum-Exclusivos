@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { Task, TaskChecklistItem, TaskSummary, TaskStatus, TaskPriority } from '@/types';
 import { logger } from '@/lib/logger';
+import { handleSupabaseError } from '@/lib/supabase-errors';
 
 export interface TaskFilters {
   status?: TaskStatus | TaskStatus[];
@@ -83,8 +84,7 @@ export const tasksService = {
       logger.info('Tasks fetched', { count: data?.length, filters });
       return data as Task[] || [];
     } catch (error) {
-      logger.error('Error fetching tasks', error);
-      throw new Error('Erro ao buscar tarefas');
+      throw handleSupabaseError(error, 'buscar tarefas');
     }
   },
 
