@@ -133,6 +133,91 @@ export type Database = {
           },
         ]
       }
+      lead_pipeline_stages: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          is_final: boolean
+          is_won: boolean
+          name: string
+          order_index: number
+          updated_at: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          id?: string
+          is_final?: boolean
+          is_won?: boolean
+          name: string
+          order_index: number
+          updated_at?: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          is_final?: boolean
+          is_won?: boolean
+          name?: string
+          order_index?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      lead_stage_history: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          from_stage_id: string | null
+          id: string
+          lead_id: string
+          notes: string | null
+          to_stage_id: string
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          from_stage_id?: string | null
+          id?: string
+          lead_id: string
+          notes?: string | null
+          to_stage_id: string
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          from_stage_id?: string | null
+          id?: string
+          lead_id?: string
+          notes?: string | null
+          to_stage_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_stage_history_from_stage_id_fkey"
+            columns: ["from_stage_id"]
+            isOneToOne: false
+            referencedRelation: "lead_pipeline_stages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_stage_history_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_stage_history_to_stage_id_fkey"
+            columns: ["to_stage_id"]
+            isOneToOne: false
+            referencedRelation: "lead_pipeline_stages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       leads: {
         Row: {
           created_at: string
@@ -140,8 +225,10 @@ export type Database = {
           email: string
           id: string
           imovel_id: string
+          lost_reason_id: string | null
           nome: string
           observacoes: string | null
+          stage_id: string | null
           status: string
           telefone: string
           tipo_interesse: string
@@ -154,8 +241,10 @@ export type Database = {
           email: string
           id?: string
           imovel_id: string
+          lost_reason_id?: string | null
           nome: string
           observacoes?: string | null
+          stage_id?: string | null
           status?: string
           telefone: string
           tipo_interesse: string
@@ -168,8 +257,10 @@ export type Database = {
           email?: string
           id?: string
           imovel_id?: string
+          lost_reason_id?: string | null
           nome?: string
           observacoes?: string | null
+          stage_id?: string | null
           status?: string
           telefone?: string
           tipo_interesse?: string
@@ -184,7 +275,45 @@ export type Database = {
             referencedRelation: "imoveis"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "leads_lost_reason_id_fkey"
+            columns: ["lost_reason_id"]
+            isOneToOne: false
+            referencedRelation: "lost_reasons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "lead_pipeline_stages"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      lost_reasons: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          order_index: number
+          reason: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          order_index?: number
+          reason: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          order_index?: number
+          reason?: string
+        }
+        Relationships: []
       }
       metricas: {
         Row: {
@@ -260,12 +389,73 @@ export type Database = {
         }
         Relationships: []
       }
+      tasks: {
+        Row: {
+          assigned_to: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          lead_id: string | null
+          order_index: number
+          priority: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          lead_id?: string | null
+          order_index?: number
+          priority?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          lead_id?: string | null
+          order_index?: number
+          priority?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_pipeline_metrics: {
+        Args: never
+        Returns: {
+          conversion_rate: number
+          lead_count: number
+          stage_id: string
+          stage_name: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
