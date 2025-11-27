@@ -52,6 +52,44 @@ export interface ExportData {
   versao: string;
 }
 
+export interface PipelineStage {
+  id: string;
+  name: string;
+  order_index: number;
+  is_final: boolean;
+  is_won: boolean;
+  color: string;
+  created_at?: string;
+}
+
+export interface LostReason {
+  id: string;
+  reason: string;
+  is_active: boolean;
+  order_index: number;
+  created_at?: string;
+}
+
+export interface StageHistory {
+  id: string;
+  lead_id: string;
+  from_stage_id?: string;
+  to_stage_id?: string;
+  changed_by?: string;
+  changed_at: string;
+  duration_days?: number;
+  notes?: string;
+}
+
+export interface PipelineMetrics {
+  stage_id: string;
+  stage_name: string;
+  stage_order: number;
+  lead_count: number;
+  avg_duration_days: number;
+  conversion_rate: number;
+}
+
 export interface Lead {
   id: string;
   imovel_id: string;
@@ -59,7 +97,13 @@ export interface Lead {
   telefone: string;
   email: string;
   tipo_interesse: 'Venda' | 'Locação';
-  status: 'Aguardando' | 'Enviado ao corretor' | 'Follow up';
+  status: 'Aguardando' | 'Enviado ao corretor' | 'Follow up'; // Mantido para compatibilidade
+  pipeline_stage_id?: string;
+  stage_changed_at?: string;
+  lost_reason_id?: string;
+  lost_notes?: string;
+  lost_at?: string;
+  won_at?: string;
   observacoes?: string;
   created_at?: string;
   updated_at?: string;
@@ -75,4 +119,4 @@ export interface LeadComment {
   created_at: string;
 }
 
-export type TabType = 'dashboard' | 'imoveis' | 'leads' | 'metricas' | 'relatorios' | 'metaads';
+export type TabType = 'dashboard' | 'imoveis' | 'leads' | 'metricas' | 'relatorios';

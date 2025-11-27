@@ -10,7 +10,6 @@ import { Separator } from '@/components/ui/separator';
 import type { Imovel, TipoImovel } from '@/types';
 import { supabaseStorageService } from '@/lib/supabaseStorage';
 import { ImageUpload } from './ImageUpload';
-import { MetaAdsCampaignSelector } from '@/components/metaAds/MetaAdsCampaignSelector';
 import { useAuth } from '@/contexts/AuthContext';
 import { Download } from 'lucide-react';
 import { toast } from 'sonner';
@@ -604,26 +603,6 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
               className="min-h-[100px] resize-none"
             />
           </div>
-
-          {/* Meta Ads Section - Only show when editing */}
-          {editingImovel && (
-            <>
-              <Separator className="my-6" />
-              <div>
-                <Label className="text-base font-semibold">Campanha do Meta Ads</Label>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Vincule uma campanha do Facebook Ads para rastrear métricas automaticamente
-                </p>
-                <MetaAdsCampaignSelector
-                  imovelId={editingImovel.id}
-                  onCampaignLinked={() => {
-                    toast.success('Campanha atualizada!');
-                  }}
-                />
-              </div>
-              <Separator className="my-6" />
-            </>
-          )}
 
           <div>
             <div className="flex items-center justify-between mb-2">
