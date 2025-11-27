@@ -1,0 +1,42 @@
+╔═══════════════════════════════════════════════════════════════╗
+║                    🚨 AÇÃO NECESSÁRIA 🚨                      ║
+║                                                               ║
+║  O sistema de tarefas está implementado no código, mas       ║
+║  precisa que alguém com acesso ao Supabase execute a         ║
+║  migration do banco de dados.                                ║
+╚═══════════════════════════════════════════════════════════════╝
+
+📦 ARQUIVOS PARA COMPARTILHAR:
+├── INSTRUCOES_PARA_ADMIN.md  ← Instruções passo a passo
+└── EXECUTAR_NO_SUPABASE.sql  ← Script SQL para executar
+
+👤 QUEM PODE EXECUTAR:
+- Administrador do projeto Supabase
+- Pessoa com acesso ao painel https://supabase.com/dashboard
+- Alguém com permissões de "Owner" no projeto
+
+⏱️ TEMPO ESTIMADO:
+- 2 minutos para executar
+- Processo muito simples: copiar, colar, clicar em "Run"
+
+📧 ENVIE ESTES ARQUIVOS:
+1. INSTRUCOES_PARA_ADMIN.md
+2. EXECUTAR_NO_SUPABASE.sql
+
+💡 MENSAGEM SUGERIDA:
+"Olá! Implementei o sistema de tarefas completo no nosso CRM, mas 
+preciso que você execute uma migration no Supabase. Preparei tudo 
+pronto - é só copiar e colar um SQL. Leva 2 minutos. Pode me ajudar?"
+
+✅ APÓS A EXECUÇÃO:
+- A pessoa deve te avisar quando terminar
+- Você vai recarregar a aplicação (F5)
+- O sistema de tarefas estará funcionando 100%
+
+═══════════════════════════════════════════════════════════════
+
+📍 LOCALIZAÇÃO DOS ARQUIVOS:
+- Pasta raiz do projeto
+- Ou acesse via GitHub no último commit
+
+═══════════════════════════════════════════════════════════════
