@@ -27,7 +27,7 @@ export async function optimizeImage(
   } = options;
 
   // Check file type
-  if (!FILE_UPLOAD.ALLOWED_IMAGE_TYPES.includes(file.type)) {
+  if (!FILE_UPLOAD.ALLOWED_IMAGE_TYPES.includes(file.type as any)) {
     throw new Error(TOAST_MESSAGES.ERROR.INVALID_FILE_TYPE);
   }
 
@@ -176,7 +176,7 @@ function canvasToBlob(
  */
 export function validateImageFile(file: File): { valid: boolean; error?: string } {
   // Check file type
-  if (!FILE_UPLOAD.ALLOWED_IMAGE_TYPES.includes(file.type)) {
+  if (!FILE_UPLOAD.ALLOWED_IMAGE_TYPES.includes(file.type as any)) {
     return {
       valid: false,
       error: TOAST_MESSAGES.ERROR.INVALID_FILE_TYPE,

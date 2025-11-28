@@ -40,7 +40,7 @@ export const leadsService = {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as Lead[];
     } catch (error) {
       logger.error('Error fetching leads', error);
       throw error;
@@ -59,7 +59,7 @@ export const leadsService = {
         .single();
 
       if (error) throw error;
-      return data;
+      return data as Lead;
     } catch (error) {
       logger.error('Error fetching lead by ID', { id, error });
       throw error;
@@ -78,7 +78,7 @@ export const leadsService = {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      return (data || []) as Lead[];
     } catch (error) {
       logger.error('Error fetching leads by imovel', { imovelId, error });
       throw error;
@@ -114,7 +114,7 @@ export const leadsService = {
         logger.warn('Error sending webhook', webhookError);
       }
 
-      return data;
+      return data as Lead;
     } catch (error) {
       logger.error('Error creating lead', { lead, error });
       throw error;
@@ -136,7 +136,7 @@ export const leadsService = {
       if (error) throw error;
 
       logger.info('Lead updated', { id });
-      return data;
+      return data as Lead;
     } catch (error) {
       logger.error('Error updating lead', { id, updates, error });
       throw error;

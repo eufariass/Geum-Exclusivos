@@ -22,7 +22,7 @@ export const PipelineMetricsComponent = ({ startDate, endDate }: PipelineMetrics
   const loadMetrics = async () => {
     try {
       setLoading(true);
-      const data = await pipelineService.getMetrics(startDate, endDate);
+      const data = await pipelineService.getMetrics();
       setMetrics(data);
     } catch (error) {
       console.error('Error loading metrics:', error);
