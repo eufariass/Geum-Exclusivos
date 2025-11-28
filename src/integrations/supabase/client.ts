@@ -5,6 +5,32 @@ import type { Database } from './types';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
+// Validate environment variables
+if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+  const errorMsg = 'Configuração do Supabase ausente!\n\n' +
+    'As seguintes variáveis de ambiente são obrigatórias:\n' +
+    '- VITE_SUPABASE_URL\n' +
+    '- VITE_SUPABASE_PUBLISHABLE_KEY\n\n' +
+    'Para desenvolvimento local: crie um arquivo .env com base no .env.example\n' +
+    'Para Lovable: verifique as configurações do projeto em lovable.dev';
+
+  console.error(errorMsg);
+  throw new Error(errorMsg);
+}
+
+// Check for placeholder values
+if (SUPABASE_URL.includes('your-project') || SUPABASE_PUBLISHABLE_KEY.includes('placeholder')) {
+  const errorMsg = 'Configuração do Supabase com valores placeholder!\n\n' +
+    'Por favor, configure as credenciais reais do Supabase:\n' +
+    '- VITE_SUPABASE_URL: URL do seu projeto\n' +
+    '- VITE_SUPABASE_PUBLISHABLE_KEY: Chave pública do projeto\n\n' +
+    'Para desenvolvimento local: edite o arquivo .env\n' +
+    'Para Lovable: configure em Project > Settings > Integrations > Supabase';
+
+  console.error(errorMsg);
+  throw new Error(errorMsg);
+}
+
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
