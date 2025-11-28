@@ -236,22 +236,27 @@ export const pipelineService = {
   /**
    * Calcular métricas do funil
    */
-  async getMetrics(startDate?: Date, endDate?: Date): Promise<PipelineMetrics[]> {
+  async getMetrics(): Promise<PipelineMetrics[]> {
     try {
-      const { data, error } = await supabase.rpc('get_pipeline_metrics', {
-        p_start_date: startDate?.toISOString(),
-        p_end_date: endDate?.toISOString(),
-      });
+      const { data, error } = await supabase.rpc('get_pipeline_metrics');
 
       if (error) throw error;
 
+      // Mapear para incluir campos faltantes
+      const metrics: PipelineMetrics[] = (data || []).map((item: any) => ({
+        stage_id: item.stage_id,
+        stage_name: item.stage_name,
+        stage_order: 0, // Não disponível na função atual
+        lead_count: item.lead_count,
+        avg_duration_days: 0, // Não disponível na função atual
+        conversion_rate: item.conversion_rate,
+      }));
+
       logger.info('Pipeline metrics calculated', {
-        startDate: startDate?.toISOString(),
-        endDate: endDate?.toISOString(),
-        stagesCount: data?.length,
+        stagesCount: metrics.length,
       });
 
-      return data || [];
+      return metrics;
     } catch (error) {
       logger.error('Error calculating pipeline metrics', error);
       throw new Error('Erro ao calcular métricas do funil');
@@ -282,7 +287,7 @@ export const pipelineService = {
       if (error) throw error;
 
       logger.info('Stuck leads found', { count: data?.length, days });
-      return data || [];
+      return (data || []) as Lead[];
     } catch (error) {
       logger.error('Error fetching stuck leads', error);
       throw new Error('Erro ao buscar leads parados');

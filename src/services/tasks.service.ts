@@ -33,8 +33,7 @@ export const tasksService = {
         .from('tasks')
         .select(`
           *,
-          lead:leads(id, nome, telefone),
-          imovel:imoveis(id, codigo, endereco)
+          lead:leads(id, nome, telefone)
         `)
         .order('due_date', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: false });
@@ -60,9 +59,10 @@ export const tasksService = {
         query = query.eq('lead_id', filters.leadId);
       }
 
-      if (filters?.imovelId) {
-        query = query.eq('imovel_id', filters.imovelId);
-      }
+      // imovel_id não existe na tabela tasks
+      // if (filters?.imovelId) {
+      //   query = query.eq('imovel_id', filters.imovelId);
+      // }
 
       if (filters?.assignedTo) {
         query = query.eq('assigned_to', filters.assignedTo);
@@ -80,8 +80,15 @@ export const tasksService = {
 
       if (error) throw error;
 
-      logger.info('Tasks fetched', { count: data?.length, filters });
-      return data as Task[] || [];
+      // Mapear dados para incluir type padrão
+      const tasks: Task[] = (data || []).map((task: any) => ({
+        ...task,
+        type: 'other' as const, // Campo não existe na tabela, usar padrão
+        lead: task.lead as any, // Partial Lead
+      }));
+
+      logger.info('Tasks fetched', { count: tasks.length, filters });
+      return tasks;
     } catch (error) {
       logger.error('Error fetching tasks', error);
       throw new Error('Erro ao buscar tarefas');
@@ -96,10 +103,13 @@ export const tasksService = {
   },
 
   /**
-   * Buscar tarefas por imóvel
+   * Buscar tarefas por imóvel - DESABILITADO (campo não existe na tabela)
    */
   async getTasksByImovel(imovelId: string): Promise<Task[]> {
-    return this.getTasks({ imovelId });
+    // Campo imovel_id não existe na tabela tasks
+    // Pode ser necessário adicionar à migração futura
+    return [];
+    // return this.getTasks({ imovelId });
   },
 
   /**
@@ -111,9 +121,7 @@ export const tasksService = {
         .from('tasks')
         .select(`
           *,
-          lead:leads(id, nome, telefone, email),
-          imovel:imoveis(id, codigo, endereco),
-          checklist:task_checklists(*)
+          lead:leads(id, nome, telefone, email)
         `)
         .eq('id', id)
         .single();
@@ -121,7 +129,12 @@ export const tasksService = {
       if (error) throw error;
 
       logger.info('Task fetched by ID', { id });
-      return data as Task;
+      return {
+        ...data,
+        type: 'other' as const,
+        checklist: [], // Tabela não existe ainda
+        lead: data.lead as any, // Partial Lead
+      } as Task;
     } catch (error) {
       logger.error('Error fetching task by ID', error);
       return null;
@@ -133,10 +146,13 @@ export const tasksService = {
    */
   async createTask(input: CreateTaskInput): Promise<Task> {
     try {
+      // Remover imovel_id se existir, pois não está na tabela
+      const { imovel_id, ...taskInput } = input as any;
+      
       const { data, error } = await supabase
         .from('tasks')
         .insert({
-          ...input,
+          ...taskInput,
           status: 'pending',
         })
         .select()
@@ -145,7 +161,10 @@ export const tasksService = {
       if (error) throw error;
 
       logger.info('Task created', { taskId: data.id, title: input.title });
-      return data as Task;
+      return {
+        ...data,
+        type: input.type,
+      } as Task;
     } catch (error) {
       logger.error('Error creating task', error);
       throw new Error('Erro ao criar tarefa');
@@ -167,7 +186,10 @@ export const tasksService = {
       if (error) throw error;
 
       logger.info('Task updated', { taskId: id, updates });
-      return data as Task;
+      return {
+        ...data,
+        type: updates.type || 'other' as const,
+      } as Task;
     } catch (error) {
       logger.error('Error updating task', error);
       throw new Error('Erro ao atualizar tarefa');
@@ -192,7 +214,10 @@ export const tasksService = {
       if (error) throw error;
 
       logger.info('Task completed', { taskId: id });
-      return data as Task;
+      return {
+        ...data,
+        type: 'other' as const,
+      } as Task;
     } catch (error) {
       logger.error('Error completing task', error);
       throw new Error('Erro ao completar tarefa');
@@ -223,12 +248,28 @@ export const tasksService = {
    */
   async getOverdueTasks(): Promise<Task[]> {
     try {
-      const { data, error } = await supabase.rpc('get_overdue_tasks');
+      const now = new Date().toISOString();
+      
+      const { data, error } = await supabase
+        .from('tasks')
+        .select(`
+          *,
+          lead:leads(id, nome, telefone)
+        `)
+        .lt('due_date', now)
+        .in('status', ['pending', 'in_progress'])
+        .order('due_date', { ascending: true });
 
       if (error) throw error;
 
-      logger.info('Overdue tasks fetched', { count: data?.length });
-      return data as Task[] || [];
+      const tasks: Task[] = (data || []).map((task: any) => ({
+        ...task,
+        type: 'other' as const,
+        lead: task.lead as any,
+      }));
+
+      logger.info('Overdue tasks fetched', { count: tasks.length });
+      return tasks;
     } catch (error) {
       logger.error('Error fetching overdue tasks', error);
       throw new Error('Erro ao buscar tarefas vencidas');
@@ -260,15 +301,32 @@ export const tasksService = {
    */
   async getTaskSummary(): Promise<TaskSummary> {
     try {
-      const { data, error } = await supabase
-        .from('task_summary')
-        .select('*')
-        .single();
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+      const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString();
+
+      // Buscar todas as tarefas
+      const { data: allTasks, error } = await supabase
+        .from('tasks')
+        .select('status, due_date');
 
       if (error) throw error;
 
-      logger.info('Task summary fetched', data);
-      return data as TaskSummary;
+      const tasks = allTasks || [];
+      const summary: TaskSummary = {
+        pending_count: tasks.filter(t => t.status === 'pending').length,
+        in_progress_count: tasks.filter(t => t.status === 'in_progress').length,
+        completed_count: tasks.filter(t => t.status === 'completed').length,
+        overdue_count: tasks.filter(t => 
+          t.due_date && t.due_date < today && ['pending', 'in_progress'].includes(t.status)
+        ).length,
+        due_today_count: tasks.filter(t => 
+          t.due_date && t.due_date >= today && t.due_date < tomorrow && ['pending', 'in_progress'].includes(t.status)
+        ).length,
+      };
+
+      logger.info('Task summary calculated', summary);
+      return summary;
     } catch (error) {
       logger.error('Error fetching task summary', error);
       return {
@@ -281,82 +339,23 @@ export const tasksService = {
     }
   },
 
-  /**
-   * Adicionar item ao checklist
-   */
+  // Métodos de checklist comentados - tabela task_checklists não existe ainda
+  // Descomentar quando a tabela for criada
+  
+  /*
   async addChecklistItem(taskId: string, itemText: string): Promise<TaskChecklistItem> {
-    try {
-      // Buscar maior order_index
-      const { data: existing } = await supabase
-        .from('task_checklists')
-        .select('order_index')
-        .eq('task_id', taskId)
-        .order('order_index', { ascending: false })
-        .limit(1);
-
-      const nextIndex = existing && existing[0] ? existing[0].order_index + 1 : 0;
-
-      const { data, error } = await supabase
-        .from('task_checklists')
-        .insert({
-          task_id: taskId,
-          item_text: itemText,
-          order_index: nextIndex,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      logger.info('Checklist item added', { taskId, itemText });
-      return data as TaskChecklistItem;
-    } catch (error) {
-      logger.error('Error adding checklist item', error);
-      throw new Error('Erro ao adicionar item ao checklist');
-    }
+    // TODO: Implementar quando task_checklists for criado
+    throw new Error('Funcionalidade não disponível - tabela task_checklists não criada');
   },
 
-  /**
-   * Atualizar item do checklist
-   */
-  async updateChecklistItem(
-    id: string,
-    updates: Partial<TaskChecklistItem>
-  ): Promise<TaskChecklistItem> {
-    try {
-      const { data, error } = await supabase
-        .from('task_checklists')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      logger.info('Checklist item updated', { id, updates });
-      return data as TaskChecklistItem;
-    } catch (error) {
-      logger.error('Error updating checklist item', error);
-      throw new Error('Erro ao atualizar item do checklist');
-    }
+  async updateChecklistItem(id: string, updates: Partial<TaskChecklistItem>): Promise<TaskChecklistItem> {
+    // TODO: Implementar quando task_checklists for criado
+    throw new Error('Funcionalidade não disponível - tabela task_checklists não criada');
   },
 
-  /**
-   * Deletar item do checklist
-   */
   async deleteChecklistItem(id: string): Promise<void> {
-    try {
-      const { error } = await supabase
-        .from('task_checklists')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
-      logger.info('Checklist item deleted', { id });
-    } catch (error) {
-      logger.error('Error deleting checklist item', error);
-      throw new Error('Erro ao deletar item do checklist');
-    }
+    // TODO: Implementar quando task_checklists for criado
+    throw new Error('Funcionalidade não disponível - tabela task_checklists não criada');
   },
+  */
 };

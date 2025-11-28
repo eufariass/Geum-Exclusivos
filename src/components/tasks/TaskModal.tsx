@@ -115,9 +115,9 @@ export const TaskModal = ({
   const [leadId, setLeadId] = useState<string>('');
   const [imovelId, setImovelId] = useState<string>('');
 
-  // Checklist state
-  const [checklistItems, setChecklistItems] = useState<Array<{ text: string; checked: boolean }>>([]);
-  const [newChecklistItem, setNewChecklistItem] = useState('');
+  // Checklist state - TEMPORARIAMENTE DESABILITADO
+  // const [checklistItems, setChecklistItems] = useState<Array<{ text: string; checked: boolean }>>([]);
+  // const [newChecklistItem, setNewChecklistItem] = useState('');
 
   useEffect(() => {
     if (isOpen) {
@@ -133,15 +133,15 @@ export const TaskModal = ({
         setLeadId(task.lead_id || '');
         setImovelId(task.imovel_id || '');
 
-        // Load checklist if exists
-        if (task.checklist) {
-          setChecklistItems(
-            task.checklist.map((item) => ({
-              text: item.item_text,
-              checked: item.is_completed,
-            }))
-          );
-        }
+        // Load checklist if exists - TEMPORARIAMENTE DESABILITADO
+        // if (task.checklist) {
+        //   setChecklistItems(
+        //     task.checklist.map((item) => ({
+        //       text: item.item_text,
+        //       checked: item.is_completed,
+        //     }))
+        //   );
+        // }
       } else {
         // Creation mode - reset form
         resetForm();
@@ -160,8 +160,8 @@ export const TaskModal = ({
     setDueDate(undefined);
     setLeadId('');
     setImovelId('');
-    setChecklistItems([]);
-    setNewChecklistItem('');
+    // setChecklistItems([]);
+    // setNewChecklistItem('');
   };
 
   const loadData = async () => {
@@ -195,21 +195,22 @@ export const TaskModal = ({
     }
   };
 
-  const handleAddChecklistItem = () => {
-    if (!newChecklistItem.trim()) return;
-    setChecklistItems([...checklistItems, { text: newChecklistItem.trim(), checked: false }]);
-    setNewChecklistItem('');
-  };
+  // Funções de checklist - TEMPORARIAMENTE DESABILITADAS
+  // const handleAddChecklistItem = () => {
+  //   if (!newChecklistItem.trim()) return;
+  //   setChecklistItems([...checklistItems, { text: newChecklistItem.trim(), checked: false }]);
+  //   setNewChecklistItem('');
+  // };
 
-  const handleRemoveChecklistItem = (index: number) => {
-    setChecklistItems(checklistItems.filter((_, i) => i !== index));
-  };
+  // const handleRemoveChecklistItem = (index: number) => {
+  //   setChecklistItems(checklistItems.filter((_, i) => i !== index));
+  // };
 
-  const handleToggleChecklistItem = (index: number) => {
-    const updated = [...checklistItems];
-    updated[index].checked = !updated[index].checked;
-    setChecklistItems(updated);
-  };
+  // const handleToggleChecklistItem = (index: number) => {
+  //   const updated = [...checklistItems];
+  //   updated[index].checked = !updated[index].checked;
+  //   setChecklistItems(updated);
+  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -250,10 +251,10 @@ export const TaskModal = ({
           imovel_id: imovelId || undefined,
         });
 
-        // Add checklist items if any
-        for (const item of checklistItems) {
-          await tasksService.addChecklistItem(newTask.id, item.text);
-        }
+        // Checklist será adicionado quando a tabela task_checklists for criada
+        // for (const item of checklistItems) {
+        //   await tasksService.addChecklistItem(newTask.id, item.text);
+        // }
 
         toast.success('Tarefa criada com sucesso!');
       }
@@ -468,12 +469,11 @@ export const TaskModal = ({
               </div>
             </div>
 
-            {/* Checklist */}
-            {!task && (
+            {/* Checklist - TEMPORARIAMENTE DESABILITADO */}
+            {/* {!task && (
               <div className="space-y-2">
                 <Label>Checklist (opcional)</Label>
                 <div className="space-y-2">
-                  {/* Lista de itens */}
                   {checklistItems.length > 0 && (
                     <div className="space-y-1 p-3 border rounded-md bg-muted/50">
                       {checklistItems.map((item, index) => (
@@ -498,7 +498,6 @@ export const TaskModal = ({
                     </div>
                   )}
 
-                  {/* Adicionar novo item */}
                   <div className="flex gap-2">
                     <Input
                       value={newChecklistItem}
@@ -523,7 +522,7 @@ export const TaskModal = ({
                   </div>
                 </div>
               </div>
-            )}
+            )} */}
           </form>
         </ScrollArea>
 
