@@ -1,6 +1,7 @@
-import { Home, Building2, Users, CheckSquare, BarChart3, FileText } from 'lucide-react';
+import { Home, Building2, Users, CheckSquare, BarChart3, FileText, UserCog } from 'lucide-react';
 import logoWhite from '@/assets/logo-geum-white.png';
 import type { TabType } from '@/types';
+import { usePermissions } from '@/hooks/usePermissions';
 import {
   Sidebar,
   SidebarContent,
@@ -29,6 +30,13 @@ const menuItems = [
 export function AppSidebar({ activeTab, onTabChange }: AppSidebarProps) {
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
+  const { isAdmin, loading } = usePermissions();
+
+  // Menu items dinâmicos baseados em permissões
+  const visibleMenuItems = [
+    ...menuItems,
+    ...(isAdmin ? [{ id: 'usuarios' as TabType, label: 'Usuários', icon: UserCog }] : []),
+  ];
 
   return (
     <Sidebar className={`border-r z-50 ${isCollapsed ? 'w-16' : 'w-64'}`}>
@@ -57,7 +65,12 @@ export function AppSidebar({ activeTab, onTabChange }: AppSidebarProps) {
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
-                {menuItems.map((item) => (
+                {loading ? (
+                  <div className="p-4 text-center text-primary-foreground/50 text-sm">
+                    Carregando...
+                  </div>
+                ) : (
+                  visibleMenuItems.map((item) => (
                   <SidebarMenuItem key={item.id}>
                     <SidebarMenuButton
                       onClick={() => onTabChange(item.id)}
@@ -74,7 +87,8 @@ export function AppSidebar({ activeTab, onTabChange }: AppSidebarProps) {
                       {!isCollapsed && <span>{item.label}</span>}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                ))}
+                  ))
+                )}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

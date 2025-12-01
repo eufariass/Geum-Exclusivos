@@ -115,7 +115,21 @@ export interface LeadComment {
   created_at: string;
 }
 
-export type TabType = 'dashboard' | 'imoveis' | 'leads' | 'tasks' | 'metricas' | 'relatorios';
+export type TabType = 'dashboard' | 'imoveis' | 'leads' | 'tasks' | 'metricas' | 'relatorios' | 'usuarios';
+
+// User Roles
+export type UserRole = 'admin' | 'corretor';
+
+export interface UserWithRole {
+  id: string;
+  nome_completo: string;
+  email?: string;
+  avatar_url?: string;
+  cargo?: string;
+  status: 'ativo' | 'inativo';
+  role: UserRole;
+  created_at?: string;
+}
 
 // Tarefas
 export type TaskType = 'call' | 'email' | 'whatsapp' | 'meeting' | 'visit' | 'follow_up' | 'other';
