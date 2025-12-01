@@ -20,21 +20,21 @@
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 10%;
 
-    /* Primary Brand Color (Azul Escuro) */
-    --primary: 220 80% 30%;
+    /* Primary Brand Color (Preto) */
+    --primary: 0 0% 10%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary (Light Blue) */
-    --secondary: 220 60% 96%;
-    --secondary-foreground: 220 80% 30%;
+    /* Secondary (Cinza Claro) */
+    --secondary: 0 0% 97%;
+    --secondary-foreground: 0 0% 10%;
 
     /* Muted Elements */
-    --muted: 220 20% 96%;
-    --muted-foreground: 220 15% 45%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
 
-    /* Accent Color (Light Blue for highlights) */
-    --accent: 220 80% 95%;
-    --accent-foreground: 220 80% 30%;
+    /* Accent Color (Cinza Claro para destaques) */
+    --accent: 0 0% 95%;
+    --accent-foreground: 0 0% 10%;
 
     /* Success */
     --success: 142 76% 36%;
@@ -45,32 +45,32 @@
     --destructive-foreground: 0 0% 98%;
 
     /* Borders & Inputs */
-    --border: 220 20% 90%;
-    --input: 220 20% 90%;
-    --ring: 220 80% 30%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 0 0% 10%;
 
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 220 20% 8%;
+    --background: 0 0% 8%;
     --foreground: 0 0% 98%;
 
-    --card: 220 20% 10%;
+    --card: 0 0% 10%;
     --card-foreground: 0 0% 98%;
-    --popover: 220 20% 10%;
+    --popover: 0 0% 10%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 220 80% 60%;
+    --primary: 0 0% 20%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 20% 15%;
+    --secondary: 0 0% 15%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 220 20% 15%;
+    --muted: 0 0% 15%;
     --muted-foreground: 0 0% 60%;
 
-    --accent: 220 80% 25%;
+    --accent: 0 0% 25%;
     --accent-foreground: 0 0% 98%;
 
     --success: 142 76% 36%;
@@ -79,9 +79,9 @@
     --destructive: 0 62% 40%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 220 20% 20%;
-    --input: 220 20% 20%;
-    --ring: 220 80% 60%;
+    --border: 0 0% 20%;
+    --input: 0 0% 20%;
+    --ring: 0 0% 60%;
   }
 }
 
