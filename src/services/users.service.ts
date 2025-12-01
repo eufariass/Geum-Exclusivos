@@ -29,7 +29,7 @@ export const usersService = {
       const usersWithRoles: UserWithRole[] = profiles?.map(profile => ({
         id: profile.id,
         nome_completo: profile.nome_completo,
-        email: undefined, // Email não disponível via client SDK
+        email: profile.email || undefined,
         avatar_url: profile.avatar_url || undefined,
         cargo: profile.cargo || undefined,
         status: (profile.status as 'ativo' | 'inativo') || 'ativo',
