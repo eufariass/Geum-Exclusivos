@@ -11,6 +11,7 @@ interface InviteEmailRequest {
   email: string;
   userName: string;
   role: string;
+  appUrl: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -22,12 +23,11 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     console.log('Send invite email function invoked');
     
-    const { email, userName, role }: InviteEmailRequest = await req.json();
+    const { email, userName, role, appUrl }: InviteEmailRequest = await req.json();
     console.log('Processing invite email for:', email, 'with role:', role);
 
     // URLs do sistema e da logo
-    const systemUrl = `${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.lovable.app') || 'https://geum-crm.lovable.app'}`;
-    const setupPasswordUrl = `${systemUrl}/definir-senha`;
+    const setupPasswordUrl = `${appUrl}/definir-senha`;
     const logoUrl = 'https://polzdhlstwdvzmyxflrk.supabase.co/storage/v1/object/public/imoveis/logo-geum-white.png';
 
     // Traduzir role para português
