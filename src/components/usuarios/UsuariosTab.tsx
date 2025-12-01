@@ -48,6 +48,7 @@ export const UsuariosTab = () => {
     try {
       setLoading(true);
       const data = await usersService.getUsers();
+      console.log('Usuários carregados no componente:', data);
       setUsers(data);
     } catch (error) {
       console.error('Erro ao carregar usuários:', error);
