@@ -83,7 +83,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signUp = async (email: string, password: string, nomeCompleto: string) => {
     const redirectUrl = `${window.location.origin}/`;
     
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -93,6 +93,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         },
       },
     });
+
+    // Enviar email de boas-vindas após cadastro bem-sucedido
+    if (!error && data.user) {
+      try {
+        await supabase.functions.invoke('send-welcome-email', {
+          body: {
+            email: data.user.email,
+            userName: nomeCompleto,
+          },
+        });
+        console.log('Welcome email sent successfully');
+      } catch (emailError) {
+        console.error('Failed to send welcome email:', emailError);
+        // Não retornamos erro aqui pois o cadastro foi bem-sucedido
+      }
+    }
+    
     return { error };
   };
 
