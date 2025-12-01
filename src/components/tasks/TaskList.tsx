@@ -5,6 +5,7 @@ import type { Task, TaskStatus } from '@/types';
 import { tasksService } from '@/services/tasks.service';
 import { TaskCard } from './TaskCard';
 import { TaskModal } from './TaskModal';
+import { TaskDetailModal } from './TaskDetailModal';
 import { SortableTaskCard } from './SortableTaskCard';
 import { Button } from '@/components/ui/button';
 import {
@@ -43,7 +44,9 @@ export const TaskList = ({ leadId, imovelId }: TaskListProps) => {
   const [loading, setLoading] = useState(true);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | undefined>();
+  const [viewingTask, setViewingTask] = useState<Task | undefined>();
   const [filterPriority, setFilterPriority] = useState<string>('all');
   const [filterType, setFilterType] = useState<string>('all');
 
@@ -138,6 +141,11 @@ export const TaskList = ({ leadId, imovelId }: TaskListProps) => {
   const handleCreateTask = () => {
     setEditingTask(undefined);
     setShowModal(true);
+  };
+
+  const handleViewTask = (task: Task) => {
+    setViewingTask(task);
+    setShowDetailModal(true);
   };
 
   const handleEditTask = (task: Task) => {
@@ -255,6 +263,7 @@ export const TaskList = ({ leadId, imovelId }: TaskListProps) => {
               label={group.label}
               color={group.color}
               tasks={group.tasks}
+              onViewTask={handleViewTask}
               onEditTask={handleEditTask}
               onCompleteTask={handleCompleteTask}
               onDeleteTask={handleDeleteTask}
@@ -280,6 +289,21 @@ export const TaskList = ({ leadId, imovelId }: TaskListProps) => {
           defaultImovelId={imovelId}
         />
       )}
+
+      {/* Task Detail Modal */}
+      {showDetailModal && viewingTask && (
+        <TaskDetailModal
+          task={viewingTask}
+          isOpen={showDetailModal}
+          onClose={() => setShowDetailModal(false)}
+          onTaskUpdated={async () => {
+            // Reload task details
+            const updated = await tasksService.getTaskById(viewingTask.id);
+            if (updated) setViewingTask(updated);
+            loadTasks();
+          }}
+        />
+      )}
     </div>
   );
 };
@@ -290,6 +314,7 @@ interface TaskColumnProps {
   label: string;
   color: string;
   tasks: Task[];
+  onViewTask: (task: Task) => void;
   onEditTask: (task: Task) => void;
   onCompleteTask: (taskId: string) => void;
   onDeleteTask: (taskId: string) => void;
@@ -300,6 +325,7 @@ const TaskColumn = ({
   label,
   color,
   tasks,
+  onViewTask,
   onEditTask,
   onCompleteTask,
   onDeleteTask,
@@ -339,13 +365,14 @@ const TaskColumn = ({
                 </div>
               ) : (
                 tasks.map((task) => (
-                  <SortableTaskCard
-                    key={task.id}
-                    task={task}
-                    onEdit={() => onEditTask(task)}
-                    onComplete={() => onCompleteTask(task.id)}
-                    onDelete={() => onDeleteTask(task.id)}
-                  />
+                  <div key={task.id} onClick={() => onViewTask(task)}>
+                    <SortableTaskCard
+                      task={task}
+                      onEdit={() => onEditTask(task)}
+                      onComplete={() => onCompleteTask(task.id)}
+                      onDelete={() => onDeleteTask(task.id)}
+                    />
+                  </div>
                 ))
               )}
             </div>

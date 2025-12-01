@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import type { Task, TaskChecklistItem, TaskSummary, TaskStatus, TaskPriority } from '@/types';
+import type { Task, TaskChecklistItem, TaskSummary, TaskStatus, TaskPriority, TaskComment, TaskActivity } from '@/types';
 import { logger } from '@/lib/logger';
 
 export interface TaskFilters {
@@ -135,6 +135,8 @@ export const tasksService = {
    */
   async createTask(input: CreateTaskInput): Promise<Task> {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
       const { data, error } = await supabase
         .from('tasks')
         .insert({
@@ -146,8 +148,21 @@ export const tasksService = {
 
       if (error) throw error;
 
+      // Log activity
+      if (user) {
+        await this.logActivity(data.id, 'created', {
+          description: 'Tarefa criada',
+          created_by: user.id,
+        });
+      }
+
       logger.info('Task created', { taskId: data.id, title: input.title });
-      return data as Task;
+      
+      return {
+        ...data,
+        comments: (data.comments as any) || [],
+        activities: (data.activities as any) || [],
+      } as Task;
     } catch (error) {
       logger.error('Error creating task', error);
       throw new Error('Erro ao criar tarefa');
@@ -159,17 +174,66 @@ export const tasksService = {
    */
   async updateTask(id: string, updates: Partial<Task>): Promise<Task> {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // Get current task to compare changes
+      const { data: currentTask } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('id', id)
+        .single();
+
       const { data, error } = await supabase
         .from('tasks')
-        .update(updates)
+        .update(updates as any)
         .eq('id', id)
         .select()
         .single();
 
       if (error) throw error;
 
+      // Log activities for specific changes
+      if (user && currentTask) {
+        if (updates.status && updates.status !== currentTask.status) {
+          await this.logActivity(id, 'status_changed', {
+            description: `Status alterado de "${currentTask.status}" para "${updates.status}"`,
+            old_value: currentTask.status,
+            new_value: updates.status,
+            created_by: user.id,
+          });
+        }
+        if (updates.priority && updates.priority !== currentTask.priority) {
+          await this.logActivity(id, 'priority_changed', {
+            description: `Prioridade alterada de "${currentTask.priority}" para "${updates.priority}"`,
+            old_value: currentTask.priority,
+            new_value: updates.priority,
+            created_by: user.id,
+          });
+        }
+        if (updates.due_date && updates.due_date !== currentTask.due_date) {
+          await this.logActivity(id, 'due_date_changed', {
+            description: `Data de vencimento alterada`,
+            old_value: currentTask.due_date || '',
+            new_value: updates.due_date,
+            created_by: user.id,
+          });
+        }
+        if (updates.assigned_to && updates.assigned_to !== currentTask.assigned_to) {
+          await this.logActivity(id, 'assigned', {
+            description: `Tarefa atribuída`,
+            new_value: updates.assigned_to,
+            created_by: user.id,
+          });
+        }
+      }
+
       logger.info('Task updated', { taskId: id, updates });
-      return data as Task;
+      
+      return {
+        ...data,
+        comments: (data.comments as any) || [],
+        activities: (data.activities as any) || [],
+      } as Task;
     } catch (error) {
       logger.error('Error updating task', error);
       throw new Error('Erro ao atualizar tarefa');
@@ -181,6 +245,8 @@ export const tasksService = {
    */
   async completeTask(id: string): Promise<Task> {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
       const { data, error } = await supabase
         .from('tasks')
         .update({
@@ -193,8 +259,21 @@ export const tasksService = {
 
       if (error) throw error;
 
+      // Log activity
+      if (user) {
+        await this.logActivity(id, 'completed', {
+          description: 'Tarefa marcada como concluída',
+          created_by: user.id,
+        });
+      }
+
       logger.info('Task completed', { taskId: id });
-      return data as Task;
+      
+      return {
+        ...data,
+        comments: (data.comments as any) || [],
+        activities: (data.activities as any) || [],
+      } as Task;
     } catch (error) {
       logger.error('Error completing task', error);
       throw new Error('Erro ao completar tarefa');
@@ -311,23 +390,163 @@ export const tasksService = {
     }
   },
 
-  // Métodos de checklist comentados - tabela task_checklists não existe ainda
-  // Descomentar quando a tabela for criada
-  
-  /*
-  async addChecklistItem(taskId: string, itemText: string): Promise<TaskChecklistItem> {
-    // TODO: Implementar quando task_checklists for criado
-    throw new Error('Funcionalidade não disponível - tabela task_checklists não criada');
+  /**
+   * Adicionar comentário
+   */
+  async addComment(taskId: string, content: string): Promise<Task> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      // Get profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('nome_completo')
+        .eq('id', user.id)
+        .single();
+
+      // Get current task
+      const { data: task } = await supabase
+        .from('tasks')
+        .select('comments')
+        .eq('id', taskId)
+        .single();
+
+      const newComment: TaskComment = {
+        id: crypto.randomUUID(),
+        content,
+        created_by: user.id,
+        created_by_name: profile?.nome_completo || 'Usuário',
+        created_at: new Date().toISOString(),
+      };
+
+      const existingComments = Array.isArray(task?.comments) ? task.comments : [];
+      const updatedComments = [...existingComments, newComment] as any;
+
+      const { data, error } = await supabase
+        .from('tasks')
+        .update({ comments: updatedComments })
+        .eq('id', taskId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Log activity
+      await this.logActivity(taskId, 'comment_added', {
+        description: 'Comentário adicionado',
+        created_by: user.id,
+      });
+
+      logger.info('Comment added', { taskId, commentId: newComment.id });
+      
+      return {
+        ...data,
+        comments: (data.comments as any) || [],
+        activities: (data.activities as any) || [],
+      } as Task;
+    } catch (error) {
+      logger.error('Error adding comment', error);
+      throw new Error('Erro ao adicionar comentário');
+    }
   },
 
-  async updateChecklistItem(id: string, updates: Partial<TaskChecklistItem>): Promise<TaskChecklistItem> {
-    // TODO: Implementar quando task_checklists for criado
-    throw new Error('Funcionalidade não disponível - tabela task_checklists não criada');
+  /**
+   * Deletar comentário
+   */
+  async deleteComment(taskId: string, commentId: string): Promise<Task> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuário não autenticado');
+
+      // Get current task
+      const { data: task } = await supabase
+        .from('tasks')
+        .select('comments')
+        .eq('id', taskId)
+        .single();
+
+      const existingComments = Array.isArray(task?.comments) ? task.comments : [];
+      const updatedComments = existingComments.filter(
+        (c: any) => c.id !== commentId
+      ) as any;
+
+      const { data, error } = await supabase
+        .from('tasks')
+        .update({ comments: updatedComments })
+        .eq('id', taskId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Log activity
+      await this.logActivity(taskId, 'comment_deleted', {
+        description: 'Comentário removido',
+        created_by: user.id,
+      });
+
+      logger.info('Comment deleted', { taskId, commentId });
+      
+      return {
+        ...data,
+        comments: (data.comments as any) || [],
+        activities: (data.activities as any) || [],
+      } as Task;
+    } catch (error) {
+      logger.error('Error deleting comment', error);
+      throw new Error('Erro ao deletar comentário');
+    }
   },
 
-  async deleteChecklistItem(id: string): Promise<void> {
-    // TODO: Implementar quando task_checklists for criado
-    throw new Error('Funcionalidade não disponível - tabela task_checklists não criada');
+  /**
+   * Registrar atividade
+   */
+  async logActivity(
+    taskId: string,
+    action: TaskActivity['action'],
+    details: Partial<TaskActivity>
+  ): Promise<void> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      // Get profile
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('nome_completo')
+        .eq('id', user?.id || '')
+        .single();
+
+      // Get current task
+      const { data: task } = await supabase
+        .from('tasks')
+        .select('activities')
+        .eq('id', taskId)
+        .single();
+
+      const newActivity: TaskActivity = {
+        id: crypto.randomUUID(),
+        action,
+        description: details.description || '',
+        old_value: details.old_value,
+        new_value: details.new_value,
+        created_by: user?.id,
+        created_by_name: profile?.nome_completo || 'Sistema',
+        created_at: new Date().toISOString(),
+      };
+
+      const existingActivities = Array.isArray(task?.activities) ? task.activities : [];
+      const updatedActivities = [...existingActivities, newActivity] as any;
+
+      await supabase
+        .from('tasks')
+        .update({ activities: updatedActivities })
+        .eq('id', taskId);
+
+      logger.info('Activity logged', { taskId, action });
+    } catch (error) {
+      logger.error('Error logging activity', error);
+      // Don't throw - activity logging is not critical
+    }
   },
-  */
 };

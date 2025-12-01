@@ -145,6 +145,8 @@ export interface Task {
   lead?: Lead;
   imovel?: Imovel;
   checklist?: TaskChecklistItem[];
+  comments?: TaskComment[];
+  activities?: TaskActivity[];
 }
 
 export interface TaskChecklistItem {
@@ -154,6 +156,25 @@ export interface TaskChecklistItem {
   is_completed: boolean;
   order_index?: number;
   created_at?: string;
+}
+
+export interface TaskComment {
+  id: string;
+  content: string;
+  created_by?: string;
+  created_by_name?: string;
+  created_at: string;
+}
+
+export interface TaskActivity {
+  id: string;
+  action: 'created' | 'status_changed' | 'priority_changed' | 'assigned' | 'due_date_changed' | 'completed' | 'comment_added' | 'comment_deleted';
+  description: string;
+  old_value?: string;
+  new_value?: string;
+  created_by?: string;
+  created_by_name?: string;
+  created_at: string;
 }
 
 export interface TaskSummary {
