@@ -7,6 +7,37 @@ export const usersService = {
    */
   async getUsers(): Promise<UserWithRole[]> {
     try {
+      // Buscar profiles diretamente com roles usando uma query raw SQL via RPC
+      // Isso contorna problemas de RLS com múltiplas queries
+      const { data: usersData, error } = await supabase.rpc('get_users_with_roles');
+
+      if (error) {
+        console.error('Erro ao buscar usuários com roles:', error);
+        // Fallback para o método antigo se a função não existir
+        return this.getUsersLegacy();
+      }
+
+      const usersWithRoles: UserWithRole[] = usersData?.map((user: any) => ({
+        id: user.id,
+        nome_completo: user.nome_completo,
+        email: user.email || undefined,
+        avatar_url: user.avatar_url || undefined,
+        cargo: user.cargo || undefined,
+        status: (user.status as 'ativo' | 'inativo') || 'ativo',
+        role: (user.role as UserRole) || 'corretor',
+        created_at: user.created_at || undefined,
+      })) || [];
+
+      console.log('Users with roles final:', usersWithRoles);
+      return usersWithRoles;
+    } catch (error) {
+      console.error('Erro ao buscar usuários:', error);
+      throw error;
+    }
+  },
+
+  async getUsersLegacy(): Promise<UserWithRole[]> {
+    try {
       // Buscar profiles com user_roles
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
@@ -39,11 +70,13 @@ export const usersService = {
       // Combinar dados
       const usersWithRoles: UserWithRole[] = profiles?.map(profile => {
         const userRole = roleMap.get(profile.id) as UserRole;
+        const finalRole = userRole || 'corretor';
+        
         console.log(`User ${profile.nome_completo}:`, {
           id: profile.id,
           status: profile.status,
-          role: userRole,
-          rawStatus: profile.status,
+          role: finalRole,
+          rawRole: userRole,
         });
         
         return {
@@ -53,7 +86,7 @@ export const usersService = {
           avatar_url: profile.avatar_url || undefined,
           cargo: profile.cargo || undefined,
           status: (profile.status as 'ativo' | 'inativo') || 'ativo',
-          role: userRole || 'corretor',
+          role: finalRole,
           created_at: profile.created_at || undefined,
         };
       }) || [];
