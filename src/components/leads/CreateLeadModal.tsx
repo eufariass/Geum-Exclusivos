@@ -34,6 +34,7 @@ export const CreateLeadModal = ({ isOpen, onClose, onSuccess }: CreateLeadModalP
   const [loading, setLoading] = useState(false);
   const [imoveis, setImoveis] = useState<Imovel[]>([]);
   const [loadingImoveis, setLoadingImoveis] = useState(true);
+  const [firstStageId, setFirstStageId] = useState<string | null>(null);
 
   // Form state
   const [nome, setNome] = useState('');
@@ -46,6 +47,7 @@ export const CreateLeadModal = ({ isOpen, onClose, onSuccess }: CreateLeadModalP
   useEffect(() => {
     if (isOpen) {
       loadImoveis();
+      loadFirstStage();
       resetForm();
     }
   }, [isOpen]);
@@ -78,6 +80,22 @@ export const CreateLeadModal = ({ isOpen, onClose, onSuccess }: CreateLeadModalP
     }
   };
 
+  const loadFirstStage = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('lead_pipeline_stages')
+        .select('id')
+        .order('order_index', { ascending: true })
+        .limit(1)
+        .single();
+
+      if (error) throw error;
+      setFirstStageId(data?.id || null);
+    } catch (error) {
+      console.error('Error loading first stage:', error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -104,7 +122,8 @@ export const CreateLeadModal = ({ isOpen, onClose, onSuccess }: CreateLeadModalP
     try {
       setLoading(true);
 
-      await leadsService.createLead({
+      // Prepare lead data with correct field name
+      const leadData: any = {
         nome: nome.trim(),
         telefone: telefone.trim(),
         email: email.trim(),
@@ -112,7 +131,14 @@ export const CreateLeadModal = ({ isOpen, onClose, onSuccess }: CreateLeadModalP
         imovel_id: imovelId,
         observacoes: observacoes.trim() || undefined,
         status: 'Aguardando',
-      });
+      };
+
+      // Add stage_id (database field) if we have it
+      if (firstStageId) {
+        leadData.stage_id = firstStageId;
+      }
+
+      await leadsService.createLead(leadData);
 
       toast.success('Lead criado com sucesso!');
       onSuccess();
