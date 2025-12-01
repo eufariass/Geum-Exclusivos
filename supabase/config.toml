@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.extract-metrics-from-image]
 verify_jwt = true
+
+[functions.generate-property-description]
+verify_jwt = true

@@ -1,4 +1,4 @@
-import { Home, Building2, Users, CheckSquare, BarChart3, FileText, UserCog } from 'lucide-react';
+import { Home, Building2, Users, CheckSquare, BarChart3, FileText, UserCog, Sparkles } from 'lucide-react';
 import type { TabType } from '@/types';
 import { usePermissions } from '@/hooks/usePermissions';
 import logoGeum from '@/assets/logo-geum-black.png';
@@ -38,6 +38,7 @@ const menuGroups = [
     items: [
       { id: 'imoveis' as TabType, label: 'Imóveis', icon: Building2 },
       { id: 'metricas' as TabType, label: 'Métricas', icon: BarChart3 },
+      { id: 'chat-ia' as TabType, label: 'Chat com IA', icon: Sparkles },
     ]
   },
   {
