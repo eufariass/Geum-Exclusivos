@@ -124,14 +124,14 @@ export const TaskCard = ({
   return (
     <Card
       className={cn(
-        'cursor-pointer transition-all hover:shadow-md',
-        isDragging && 'opacity-50 rotate-2',
+        'cursor-pointer transition-all hover:shadow-lg hover:-translate-y-0.5 bg-card',
+        isDragging && 'opacity-50 rotate-1 shadow-xl',
         isOverdue && 'border-l-4 border-l-red-500',
         task.status === 'completed' && 'opacity-60'
       )}
       onClick={onClick}
     >
-      <CardContent className="p-3 space-y-2.5">
+      <CardContent className="p-4 space-y-3">
         {/* Header: Drag handle, type icon, title, menu */}
         <div className="flex items-start gap-2">
           {/* Drag Handle */}
@@ -200,13 +200,13 @@ export const TaskCard = ({
 
         {/* Badges: Status, Priority, Type */}
         <div className="flex flex-wrap gap-1.5">
-          <Badge variant="outline" className={cn('text-xs', statusColors[task.status])}>
+          <Badge variant="outline" className={cn('text-xs px-2 py-0.5', statusColors[task.status])}>
             {statusLabels[task.status]}
           </Badge>
-          <Badge variant="outline" className="text-xs">
+          <Badge variant="outline" className="text-xs px-2 py-0.5">
             {taskTypeLabels[task.type]}
           </Badge>
-          <Badge variant="outline" className={cn('text-xs', priorityColors[task.priority])}>
+          <Badge variant="outline" className={cn('text-xs px-2 py-0.5', priorityColors[task.priority])}>
             {priorityLabels[task.priority]}
           </Badge>
         </div>
