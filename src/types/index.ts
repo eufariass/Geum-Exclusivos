@@ -98,12 +98,8 @@ export interface Lead {
   email: string;
   tipo_interesse: 'Venda' | 'Locação';
   status: 'Aguardando' | 'Enviado ao corretor' | 'Follow up'; // Mantido para compatibilidade
-  pipeline_stage_id?: string;
-  stage_changed_at?: string;
+  stage_id?: string;
   lost_reason_id?: string;
-  lost_notes?: string;
-  lost_at?: string;
-  won_at?: string;
   observacoes?: string;
   created_at?: string;
   updated_at?: string;
