@@ -428,12 +428,11 @@ export const TaskModal = ({
                     <Loader2 className="h-4 w-4 animate-spin" />
                   </div>
                 ) : (
-                  <Select value={leadId} onValueChange={setLeadId}>
+                  <Select value={leadId || undefined} onValueChange={(value) => setLeadId(value || '')}>
                     <SelectTrigger id="lead">
-                      <SelectValue placeholder="Selecionar lead" />
+                      <SelectValue placeholder="Nenhum" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Nenhum</SelectItem>
                       {leads.map((lead) => (
                         <SelectItem key={lead.id} value={lead.id}>
                           {lead.nome} - {lead.telefone}
@@ -452,12 +451,11 @@ export const TaskModal = ({
                     <Loader2 className="h-4 w-4 animate-spin" />
                   </div>
                 ) : (
-                  <Select value={imovelId} onValueChange={setImovelId}>
+                  <Select value={imovelId || undefined} onValueChange={(value) => setImovelId(value || '')}>
                     <SelectTrigger id="imovel">
-                      <SelectValue placeholder="Selecionar imóvel" />
+                      <SelectValue placeholder="Nenhum" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Nenhum</SelectItem>
                       {imoveis.map((imovel) => (
                         <SelectItem key={imovel.id} value={imovel.id}>
                           {imovel.codigo} - {imovel.endereco}
