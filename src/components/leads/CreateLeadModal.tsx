@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import type { Imovel } from '@/types';
+import type { Imovel, PipelineStage } from '@/types';
 import { leadsService } from '@/services/leads.service';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
@@ -34,7 +34,8 @@ export const CreateLeadModal = ({ isOpen, onClose, onSuccess }: CreateLeadModalP
   const [loading, setLoading] = useState(false);
   const [imoveis, setImoveis] = useState<Imovel[]>([]);
   const [loadingImoveis, setLoadingImoveis] = useState(true);
-  const [firstStageId, setFirstStageId] = useState<string | null>(null);
+  const [stages, setStages] = useState<PipelineStage[]>([]);
+  const [stageId, setStageId] = useState('');
 
   // Form state
   const [nome, setNome] = useState('');
@@ -47,7 +48,7 @@ export const CreateLeadModal = ({ isOpen, onClose, onSuccess }: CreateLeadModalP
   useEffect(() => {
     if (isOpen) {
       loadImoveis();
-      loadFirstStage();
+      loadStages();
       resetForm();
     }
   }, [isOpen]);
@@ -80,19 +81,23 @@ export const CreateLeadModal = ({ isOpen, onClose, onSuccess }: CreateLeadModalP
     }
   };
 
-  const loadFirstStage = async () => {
+  const loadStages = async () => {
     try {
       const { data, error } = await supabase
         .from('lead_pipeline_stages')
-        .select('id')
-        .order('order_index', { ascending: true })
-        .limit(1)
-        .single();
+        .select('*')
+        .order('order_index', { ascending: true });
 
       if (error) throw error;
-      setFirstStageId(data?.id || null);
+      setStages(data || []);
+      
+      // Pré-selecionar primeiro estágio
+      if (data && data.length > 0) {
+        setStageId(data[0].id);
+      }
     } catch (error) {
-      console.error('Error loading first stage:', error);
+      console.error('Error loading stages:', error);
+      toast.error('Erro ao carregar estágios');
     }
   };
 
@@ -122,23 +127,16 @@ export const CreateLeadModal = ({ isOpen, onClose, onSuccess }: CreateLeadModalP
     try {
       setLoading(true);
 
-      // Prepare lead data with correct field name
-      const leadData: any = {
+      await leadsService.createLead({
         nome: nome.trim(),
         telefone: telefone.trim(),
         email: email.trim(),
         tipo_interesse: tipoInteresse,
         imovel_id: imovelId,
+        stage_id: stageId,
         observacoes: observacoes.trim() || undefined,
         status: 'Aguardando',
-      };
-
-      // Add stage_id (database field) if we have it
-      if (firstStageId) {
-        leadData.stage_id = firstStageId;
-      }
-
-      await leadsService.createLead(leadData);
+      });
 
       toast.success('Lead criado com sucesso!');
       onSuccess();
@@ -265,11 +263,36 @@ export const CreateLeadModal = ({ isOpen, onClose, onSuccess }: CreateLeadModalP
                   </Select>
                 )}
               </div>
-            </div>
+              </div>
 
-            {/* Observações */}
-            <div className="space-y-2">
-              <Label htmlFor="observacoes">Observações</Label>
+              {/* Estágio */}
+              <div className="space-y-2">
+                <Label htmlFor="stage_id">
+                  Estágio <span className="text-destructive">*</span>
+                </Label>
+                <Select value={stageId} onValueChange={setStageId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o estágio..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {stages.map((stage) => (
+                      <SelectItem key={stage.id} value={stage.id}>
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: stage.color }}
+                          />
+                          {stage.name}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Observações */}
+              <div className="space-y-2">
+                <Label htmlFor="observacoes">Observações</Label>
               <Textarea
                 id="observacoes"
                 value={observacoes}

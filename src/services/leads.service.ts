@@ -13,6 +13,7 @@ export interface Lead {
   email: string;
   tipo_interesse: 'Venda' | 'Locação';
   status: 'Aguardando' | 'Enviado ao corretor' | 'Follow up';
+  stage_id?: string;
   observacoes?: string;
   created_at: string;
   updated_at?: string;

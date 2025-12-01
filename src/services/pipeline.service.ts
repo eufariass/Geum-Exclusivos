@@ -58,7 +58,7 @@ export const pipelineService = {
 
       // Distribuir leads nas etapas
       leads?.forEach((lead: any) => {
-        const stageId = lead.pipeline_stage_id;
+        const stageId = lead.stage_id;
         if (stageId && leadsMap.has(stageId)) {
           leadsMap.get(stageId)!.push(lead);
         }
@@ -94,7 +94,7 @@ export const pipelineService = {
       const { error } = await supabase
         .from('leads')
         .update({
-          pipeline_stage_id: toStageId,
+          stage_id: toStageId,
           updated_at: new Date().toISOString(),
         })
         .eq('id', leadId);
@@ -136,10 +136,8 @@ export const pipelineService = {
       const { error } = await supabase
         .from('leads')
         .update({
-          pipeline_stage_id: lostStage.id,
+          stage_id: lostStage.id,
           lost_reason_id: lostReasonId,
-          lost_notes: notes,
-          lost_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
         .eq('id', leadId);
@@ -172,8 +170,7 @@ export const pipelineService = {
       const { error } = await supabase
         .from('leads')
         .update({
-          pipeline_stage_id: wonStage.id,
-          won_at: new Date().toISOString(),
+          stage_id: wonStage.id,
           updated_at: new Date().toISOString(),
         })
         .eq('id', leadId);
@@ -278,11 +275,11 @@ export const pipelineService = {
           stage:lead_pipeline_stages(*),
           imovel:imoveis(codigo, endereco)
         `)
-        .lt('stage_changed_at', cutoffDate.toISOString())
-        .not('pipeline_stage_id', 'in', `(
+        .lt('updated_at', cutoffDate.toISOString())
+        .not('stage_id', 'in', `(
           SELECT id FROM lead_pipeline_stages WHERE is_final = true
         )`)
-        .order('stage_changed_at', { ascending: true });
+        .order('updated_at', { ascending: true });
 
       if (error) throw error;
 
