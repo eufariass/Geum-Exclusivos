@@ -102,14 +102,15 @@ export const usersService = {
         if (roleError) throw roleError;
       }
 
-      // Enviar email de convite
-      const { error: emailError } = await supabase.functions.invoke('send-invite-email', {
-        body: { 
-          email, 
-          userName: nomeCompleto,
-          role 
-        }
-      });
+    // Enviar email de convite
+    const { error: emailError } = await supabase.functions.invoke('send-invite-email', {
+      body: { 
+        email, 
+        userName: nomeCompleto,
+        role,
+        appUrl: window.location.origin
+      }
+    });
 
       if (emailError) {
         console.error('Erro ao enviar email de convite:', emailError);
@@ -164,7 +165,8 @@ export const usersService = {
         body: { 
           email, 
           userName: nomeCompleto,
-          role 
+          role,
+          appUrl: window.location.origin
         }
       });
 
