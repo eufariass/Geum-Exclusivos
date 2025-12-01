@@ -76,35 +76,52 @@ export const DashboardTab = () => {
       return metricas.filter((m) => m.mes === month).reduce((sum, m) => sum + m.visitas_realizadas, 0);
     });
 
+    // Create gradient for the area chart
+    const createGradient = (ctx: CanvasRenderingContext2D, color: string) => {
+      const gradient = ctx.createLinearGradient(0, 0, 0, 320);
+      gradient.addColorStop(0, color);
+      gradient.addColorStop(1, 'rgba(139, 92, 246, 0)');
+      return gradient;
+    };
+
     return {
       labels,
       datasets: [
         {
           label: 'Leads',
           data: leadsData,
-          borderColor: 'hsl(var(--primary))',
-          backgroundColor: 'hsla(var(--primary), 0.08)',
+          borderColor: 'rgb(139, 92, 246)',
+          backgroundColor: (context: any) => {
+            const ctx = context.chart.ctx;
+            return createGradient(ctx, 'rgba(139, 92, 246, 0.4)');
+          },
           fill: true,
           tension: 0.4,
           borderWidth: 2.5,
           pointRadius: 4,
           pointHoverRadius: 6,
-          pointBackgroundColor: 'hsl(var(--primary))',
-          pointBorderColor: '#fff',
+          pointBackgroundColor: '#fff',
+          pointBorderColor: 'rgb(139, 92, 246)',
           pointBorderWidth: 2,
         },
         {
           label: 'Visitas',
           data: visitsData,
-          borderColor: 'hsl(var(--muted-foreground))',
-          backgroundColor: 'hsla(var(--muted-foreground), 0.08)',
+          borderColor: 'rgb(59, 130, 246)',
+          backgroundColor: (context: any) => {
+            const ctx = context.chart.ctx;
+            const gradient = ctx.createLinearGradient(0, 0, 0, 320);
+            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
+            gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
+            return gradient;
+          },
           fill: true,
           tension: 0.4,
           borderWidth: 2.5,
           pointRadius: 4,
           pointHoverRadius: 6,
-          pointBackgroundColor: 'hsl(var(--muted-foreground))',
-          pointBorderColor: '#fff',
+          pointBackgroundColor: '#fff',
+          pointBorderColor: 'rgb(59, 130, 246)',
           pointBorderWidth: 2,
         },
       ],
@@ -219,6 +236,7 @@ export const DashboardTab = () => {
               },
               plugins: {
                 legend: { 
+                  display: true,
                   position: 'top',
                   align: 'end',
                   labels: {
@@ -233,14 +251,15 @@ export const DashboardTab = () => {
                   }
                 },
                 tooltip: {
-                  backgroundColor: 'hsl(var(--popover))',
-                  titleColor: 'hsl(var(--popover-foreground))',
-                  bodyColor: 'hsl(var(--popover-foreground))',
-                  borderColor: 'hsl(var(--border))',
+                  backgroundColor: '#fff',
+                  titleColor: '#000',
+                  bodyColor: '#000',
+                  borderColor: 'rgb(229, 231, 235)',
                   borderWidth: 1,
                   padding: 12,
                   displayColors: true,
                   boxPadding: 6,
+                  cornerRadius: 8,
                 }
               },
               scales: {
@@ -248,16 +267,19 @@ export const DashboardTab = () => {
                   beginAtZero: true,
                   grid: {
                     display: true,
-                    color: 'hsl(var(--border))',
+                    color: 'rgba(0, 0, 0, 0.05)',
+                    drawTicks: false,
                   },
                   border: {
                     display: false
                   },
                   ticks: {
-                    padding: 8,
+                    padding: 12,
                     font: {
-                      size: 11
-                    }
+                      size: 11,
+                      family: 'Inter'
+                    },
+                    color: 'rgba(0, 0, 0, 0.6)'
                   }
                 },
                 x: {
@@ -268,10 +290,12 @@ export const DashboardTab = () => {
                     display: false
                   },
                   ticks: {
-                    padding: 8,
+                    padding: 12,
                     font: {
-                      size: 11
-                    }
+                      size: 11,
+                      family: 'Inter'
+                    },
+                    color: 'rgba(0, 0, 0, 0.6)'
                   }
                 }
               },

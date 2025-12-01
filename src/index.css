@@ -12,13 +12,13 @@
   :root {
     /* Base Colors */
     --background: 0 0% 100%;
-    --foreground: 220 15% 20%;
+    --foreground: 0 0% 10%;
 
     /* Card & Surfaces */
     --card: 0 0% 100%;
-    --card-foreground: 220 15% 20%;
+    --card-foreground: 0 0% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 15% 20%;
+    --popover-foreground: 0 0% 10%;
 
     /* Primary Brand Color (Azul Escuro) */
     --primary: 220 80% 30%;
