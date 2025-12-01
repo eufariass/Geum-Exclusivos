@@ -27,7 +27,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { UserPlus, MoreVertical, Shield, User as UserIcon, Loader2 } from 'lucide-react';
+import { UserPlus, MoreVertical, Shield, User as UserIcon, Loader2, Mail } from 'lucide-react';
 import { toast } from 'sonner';
 
 export const UsuariosTab = () => {
@@ -99,6 +99,21 @@ export const UsuariosTab = () => {
     } catch (error) {
       console.error('Erro ao alterar status:', error);
       toast.error('Erro ao alterar status');
+    }
+  };
+
+  const handleResendInvite = async (user: UserWithRole) => {
+    if (!user.email) {
+      toast.error('Usuário não possui e-mail cadastrado');
+      return;
+    }
+
+    try {
+      await usersService.resendInvite(user.email, user.nome_completo, user.role);
+      toast.success('E-mail de convite reenviado com sucesso!');
+    } catch (error: any) {
+      console.error('Erro ao reenviar convite:', error);
+      toast.error(error.message || 'Erro ao reenviar e-mail de convite');
     }
   };
 
@@ -257,6 +272,12 @@ export const UsuariosTab = () => {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => handleResendInvite(user)}
+                            >
+                              <Mail className="h-4 w-4 mr-2" />
+                              Reenviar convite
+                            </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() =>
                                 handleChangeRole(

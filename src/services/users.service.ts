@@ -156,6 +156,29 @@ export const usersService = {
   },
 
   /**
+   * Reenviar e-mail de convite
+   */
+  async resendInvite(email: string, nomeCompleto: string, role: UserRole): Promise<void> {
+    try {
+      const { error: emailError } = await supabase.functions.invoke('send-invite-email', {
+        body: { 
+          email, 
+          userName: nomeCompleto,
+          role 
+        }
+      });
+
+      if (emailError) {
+        console.error('Erro ao reenviar email de convite:', emailError);
+        throw new Error('Falha ao enviar e-mail de convite');
+      }
+    } catch (error) {
+      console.error('Erro ao reenviar convite:', error);
+      throw error;
+    }
+  },
+
+  /**
    * Buscar role do usuário atual
    */
   async getCurrentUserRole(): Promise<UserRole | null> {
