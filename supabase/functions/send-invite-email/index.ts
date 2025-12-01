@@ -79,26 +79,22 @@ const handler = async (req: Request): Promise<Response> => {
                       <tr>
                           <td style="padding: 40px 40px 50px;">
                               <h1 style="margin: 0 0 20px; font-size: 24px; line-height: 30px; color: #111827; font-weight: 700; text-align: center;">
-                                  Bem-vindo à Geum
+                                  Bem-vindo ao CRM da Imobiliária Geum
                               </h1>
                               
                               <p style="margin: 0 0 20px; font-size: 16px; line-height: 26px; color: #4b5563; text-align: center;">
-                                  Olá <strong>${userName}</strong>! Sua conta no nosso CRM foi criada com sucesso.
-                              </p>
-                              
-                              <p style="margin: 0 0 20px; font-size: 16px; line-height: 26px; color: #4b5563; text-align: center;">
-                                  Você foi convidado com a função de <strong>${roleDisplay}</strong>.
+                                  Sua conta foi criada com sucesso e agora você faz parte do nosso sistema interno.
                               </p>
                               
                               <p style="margin: 0 0 35px; font-size: 16px; line-height: 26px; color: #4b5563; text-align: center;">
-                                  Para começar a gerenciar seus imóveis e acessar o sistema, clique no botão abaixo e defina sua senha de acesso.
+                                  Para acessar o painel e começar a gerenciar seus imóveis, basta clicar no botão abaixo e definir sua senha.
                               </p>
 
                               <table width="100%" border="0" cellspacing="0" cellpadding="0">
                                   <tr>
                                       <td align="center">
                                           <a href="${setupPasswordUrl}" class="btn-primary">
-                                              Confirmar Minha Conta
+                                              Ativar Minha Conta
                                           </a>
                                       </td>
                                   </tr>
@@ -106,7 +102,7 @@ const handler = async (req: Request): Promise<Response> => {
 
                               <p style="margin-top: 40px; margin-bottom: 0; font-size: 14px; line-height: 22px; color: #9ca3af; text-align: center; border-top: 1px solid #e5e7eb; padding-top: 20px;">
                                   Este convite é válido por 24 horas.<br>
-                                  Se não foi você, apenas ignore este e-mail.
+                                  Se você não solicitou este acesso, basta desconsiderar este e-mail.
                               </p>
                           </td>
                       </tr>
