@@ -1,6 +1,7 @@
 import { Home, Building2, Users, CheckSquare, BarChart3, FileText, UserCog } from 'lucide-react';
 import type { TabType } from '@/types';
 import { usePermissions } from '@/hooks/usePermissions';
+import logoGeum from '@/assets/logo-geum-black.png';
 import {
   Sidebar,
   SidebarContent,
@@ -55,6 +56,15 @@ export function AppSidebar({ activeTab, onTabChange }: AppSidebarProps) {
   return (
     <Sidebar className="border-r border-border z-50">
       <div className="h-full bg-card flex flex-col">
+        {/* Header com Logo */}
+        <div className="p-4 border-b border-border">
+          <img 
+            src={logoGeum} 
+            alt="Geum Imobiliária" 
+            className={`${isCollapsed ? 'w-8 h-8 object-contain mx-auto' : 'h-8 w-auto'} transition-all`}
+          />
+        </div>
+
         {/* Menu */}
         <SidebarContent className="px-3 py-6">
           {loading ? (
