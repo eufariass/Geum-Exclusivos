@@ -9,6 +9,7 @@ import { TasksTab } from '@/components/tasks/TasksTab';
 import { MetricasTab } from '@/components/metricas/MetricasTab';
 import { RelatoriosTab } from '@/components/relatorios/RelatoriosTab';
 import { UsuariosTab } from '@/components/usuarios/UsuariosTab';
+import { ChatIATab } from '@/components/chat-ia/ChatIATab';
 import { useToastManager } from '@/components/Toast';
 import { usePermissions } from '@/hooks/usePermissions';
 import type { TabType } from '@/types';
@@ -44,6 +45,7 @@ const Index = () => {
               <MetricasTab onToast={showToast} key={refreshKey} />
             )}
             {activeTab === 'relatorios' && <RelatoriosTab showToast={showToast} key={refreshKey} />}
+            {activeTab === 'chat-ia' && <ChatIATab key={refreshKey} />}
             {activeTab === 'usuarios' && isAdmin && <UsuariosTab key={refreshKey} />}
           </main>
         </div>

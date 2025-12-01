@@ -115,7 +115,7 @@ export interface LeadComment {
   created_at: string;
 }
 
-export type TabType = 'dashboard' | 'imoveis' | 'leads' | 'tasks' | 'metricas' | 'relatorios' | 'usuarios';
+export type TabType = 'dashboard' | 'imoveis' | 'leads' | 'tasks' | 'metricas' | 'relatorios' | 'usuarios' | 'chat-ia';
 
 // User Roles
 export type UserRole = 'admin' | 'corretor';
