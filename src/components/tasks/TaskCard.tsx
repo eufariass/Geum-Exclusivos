@@ -124,7 +124,7 @@ export const TaskCard = ({
   return (
     <Card
       className={cn(
-        'cursor-pointer transition-all hover:shadow-lg hover:-translate-y-0.5 bg-card',
+        'cursor-pointer transition-all hover:shadow-lg bg-card',
         isDragging && 'opacity-50 rotate-1 shadow-xl',
         isOverdue && 'border-l-4 border-l-red-500',
         task.status === 'completed' && 'opacity-60'

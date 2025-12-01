@@ -357,7 +357,7 @@ const TaskColumn = ({
         )}
       >
         <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-          <div className="flex flex-col gap-3 overflow-y-auto max-h-[calc(100vh-380px)] pr-1">
+          <div className="flex flex-col gap-3 overflow-y-auto max-h-[calc(100vh-380px)] pr-1 px-1">
             {tasks.length === 0 ? (
               <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
                 Nenhuma tarefa
