@@ -1,5 +1,5 @@
 import { useMemo, useEffect, useState } from 'react';
-import { Line } from 'react-chartjs-2';
+import { Line, Bar } from 'react-chartjs-2';
 import { Building2, Eye, Calendar } from 'lucide-react';
 import {
   Chart as ChartJS,
@@ -7,6 +7,7 @@ import {
   LinearScale,
   PointElement,
   LineElement,
+  BarElement,
   Title,
   Tooltip,
   Legend,
@@ -18,7 +19,7 @@ import { Card } from '@/components/ui/card';
 import { KPICard } from './KPICard';
 import type { Imovel, Metrica } from '@/types';
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler);
 
 export const DashboardTab = () => {
   const [imoveis, setImoveis] = useState<Imovel[]>([]);
@@ -59,7 +60,8 @@ export const DashboardTab = () => {
     };
   }, [imoveis, metricas, currentMonth]);
 
-  const chartData = useMemo(() => {
+  // Gráfico 1: Leads e Visitas (linha)
+  const leadsChartData = useMemo(() => {
     const last6Months = getLast6Months();
     const labels = last6Months.map((month) => {
       const [, m] = month.split('-');
@@ -74,18 +76,6 @@ export const DashboardTab = () => {
       return metricas.filter((m) => m.mes === month).reduce((sum, m) => sum + m.visitas_realizadas, 0);
     });
 
-    const viewsData = last6Months.map((month) => {
-      return metricas.filter((m) => m.mes === month).reduce((sum, m) => sum + m.visualizacoes, 0);
-    });
-
-    // Create gradient for the area chart
-    const createGradient = (ctx: CanvasRenderingContext2D, color: string) => {
-      const gradient = ctx.createLinearGradient(0, 0, 0, 320);
-      gradient.addColorStop(0, color);
-      gradient.addColorStop(1, 'rgba(139, 92, 246, 0)');
-      return gradient;
-    };
-
     return {
       labels,
       datasets: [
@@ -95,26 +85,9 @@ export const DashboardTab = () => {
           borderColor: 'rgb(139, 92, 246)',
           backgroundColor: (context: any) => {
             const ctx = context.chart.ctx;
-            return createGradient(ctx, 'rgba(139, 92, 246, 0.4)');
-          },
-          fill: true,
-          tension: 0.4,
-          borderWidth: 2.5,
-          pointRadius: 4,
-          pointHoverRadius: 6,
-          pointBackgroundColor: '#fff',
-          pointBorderColor: 'rgb(139, 92, 246)',
-          pointBorderWidth: 2,
-        },
-        {
-          label: 'Visualizações',
-          data: viewsData,
-          borderColor: 'rgb(34, 197, 94)',
-          backgroundColor: (context: any) => {
-            const ctx = context.chart.ctx;
             const gradient = ctx.createLinearGradient(0, 0, 0, 320);
-            gradient.addColorStop(0, 'rgba(34, 197, 94, 0.4)');
-            gradient.addColorStop(1, 'rgba(34, 197, 94, 0)');
+            gradient.addColorStop(0, 'rgba(139, 92, 246, 0.4)');
+            gradient.addColorStop(1, 'rgba(139, 92, 246, 0)');
             return gradient;
           },
           fill: true,
@@ -123,7 +96,7 @@ export const DashboardTab = () => {
           pointRadius: 4,
           pointHoverRadius: 6,
           pointBackgroundColor: '#fff',
-          pointBorderColor: 'rgb(34, 197, 94)',
+          pointBorderColor: 'rgb(139, 92, 246)',
           pointBorderWidth: 2,
         },
         {
@@ -145,6 +118,32 @@ export const DashboardTab = () => {
           pointBackgroundColor: '#fff',
           pointBorderColor: 'rgb(59, 130, 246)',
           pointBorderWidth: 2,
+        },
+      ],
+    };
+  }, [metricas]);
+
+  // Gráfico 2: Visualizações (barras)
+  const viewsChartData = useMemo(() => {
+    const last6Months = getLast6Months();
+    const labels = last6Months.map((month) => {
+      const [, m] = month.split('-');
+      return new Date(2000, parseInt(m) - 1).toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '').toUpperCase();
+    });
+
+    const viewsData = last6Months.map((month) => {
+      return metricas.filter((m) => m.mes === month).reduce((sum, m) => sum + m.visualizacoes, 0);
+    });
+
+    return {
+      labels,
+      datasets: [
+        {
+          label: 'Visualizações',
+          data: viewsData,
+          backgroundColor: 'rgb(139, 92, 246)',
+          borderRadius: 6,
+          borderSkipped: false,
         },
       ],
     };
@@ -212,17 +211,17 @@ export const DashboardTab = () => {
         </div>
       </div>
 
-      {/* Chart Section */}
+      {/* Gráfico de Leads e Visitas */}
       <Card className="p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-lg font-semibold">Evolução - Últimos 6 Meses</h2>
-            <p className="text-sm text-muted-foreground mt-1">Acompanhamento de leads, visualizações e visitas</p>
+            <h2 className="text-lg font-semibold">Leads e Visitas - Últimos 6 Meses</h2>
+            <p className="text-sm text-muted-foreground mt-1">Acompanhamento de leads e visitas realizadas</p>
           </div>
         </div>
         <div className="h-[320px]">
           <Line
-            data={chartData}
+            data={leadsChartData}
             options={{
               responsive: true,
               maintainAspectRatio: false,
@@ -296,6 +295,78 @@ export const DashboardTab = () => {
                 }
               },
             }}
+          />
+        </div>
+      </Card>
+
+      {/* Gráfico de Visualizações */}
+      <Card className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="text-lg font-semibold">Visualizações - Últimos 6 Meses</h2>
+            <p className="text-sm text-muted-foreground mt-1">Acompanhamento de visualizações nos portais</p>
+          </div>
+        </div>
+        <div className="h-[320px]">
+          <Bar 
+            data={viewsChartData} 
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { 
+                  display: false,
+                },
+                tooltip: {
+                  backgroundColor: '#fff',
+                  titleColor: '#000',
+                  bodyColor: '#000',
+                  borderColor: 'rgb(229, 231, 235)',
+                  borderWidth: 1,
+                  padding: 12,
+                  displayColors: true,
+                  boxPadding: 6,
+                  cornerRadius: 8,
+                }
+              },
+              scales: {
+                y: { 
+                  beginAtZero: true,
+                  grid: {
+                    display: true,
+                    color: 'rgba(0, 0, 0, 0.05)',
+                    drawTicks: false,
+                  },
+                  border: {
+                    display: false
+                  },
+                  ticks: {
+                    padding: 12,
+                    font: {
+                      size: 11,
+                      family: 'Inter'
+                    },
+                    color: 'rgba(0, 0, 0, 0.6)'
+                  }
+                },
+                x: {
+                  grid: {
+                    display: false
+                  },
+                  border: {
+                    display: false
+                  },
+                  ticks: {
+                    padding: 12,
+                    font: {
+                      size: 11,
+                      family: 'Inter'
+                    },
+                    color: 'rgba(0, 0, 0, 0.6)'
+                  }
+                }
+              },
+            }} 
           />
         </div>
       </Card>
