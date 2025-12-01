@@ -31,7 +31,7 @@ export function AppSidebar({ activeTab, onTabChange }: AppSidebarProps) {
   const isCollapsed = state === 'collapsed';
 
   return (
-    <Sidebar className={`border-r ${isCollapsed ? 'w-16' : 'w-64'}`}>
+    <Sidebar className={`border-r z-50 ${isCollapsed ? 'w-16' : 'w-64'}`}>
       <div className="h-full bg-primary flex flex-col">
         {/* Logo */}
         <div className={`p-4 border-b border-primary-foreground/10 ${isCollapsed ? 'px-2' : ''}`}>
