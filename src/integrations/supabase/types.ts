@@ -392,47 +392,63 @@ export type Database = {
       tasks: {
         Row: {
           assigned_to: string | null
+          completed_at: string | null
           created_at: string
           created_by: string | null
           description: string | null
           due_date: string | null
           id: string
+          imovel_id: string | null
           lead_id: string | null
           order_index: number
           priority: string
           status: string
           title: string
+          type: string
           updated_at: string
         }
         Insert: {
           assigned_to?: string | null
+          completed_at?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           due_date?: string | null
           id?: string
+          imovel_id?: string | null
           lead_id?: string | null
           order_index?: number
           priority?: string
           status?: string
           title: string
+          type?: string
           updated_at?: string
         }
         Update: {
           assigned_to?: string | null
+          completed_at?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
           due_date?: string | null
           id?: string
+          imovel_id?: string | null
           lead_id?: string | null
           order_index?: number
           priority?: string
           status?: string
           title?: string
+          type?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "tasks_imovel_id_fkey"
+            columns: ["imovel_id"]
+            isOneToOne: false
+            referencedRelation: "imoveis"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tasks_lead_id_fkey"
             columns: ["lead_id"]
