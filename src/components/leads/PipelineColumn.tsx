@@ -7,9 +7,10 @@ import { Badge } from '@/components/ui/badge';
 interface PipelineColumnProps {
   stage: PipelineStage;
   leads: Lead[];
+  onLeadClick?: (lead: Lead) => void;
 }
 
-export const PipelineColumn = ({ stage, leads }: PipelineColumnProps) => {
+export const PipelineColumn = ({ stage, leads, onLeadClick }: PipelineColumnProps) => {
   const { setNodeRef, isOver } = useDroppable({
     id: stage.id,
   });
@@ -44,7 +45,7 @@ export const PipelineColumn = ({ stage, leads }: PipelineColumnProps) => {
       >
         <SortableContext items={leads.map((l) => l.id)} strategy={verticalListSortingStrategy}>
           {leads.map((lead) => (
-            <SortableLeadCard key={lead.id} lead={lead} />
+            <SortableLeadCard key={lead.id} lead={lead} onClick={onLeadClick} />
           ))}
         </SortableContext>
 

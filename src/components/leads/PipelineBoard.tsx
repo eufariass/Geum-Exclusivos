@@ -6,6 +6,7 @@ import { pipelineService, type LeadsByStage } from '@/services/pipeline.service'
 import { PipelineColumn } from './PipelineColumn';
 import { PipelineLeadCard } from './PipelineLeadCard';
 import { LostReasonModal } from './LostReasonModal';
+import { LeadDetailModal } from './LeadDetailModal';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -20,6 +21,8 @@ export const PipelineBoard = ({ onRefresh }: PipelineBoardProps) => {
   const [showLostModal, setShowLostModal] = useState(false);
   const [leadToMarkLost, setLeadToMarkLost] = useState<Lead | null>(null);
   const [targetLostStageId, setTargetLostStageId] = useState<string | null>(null);
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   useEffect(() => {
     loadLeads();
@@ -111,6 +114,16 @@ export const PipelineBoard = ({ onRefresh }: PipelineBoardProps) => {
     setTargetLostStageId(null);
   };
 
+  const handleLeadClick = (lead: Lead) => {
+    setSelectedLead(lead);
+    setShowDetailModal(true);
+  };
+
+  const handleLeadUpdated = () => {
+    loadLeads();
+    onRefresh?.();
+  };
+
   // Encontrar lead ativo para overlay
   const activeLead = leadsByStage
     .flatMap((g) => g.leads)
@@ -137,6 +150,7 @@ export const PipelineBoard = ({ onRefresh }: PipelineBoardProps) => {
               key={group.stage.id}
               stage={group.stage}
               leads={group.leads}
+              onLeadClick={handleLeadClick}
             />
           ))}
         </div>
@@ -151,6 +165,18 @@ export const PipelineBoard = ({ onRefresh }: PipelineBoardProps) => {
           lead={leadToMarkLost}
           onConfirm={handleConfirmLost}
           onCancel={handleCancelLost}
+        />
+      )}
+
+      {showDetailModal && selectedLead && (
+        <LeadDetailModal
+          lead={selectedLead}
+          isOpen={showDetailModal}
+          onClose={() => {
+            setShowDetailModal(false);
+            setSelectedLead(null);
+          }}
+          onLeadUpdated={handleLeadUpdated}
         />
       )}
     </>
