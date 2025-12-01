@@ -81,7 +81,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
         estado: imovelAny.estado || 'PR',
         endereco: editingImovel.endereco,
         tipo: editingImovel.tipo,
-        valor: editingImovel.valor ? String(editingImovel.valor) : '',
+        valor: editingImovel.valor ? editingImovel.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '',
         descricao: editingImovel.descricao || '',
         quartos: editingImovel.quartos ? String(editingImovel.quartos) : '',
         banheiros: editingImovel.banheiros ? String(editingImovel.banheiros) : '',

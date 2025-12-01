@@ -144,8 +144,8 @@ export const ImoveisTab = ({ onToast }: ImoveisTabProps) => {
 
                 {imovel.valor && (
                   <div className="flex items-center gap-2 pt-2 border-t">
-                    <DollarSign className="h-4 w-4 text-accent flex-shrink-0" />
-                    <p className="text-lg font-bold text-accent">
+                    <DollarSign className="h-4 w-4 text-foreground flex-shrink-0" />
+                    <p className="text-lg font-bold text-foreground">
                       {formatCurrency(imovel.valor)}
                     </p>
                   </div>
