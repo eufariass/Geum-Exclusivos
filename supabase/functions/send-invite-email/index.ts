@@ -28,7 +28,7 @@ const handler = async (req: Request): Promise<Response> => {
     // URLs do sistema e da logo
     const systemUrl = `${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.lovable.app') || 'https://geum-crm.lovable.app'}`;
     const setupPasswordUrl = `${systemUrl}/definir-senha`;
-    const logoUrl = `${Deno.env.get('SUPABASE_URL')}/storage/v1/object/public/imoveis/logo-geum-black.png`;
+    const logoUrl = 'https://polzdhlstwdvzmyxflrk.supabase.co/storage/v1/object/public/imoveis/logo-geum-white.png';
 
     // Traduzir role para português
     const roleTranslation: Record<string, string> = {
@@ -37,91 +37,92 @@ const handler = async (req: Request): Promise<Response> => {
     };
     const roleDisplay = roleTranslation[role] || role;
 
-    // Template HTML do email
+    // Template HTML do email com design Geum
     const html = `
       <!DOCTYPE html>
-      <html>
-        <head>
-          <meta charset="utf-8">
+      <html lang="pt-BR">
+      <head>
+          <meta charset="UTF-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Convite - Geum Imobiliária</title>
-        </head>
-        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; background-color: #f6f9fc;">
-          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f6f9fc; padding: 20px 0;">
-            <tr>
-              <td align="center">
-                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-                  <!-- Header com Logo -->
-                  <tr>
-                    <td align="center" style="padding: 32px 20px; border-bottom: 1px solid #e6ebf1;">
-                      <img src="${logoUrl}" alt="Geum Imobiliária" style="height: 48px; width: auto;" />
-                    </td>
-                  </tr>
+          <title>Convite CRM Imobiliária Geum</title>
+          <style>
+              body { margin: 0; padding: 0; min-width: 100%; background-color: #f4f4f5; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+              .btn-primary {
+                  background-color: #000000;
+                  color: #ffffff !important;
+                  padding: 14px 28px;
+                  text-decoration: none;
+                  border-radius: 6px;
+                  font-weight: bold;
+                  display: inline-block;
+                  text-align: center;
+                  font-size: 16px;
+              }
+              .btn-primary:hover {
+                  background-color: #333333;
+              }
+          </style>
+      </head>
+      <body style="margin: 0; padding: 0; background-color: #f4f4f5;">
+          <center style="width: 100%; table-layout: fixed; background-color: #f4f4f5; padding: 40px 0;">
+              <div style="max-width: 600px; margin: 0 auto; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);">
                   
-                  <!-- Conteúdo Principal -->
-                  <tr>
-                    <td style="padding: 32px 20px;">
-                      <h1 style="color: #1a1a1a; font-size: 28px; font-weight: bold; margin: 0 0 24px; text-align: center;">
-                        🎉 Você foi convidado!
-                      </h1>
-                      
-                      <p style="color: #525f7f; font-size: 16px; line-height: 24px; margin: 16px 0;">
-                        Olá <strong>${userName}</strong>,
-                      </p>
-                      
-                      <p style="color: #525f7f; font-size: 16px; line-height: 24px; margin: 16px 0;">
-                        Você foi convidado para acessar o sistema GEUM Imobiliária 
-                        com a função de <strong>${roleDisplay}</strong>.
-                      </p>
-
-                      <p style="color: #525f7f; font-size: 16px; line-height: 24px; margin: 16px 0;">
-                        Para começar, clique no botão abaixo e defina sua senha de acesso:
-                      </p>
-
-                      <!-- Botão de Definir Senha -->
-                      <table width="100%" cellpadding="0" cellspacing="0" style="margin: 32px 0;">
-                        <tr>
-                          <td align="center">
-                            <a href="${setupPasswordUrl}" target="_blank" style="background-color: #0070f3; border-radius: 8px; color: #ffffff; display: inline-block; font-size: 16px; font-weight: bold; text-decoration: none; padding: 14px 32px;">
-                              Definir Minha Senha
-                            </a>
+                  <table align="center" border="0" cellpadding="0" cellspacing="0" style="background-color: #000000; width: 100%; max-width: 600px; border-radius: 8px 8px 0 0;">
+                      <tr>
+                          <td align="center" style="padding: 45px 20px;">
+                              <img src="${logoUrl}" alt="Imobiliária Geum" style="display: block; border: 0; max-width: 250px; height: auto;">
                           </td>
-                        </tr>
-                      </table>
+                      </tr>
+                  </table>
 
-                      <p style="color: #525f7f; font-size: 16px; line-height: 24px; margin: 16px 0;">
-                        Ou copie e cole este link no seu navegador:
-                      </p>
-                      
-                      <p style="color: #0070f3; font-size: 14px; margin: 16px 0; word-break: break-all;">
-                        ${setupPasswordUrl}
-                      </p>
+                  <table align="center" border="0" cellpadding="0" cellspacing="0" style="background-color: #ffffff; width: 100%; max-width: 600px; border-radius: 0 0 8px 8px;">
+                      <tr>
+                          <td style="padding: 40px 40px 50px;">
+                              <h1 style="margin: 0 0 20px; font-size: 24px; line-height: 30px; color: #111827; font-weight: 700; text-align: center;">
+                                  Bem-vindo à Geum
+                              </h1>
+                              
+                              <p style="margin: 0 0 20px; font-size: 16px; line-height: 26px; color: #4b5563; text-align: center;">
+                                  Olá <strong>${userName}</strong>! Sua conta no nosso CRM foi criada com sucesso.
+                              </p>
+                              
+                              <p style="margin: 0 0 20px; font-size: 16px; line-height: 26px; color: #4b5563; text-align: center;">
+                                  Você foi convidado com a função de <strong>${roleDisplay}</strong>.
+                              </p>
+                              
+                              <p style="margin: 0 0 35px; font-size: 16px; line-height: 26px; color: #4b5563; text-align: center;">
+                                  Para começar a gerenciar seus imóveis e acessar o sistema, clique no botão abaixo e defina sua senha de acesso.
+                              </p>
 
-                      <div style="background-color: #fff4e6; border-left: 4px solid #ff9800; padding: 16px; margin: 24px 0; border-radius: 4px;">
-                        <p style="color: #e65100; font-size: 14px; line-height: 20px; margin: 0; font-weight: 600;">
-                          ⏰ Este link de convite expira em 24 horas
-                        </p>
-                      </div>
+                              <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                  <tr>
+                                      <td align="center">
+                                          <a href="${setupPasswordUrl}" class="btn-primary">
+                                              Confirmar Minha Conta
+                                          </a>
+                                      </td>
+                                  </tr>
+                              </table>
 
-                      <p style="color: #8898aa; font-size: 12px; line-height: 16px; margin: 24px 0 8px;">
-                        Se você não esperava este convite, por favor ignore este e-mail.
-                      </p>
-                    </td>
-                  </tr>
+                              <p style="margin-top: 40px; margin-bottom: 0; font-size: 14px; line-height: 22px; color: #9ca3af; text-align: center; border-top: 1px solid #e5e7eb; padding-top: 20px;">
+                                  Este convite é válido por 24 horas.<br>
+                                  Se não foi você, apenas ignore este e-mail.
+                              </p>
+                          </td>
+                      </tr>
+                  </table>
 
-                  <!-- Footer -->
-                  <tr>
-                    <td align="center" style="border-top: 1px solid #e6ebf1; padding: 20px;">
-                      <p style="color: #8898aa; font-size: 12px; line-height: 16px; margin: 8px 0;">
-                        © ${new Date().getFullYear()} Geum Imobiliária. Todos os direitos reservados.
-                      </p>
-                    </td>
-                  </tr>
-                </table>
-              </td>
-            </tr>
-          </table>
-        </body>
+                  <table align="center" border="0" cellpadding="0" cellspacing="0" style="width: 100%; max-width: 600px; margin-top: 20px;">
+                      <tr>
+                          <td align="center" style="padding: 0 20px; font-size: 12px; color: #71717a;">
+                              <p>&copy; ${new Date().getFullYear()} Imobiliária Geum. Todos os direitos reservados.</p>
+                          </td>
+                      </tr>
+                  </table>
+
+              </div>
+          </center>
+      </body>
       </html>
     `;
 
