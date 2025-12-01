@@ -30,13 +30,17 @@ const menuItems = [
 export function AppSidebar({ activeTab, onTabChange }: AppSidebarProps) {
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
-  const { isAdmin, loading } = usePermissions();
+  const { isAdmin, loading, role } = usePermissions();
+
+  console.log('👤 Sidebar - isAdmin:', isAdmin, 'role:', role, 'loading:', loading);
 
   // Menu items dinâmicos baseados em permissões
   const visibleMenuItems = [
     ...menuItems,
     ...(isAdmin ? [{ id: 'usuarios' as TabType, label: 'Usuários', icon: UserCog }] : []),
   ];
+
+  console.log('📋 Visible menu items:', visibleMenuItems.map(i => i.label));
 
   return (
     <Sidebar className={`border-r z-50 ${isCollapsed ? 'w-16' : 'w-64'}`}>
