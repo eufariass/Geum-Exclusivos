@@ -47,18 +47,35 @@ export const DashboardTab = () => {
   }, []);
 
   const stats = useMemo(() => {
-    const currentMetrics = metricas.filter((m) => m.mes === currentMonth);
-    const currentLeads = currentMetrics.reduce((sum, m) => sum + m.leads, 0);
-    const currentViews = currentMetrics.reduce((sum, m) => sum + m.visualizacoes, 0);
-    const currentVisits = currentMetrics.reduce((sum, m) => sum + m.visitas_realizadas, 0);
+    // Encontrar o mês mais recente com dados
+    const availableMonths = [...new Set(metricas.map(m => m.mes))].sort().reverse();
+    const latestMonth = availableMonths[0] || currentMonth;
+    
+    const latestMetrics = metricas.filter((m) => m.mes === latestMonth);
+    const totalLeads = latestMetrics.reduce((sum, m) => sum + m.leads, 0);
+    const totalViews = latestMetrics.reduce((sum, m) => sum + m.visualizacoes, 0);
+    const totalVisits = latestMetrics.reduce((sum, m) => sum + m.visitas_realizadas, 0);
 
     return {
       totalImoveis: imoveis.length,
-      leads: currentLeads,
-      views: currentViews,
-      visits: currentVisits,
+      leads: totalLeads,
+      views: totalViews,
+      visits: totalVisits,
     };
   }, [imoveis, metricas, currentMonth]);
+
+  const totalStats = useMemo(() => {
+    const allLeads = metricas.reduce((sum, m) => sum + m.leads, 0);
+    const allViews = metricas.reduce((sum, m) => sum + m.visualizacoes, 0);
+    const allVisits = metricas.reduce((sum, m) => sum + m.visitas_realizadas, 0);
+
+    return {
+      totalImoveis: imoveis.length,
+      leads: allLeads,
+      views: allViews,
+      visits: allVisits,
+    };
+  }, [imoveis, metricas]);
 
   // Gráfico 1: Leads e Visitas (linha)
   const leadsChartData = useMemo(() => {
@@ -183,7 +200,7 @@ export const DashboardTab = () => {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Total de Imóveis</p>
-                <p className="text-2xl font-bold">{stats.totalImoveis}</p>
+                <p className="text-2xl font-bold">{totalStats.totalImoveis}</p>
               </div>
               <Building2 className="h-8 w-8 text-muted-foreground" />
             </div>
@@ -193,7 +210,7 @@ export const DashboardTab = () => {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Visualizações</p>
-                <p className="text-2xl font-bold">{stats.views.toLocaleString('pt-BR')}</p>
+                <p className="text-2xl font-bold">{totalStats.views.toLocaleString('pt-BR')}</p>
               </div>
               <Eye className="h-8 w-8 text-muted-foreground" />
             </div>
@@ -203,7 +220,7 @@ export const DashboardTab = () => {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Visitas Realizadas</p>
-                <p className="text-2xl font-bold">{stats.visits}</p>
+                <p className="text-2xl font-bold">{totalStats.visits}</p>
               </div>
               <Calendar className="h-8 w-8 text-muted-foreground" />
             </div>
