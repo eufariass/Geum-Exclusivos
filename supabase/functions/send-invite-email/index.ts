@@ -7,9 +7,10 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface WelcomeEmailRequest {
+interface InviteEmailRequest {
   email: string;
   userName: string;
+  role: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -19,14 +20,22 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    console.log('Send welcome email function invoked');
+    console.log('Send invite email function invoked');
     
-    const { email, userName }: WelcomeEmailRequest = await req.json();
-    console.log('Processing welcome email for:', email);
+    const { email, userName, role }: InviteEmailRequest = await req.json();
+    console.log('Processing invite email for:', email, 'with role:', role);
 
     // URLs do sistema e da logo
     const systemUrl = `${Deno.env.get('SUPABASE_URL')?.replace('.supabase.co', '.lovable.app') || 'https://geum-crm.lovable.app'}`;
+    const setupPasswordUrl = `${systemUrl}/definir-senha`;
     const logoUrl = `${Deno.env.get('SUPABASE_URL')}/storage/v1/object/public/imoveis/logo-geum-black.png`;
+
+    // Traduzir role para português
+    const roleTranslation: Record<string, string> = {
+      'admin': 'Administrador',
+      'corretor': 'Corretor'
+    };
+    const roleDisplay = roleTranslation[role] || role;
 
     // Template HTML do email
     const html = `
@@ -35,7 +44,7 @@ const handler = async (req: Request): Promise<Response> => {
         <head>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Bem-vindo à Geum Imobiliária</title>
+          <title>Convite - Geum Imobiliária</title>
         </head>
         <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; background-color: #f6f9fc;">
           <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f6f9fc; padding: 20px 0;">
@@ -53,7 +62,7 @@ const handler = async (req: Request): Promise<Response> => {
                   <tr>
                     <td style="padding: 32px 20px;">
                       <h1 style="color: #1a1a1a; font-size: 28px; font-weight: bold; margin: 0 0 24px; text-align: center;">
-                        Conta Criada com Sucesso!
+                        🎉 Você foi convidado!
                       </h1>
                       
                       <p style="color: #525f7f; font-size: 16px; line-height: 24px; margin: 16px 0;">
@@ -61,21 +70,20 @@ const handler = async (req: Request): Promise<Response> => {
                       </p>
                       
                       <p style="color: #525f7f; font-size: 16px; line-height: 24px; margin: 16px 0;">
-                        Sua conta na Geum Imobiliária foi criada com sucesso! 
-                        Estamos muito felizes em tê-lo(a) conosco.
+                        Você foi convidado para acessar o sistema GEUM Imobiliária 
+                        com a função de <strong>${roleDisplay}</strong>.
                       </p>
 
                       <p style="color: #525f7f; font-size: 16px; line-height: 24px; margin: 16px 0;">
-                        Agora você pode acessar nosso sistema e começar a gerenciar 
-                        seus imóveis, leads e tarefas de forma eficiente.
+                        Para começar, clique no botão abaixo e defina sua senha de acesso:
                       </p>
 
-                      <!-- Botão de Acesso -->
+                      <!-- Botão de Definir Senha -->
                       <table width="100%" cellpadding="0" cellspacing="0" style="margin: 32px 0;">
                         <tr>
                           <td align="center">
-                            <a href="${systemUrl}" target="_blank" style="background-color: #0070f3; border-radius: 8px; color: #ffffff; display: inline-block; font-size: 16px; font-weight: bold; text-decoration: none; padding: 14px 32px;">
-                              Acessar o Sistema
+                            <a href="${setupPasswordUrl}" target="_blank" style="background-color: #0070f3; border-radius: 8px; color: #ffffff; display: inline-block; font-size: 16px; font-weight: bold; text-decoration: none; padding: 14px 32px;">
+                              Definir Minha Senha
                             </a>
                           </td>
                         </tr>
@@ -86,11 +94,17 @@ const handler = async (req: Request): Promise<Response> => {
                       </p>
                       
                       <p style="color: #0070f3; font-size: 14px; margin: 16px 0; word-break: break-all;">
-                        ${systemUrl}
+                        ${setupPasswordUrl}
                       </p>
 
+                      <div style="background-color: #fff4e6; border-left: 4px solid #ff9800; padding: 16px; margin: 24px 0; border-radius: 4px;">
+                        <p style="color: #e65100; font-size: 14px; line-height: 20px; margin: 0; font-weight: 600;">
+                          ⏰ Este link de convite expira em 24 horas
+                        </p>
+                      </div>
+
                       <p style="color: #8898aa; font-size: 12px; line-height: 16px; margin: 24px 0 8px;">
-                        Se você não solicitou esta conta, por favor ignore este e-mail.
+                        Se você não esperava este convite, por favor ignore este e-mail.
                       </p>
                     </td>
                   </tr>
@@ -123,7 +137,7 @@ const handler = async (req: Request): Promise<Response> => {
       body: JSON.stringify({
         from: 'Geum Imobiliária <onboarding@resend.dev>',
         to: [email],
-        subject: 'Bem-vindo à Geum Imobiliária! 🏠',
+        subject: '🎉 Você foi convidado para o GEUM!',
         html,
       }),
     });
@@ -135,7 +149,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const emailData = await resendResponse.json();
-    console.log('Welcome email sent successfully:', emailData);
+    console.log('Invite email sent successfully:', emailData);
 
     return new Response(
       JSON.stringify({ success: true, data: emailData }),
@@ -148,11 +162,11 @@ const handler = async (req: Request): Promise<Response> => {
       }
     );
   } catch (error: any) {
-    console.error('Error in send-welcome-email function:', error);
+    console.error('Error in send-invite-email function:', error);
     return new Response(
       JSON.stringify({ 
         success: false,
-        error: error.message || 'Failed to send welcome email'
+        error: error.message || 'Failed to send invite email'
       }),
       {
         status: 500,

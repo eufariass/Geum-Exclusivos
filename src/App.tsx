@@ -12,6 +12,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const SetupPassword = lazy(() => import("./pages/SetupPassword"));
 const ImovelLanding = lazy(() => import("./pages/ImovelLanding"));
 const ImoveisPublic = lazy(() => import("./pages/ImoveisPublic"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -48,6 +49,7 @@ const App = () => (
                 <Route path="/" element={<ImoveisPublic />} />
                 <Route path="/login" element={<Auth />} />
                 <Route path="/redefinir-senha" element={<ResetPassword />} />
+                <Route path="/definir-senha" element={<SetupPassword />} />
                 <Route path="/:codigo" element={<ImovelLanding />} />
                 <Route
                   path="/sistema"

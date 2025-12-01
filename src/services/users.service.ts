@@ -45,19 +45,21 @@ export const usersService = {
   },
 
   /**
-   * Convidar novo usuário (criar via signup)
-   * Nota: O usuário precisará confirmar o email e fazer login
+   * Convidar novo usuário (enviar email de convite)
    */
   async inviteUser(email: string, nomeCompleto: string, role: UserRole): Promise<void> {
     try {
-      // Criar usuário via signup
+      // Criar usuário via signup com senha temporária
+      const tempPassword = Math.random().toString(36).slice(-12);
+      
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
-        password: Math.random().toString(36).slice(-12), // Senha temporária
+        password: tempPassword,
         options: {
           data: {
             nome_completo: nomeCompleto,
           },
+          emailRedirectTo: `${window.location.origin}/definir-senha`,
         },
       });
 
@@ -76,6 +78,20 @@ export const usersService = {
           .eq('user_id', authData.user.id);
 
         if (roleError) throw roleError;
+      }
+
+      // Enviar email de convite
+      const { error: emailError } = await supabase.functions.invoke('send-invite-email', {
+        body: { 
+          email, 
+          userName: nomeCompleto,
+          role 
+        }
+      });
+
+      if (emailError) {
+        console.error('Erro ao enviar email de convite:', emailError);
+        // Não lançar erro aqui pois o usuário foi criado com sucesso
       }
     } catch (error) {
       console.error('Erro ao convidar usuário:', error);
