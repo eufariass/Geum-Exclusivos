@@ -58,15 +58,32 @@ export const ChatIATab = () => {
 
     const parts = [
       `Gere a descrição para este imóvel:`,
-      `\nCódigo: ${selectedImovel.codigo}`,
+      `\n=== INFORMAÇÕES BÁSICAS ===`,
+      `Código: ${selectedImovel.codigo}`,
+      selectedImovel.titulo && `Título atual: ${selectedImovel.titulo}`,
       `Tipo: ${selectedImovel.tipo}`,
+      `Cliente/Proprietário: ${selectedImovel.cliente}`,
       selectedImovel.valor && `Valor: R$ ${selectedImovel.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`,
       `Tipo de negócio: ${selectedImovel.tipos_disponiveis?.join(', ') || 'Não especificado'}`,
+      selectedImovel.plataformas_anuncio?.length && `Plataformas de anúncio: ${selectedImovel.plataformas_anuncio.join(', ')}`,
+      
+      `\n=== CARACTERÍSTICAS ===`,
       selectedImovel.quartos && `Quartos: ${selectedImovel.quartos}`,
       selectedImovel.banheiros && `Banheiros: ${selectedImovel.banheiros}`,
-      selectedImovel.area_m2 && `Área: ${selectedImovel.area_m2}m²`,
+      selectedImovel.area_m2 && `Área total: ${selectedImovel.area_m2}m²`,
       selectedImovel.vagas && `Vagas de garagem: ${selectedImovel.vagas}`,
-      `\nEndereço: ${selectedImovel.rua}, ${selectedImovel.numero} - ${selectedImovel.bairro}, ${selectedImovel.cidade}/${selectedImovel.estado}`,
+      
+      `\n=== LOCALIZAÇÃO ===`,
+      `Endereço completo: ${selectedImovel.rua}, ${selectedImovel.numero} - ${selectedImovel.bairro}`,
+      `Cidade: ${selectedImovel.cidade}/${selectedImovel.estado}`,
+      selectedImovel.cep && `CEP: ${selectedImovel.cep}`,
+      
+      selectedImovel.descricao && `\n=== DESCRIÇÃO ATUAL ===`,
+      selectedImovel.descricao && `${selectedImovel.descricao}`,
+      
+      `\n=== OUTRAS INFORMAÇÕES ===`,
+      selectedImovel.data_cadastro && `Data de cadastro: ${new Date(selectedImovel.data_cadastro).toLocaleDateString('pt-BR')}`,
+      selectedImovel.image_urls?.length && `Quantidade de fotos: ${selectedImovel.image_urls.length}`,
     ].filter(Boolean);
 
     return parts.join('\n');
