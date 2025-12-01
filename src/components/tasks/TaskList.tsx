@@ -18,6 +18,7 @@ import {
 import { Loader2, Plus, Filter } from 'lucide-react';
 import { toast } from 'sonner';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface TaskListProps {
@@ -335,16 +336,15 @@ const TaskColumn = ({
   });
 
   return (
-    <div className="flex-shrink-0 w-[320px] flex flex-col">
+    <div className="flex-1 min-w-[280px] max-w-[350px] flex flex-col">
       {/* Column Header */}
-      <div className="mb-3">
-        <div className="flex items-center gap-2 mb-2">
-          <div className={cn('w-3 h-3 rounded-full', color)} />
-          <h3 className="font-semibold text-sm">{label}</h3>
-          <span className="text-xs text-muted-foreground">({tasks.length})</span>
-        </div>
-        <div className="h-1 bg-muted rounded-full overflow-hidden">
-          <div className={cn('h-full', color)} style={{ width: '100%' }} />
+      <div className="flex items-center justify-between mb-3 px-2">
+        <div className="flex items-center gap-2">
+          <div className={cn('w-2 h-2 rounded-full', color)} />
+          <h3 className="font-medium text-sm">{label}</h3>
+          <Badge variant="secondary" className="text-xs h-5">
+            {tasks.length}
+          </Badge>
         </div>
       </div>
 
@@ -352,27 +352,27 @@ const TaskColumn = ({
       <div 
         ref={setNodeRef}
         className={cn(
-          "flex-1 p-2 rounded-lg transition-colors",
-          isOver ? "bg-primary/10 ring-2 ring-primary" : "bg-muted/30"
+          "flex-1 rounded-xl border-2 border-dashed p-3 min-h-[400px] transition-all",
+          isOver ? "border-primary bg-primary/5" : "border-transparent bg-muted/20"
         )}
       >
         <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-          <ScrollArea className="h-full pr-2">
-            <div className="space-y-2 min-h-[200px]">
+          <ScrollArea className="h-[calc(100vh-340px)] pr-2">
+            <div className="space-y-2.5">
               {tasks.length === 0 ? (
-                <div className="flex items-center justify-center py-8 text-sm text-muted-foreground">
+                <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
                   Nenhuma tarefa
                 </div>
               ) : (
                 tasks.map((task) => (
-                  <div key={task.id} onClick={() => onViewTask(task)}>
-                    <SortableTaskCard
-                      task={task}
-                      onEdit={() => onEditTask(task)}
-                      onComplete={() => onCompleteTask(task.id)}
-                      onDelete={() => onDeleteTask(task.id)}
-                    />
-                  </div>
+                  <SortableTaskCard
+                    key={task.id}
+                    task={task}
+                    onClick={() => onViewTask(task)}
+                    onEdit={() => onEditTask(task)}
+                    onComplete={() => onCompleteTask(task.id)}
+                    onDelete={() => onDeleteTask(task.id)}
+                  />
                 ))
               )}
             </div>

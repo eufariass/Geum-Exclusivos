@@ -5,12 +5,13 @@ import { TaskCard } from './TaskCard';
 
 interface SortableTaskCardProps {
   task: Task;
+  onClick?: () => void;
   onEdit?: () => void;
   onComplete?: () => void;
   onDelete?: () => void;
 }
 
-export const SortableTaskCard = ({ task, onEdit, onComplete, onDelete }: SortableTaskCardProps) => {
+export const SortableTaskCard = ({ task, onClick, onEdit, onComplete, onDelete }: SortableTaskCardProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: task.id,
   });
@@ -22,13 +23,15 @@ export const SortableTaskCard = ({ task, onEdit, onComplete, onDelete }: Sortabl
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div ref={setNodeRef} style={style} {...attributes}>
       <TaskCard
         task={task}
+        onClick={onClick}
         onEdit={onEdit}
         onComplete={onComplete}
         onDelete={onDelete}
         isDragging={isDragging}
+        dragHandleProps={listeners}
       />
     </div>
   );
