@@ -85,7 +85,7 @@ export const ChatIATab = () => {
       const { data: { session } } = await supabase.auth.getSession();
       
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-property-description`,
+        'https://polzdhlstwdvzmyxflrk.supabase.co/functions/v1/generate-property-description',
         {
           method: 'POST',
           headers: {
