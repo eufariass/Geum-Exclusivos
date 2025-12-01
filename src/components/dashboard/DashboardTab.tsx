@@ -1,6 +1,6 @@
 import { useMemo, useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
-import { Building2, TrendingUp, Eye, Calendar, Sparkles } from 'lucide-react';
+import { Building2, Eye, Calendar } from 'lucide-react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -15,9 +15,7 @@ import {
 import { supabaseStorageService } from '@/lib/supabaseStorage';
 import { getCurrentMonth, getPreviousMonth, getLast6Months } from '@/lib/dateUtils';
 import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { KPICard } from './KPICard';
-import { Progress } from '@/components/ui/progress';
 import type { Imovel, Metrica } from '@/types';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
@@ -141,77 +139,51 @@ export const DashboardTab = () => {
       {/* Activity Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <KPICard
-          title="Taxa de conversão"
-          value="0,00%"
-          badge="0/700"
-        />
-        <KPICard
-          title="Novos clientes"
+          title="Total de Leads"
           value={stats.leads}
         />
         <KPICard
-          title="Ticket médio"
-          value="R$ 0,00"
+          title="Visualizações"
+          value={stats.views.toLocaleString('pt-BR')}
+        />
+        <KPICard
+          title="Visitas Realizadas"
+          value={stats.visits}
         />
       </div>
-
-      {/* Highlight Card */}
-      <Card className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground p-8 border-0">
-        <Badge className="absolute top-4 right-4 bg-success text-success-foreground">
-          NOVIDADE
-        </Badge>
-        <div className="flex items-start gap-4">
-          <Sparkles className="h-8 w-8 flex-shrink-0" />
-          <div>
-            <h3 className="text-xl font-bold mb-2">Descubra o Novo Dashboard</h3>
-            <p className="text-primary-foreground/90 text-sm mb-4">
-              Explore as novas funcionalidades e visualizações de dados que preparamos para você.
-            </p>
-            <button className="bg-background text-foreground px-4 py-2 rounded-lg text-sm font-medium hover:bg-background/90 transition-colors">
-              Saiba mais
-            </button>
-          </div>
-        </div>
-      </Card>
 
       {/* General Data Section */}
       <div>
         <h2 className="text-lg font-semibold mb-4">Dados gerais</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card className="p-6">
-            <div className="flex items-start justify-between mb-4">
+            <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Total de Imóveis</p>
                 <p className="text-2xl font-bold">{stats.totalImoveis}</p>
               </div>
-              <Building2 className="h-8 w-8 text-primary" />
+              <Building2 className="h-8 w-8 text-muted-foreground" />
             </div>
-            <Progress value={75} className="h-2" />
-            <p className="text-xs text-muted-foreground mt-2">75% da meta mensal</p>
           </Card>
 
           <Card className="p-6">
-            <div className="flex items-start justify-between mb-4">
+            <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Visualizações</p>
                 <p className="text-2xl font-bold">{stats.views.toLocaleString('pt-BR')}</p>
               </div>
-              <Eye className="h-8 w-8 text-primary" />
+              <Eye className="h-8 w-8 text-muted-foreground" />
             </div>
-            <Progress value={60} className="h-2" />
-            <p className="text-xs text-muted-foreground mt-2">60% da meta mensal</p>
           </Card>
 
           <Card className="p-6">
-            <div className="flex items-start justify-between mb-4">
+            <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Visitas Realizadas</p>
                 <p className="text-2xl font-bold">{stats.visits}</p>
               </div>
-              <Calendar className="h-8 w-8 text-primary" />
+              <Calendar className="h-8 w-8 text-muted-foreground" />
             </div>
-            <Progress value={45} className="h-2" />
-            <p className="text-xs text-muted-foreground mt-2">45% da meta mensal</p>
           </Card>
         </div>
       </div>
