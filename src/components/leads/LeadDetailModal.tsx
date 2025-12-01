@@ -27,6 +27,8 @@ import {
   Trash2,
   User,
   RefreshCw,
+  Save,
+  Loader2,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -57,6 +59,8 @@ export const LeadDetailModal = ({
   const [stageHistory, setStageHistory] = useState<StageHistory[]>([]);
   const [stages, setStages] = useState<PipelineStage[]>([]);
   const [currentStage, setCurrentStage] = useState<PipelineStage | null>(null);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const init = async () => {
@@ -69,6 +73,16 @@ export const LeadDetailModal = ({
     };
     init();
   }, [lead.id]);
+
+  // Track unsaved changes
+  useEffect(() => {
+    const changed =
+      nome !== lead.nome ||
+      telefone !== lead.telefone ||
+      email !== lead.email ||
+      observacoes !== (lead.observacoes || '');
+    setHasUnsavedChanges(changed);
+  }, [nome, telefone, email, observacoes, lead]);
 
   const loadComments = async () => {
     try {
@@ -101,42 +115,33 @@ export const LeadDetailModal = ({
     }
   };
 
-  const handleUpdateNome = async () => {
-    if (nome.trim() === lead.nome) {
-      setEditingTitle(false);
-      return;
-    }
-
+  const handleSaveChanges = async () => {
+    setIsSaving(true);
     try {
-      await leadsService.updateLead(lead.id, { nome: nome.trim() });
-      toast.success('Nome atualizado!');
+      await leadsService.updateLead(lead.id, {
+        nome: nome.trim(),
+        telefone,
+        email,
+        observacoes,
+      });
+      toast.success('Lead atualizado com sucesso!');
+      setHasUnsavedChanges(false);
       setEditingTitle(false);
-      onLeadUpdated();
+      onLeadUpdated(); // Só chama refresh após salvar tudo
     } catch (error) {
-      toast.error('Erro ao atualizar nome');
-      setNome(lead.nome);
+      toast.error('Erro ao salvar alterações');
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleUpdateField = async (field: string, value: any) => {
     try {
       await leadsService.updateLead(lead.id, { [field]: value });
-      toast.success('Lead atualizado!');
-      onLeadUpdated();
+      toast.success('Campo atualizado!');
+      // Não chama onLeadUpdated() para não fechar o modal
     } catch (error) {
-      toast.error('Erro ao atualizar lead');
-    }
-  };
-
-  const handleUpdateObservacoes = async () => {
-    if (observacoes === (lead.observacoes || '')) return;
-
-    try {
-      await leadsService.updateLead(lead.id, { observacoes });
-      toast.success('Observações atualizadas!');
-      onLeadUpdated();
-    } catch (error) {
-      toast.error('Erro ao atualizar observações');
+      toast.error('Erro ao atualizar campo');
     }
   };
 
@@ -144,10 +149,9 @@ export const LeadDetailModal = ({
     try {
       await leadsService.updateLeadStage(lead.id, newStageId);
       toast.success('Estágio atualizado!');
-      onLeadUpdated();
       await loadStageHistory();
       
-      // Update current stage
+      // Update current stage localmente (sem chamar onLeadUpdated)
       const stage = stages.find(s => s.id === newStageId);
       setCurrentStage(stage || null);
     } catch (error) {
@@ -187,9 +191,8 @@ export const LeadDetailModal = ({
                 <Input
                   value={nome}
                   onChange={(e) => setNome(e.target.value)}
-                  onBlur={handleUpdateNome}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleUpdateNome();
+                    if (e.key === 'Enter') setEditingTitle(false);
                     if (e.key === 'Escape') {
                       setNome(lead.nome);
                       setEditingTitle(false);
@@ -203,7 +206,7 @@ export const LeadDetailModal = ({
                   className="text-xl cursor-pointer hover:text-primary transition-colors"
                   onClick={() => setEditingTitle(true)}
                 >
-                  {lead.nome}
+                  {nome}
                 </DialogTitle>
               )}
               
@@ -232,37 +235,34 @@ export const LeadDetailModal = ({
             <div className="col-span-2 space-y-4 overflow-y-auto pr-2">
               {/* Contact Information */}
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-xs text-muted-foreground">Telefone</Label>
-                  <Input
-                    value={telefone}
-                    onChange={(e) => setTelefone(e.target.value)}
-                    onBlur={() => handleUpdateField('telefone', telefone)}
-                    placeholder="Telefone..."
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground">E-mail</Label>
-                  <Input
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    onBlur={() => handleUpdateField('email', email)}
-                    placeholder="E-mail..."
-                  />
-                </div>
+                 <div>
+                   <Label className="text-xs text-muted-foreground">Telefone</Label>
+                   <Input
+                     value={telefone}
+                     onChange={(e) => setTelefone(e.target.value)}
+                     placeholder="Telefone..."
+                   />
+                 </div>
+                 <div>
+                   <Label className="text-xs text-muted-foreground">E-mail</Label>
+                   <Input
+                     value={email}
+                     onChange={(e) => setEmail(e.target.value)}
+                     placeholder="E-mail..."
+                   />
+                 </div>
               </div>
 
-              {/* Observações */}
-              <div>
-                <h3 className="text-sm font-semibold mb-2">Observações</h3>
-                <Textarea
-                  value={observacoes}
-                  onChange={(e) => setObservacoes(e.target.value)}
-                  onBlur={handleUpdateObservacoes}
-                  placeholder="Adicione observações sobre o lead..."
-                  className="min-h-[100px] resize-none"
-                />
-              </div>
+               {/* Observações */}
+               <div>
+                 <h3 className="text-sm font-semibold mb-2">Observações</h3>
+                 <Textarea
+                   value={observacoes}
+                   onChange={(e) => setObservacoes(e.target.value)}
+                   placeholder="Adicione observações sobre o lead..."
+                   className="min-h-[100px] resize-none"
+                 />
+               </div>
 
               <Separator />
 
@@ -460,6 +460,32 @@ export const LeadDetailModal = ({
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Footer com botão de salvar */}
+        <div className="border-t pt-4 mt-4 flex justify-end gap-2">
+          <Button
+            variant="outline"
+            onClick={onClose}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleSaveChanges}
+            disabled={!hasUnsavedChanges || isSaving}
+          >
+            {isSaving ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                Salvando...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4 mr-2" />
+                Salvar Alterações
+              </>
+            )}
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
