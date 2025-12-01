@@ -3,10 +3,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { Imovel, Metrica } from '@/types';
 import { supabaseStorageService } from '@/lib/supabaseStorage';
 import { getCurrentMonth, getMonthName } from '@/lib/dateUtils';
 import { useAuth } from '@/contexts/AuthContext';
+import { AIMetricsImport } from './AIMetricsImport';
 
 interface MetricasTabProps {
   onToast: (message: string, type: 'success' | 'error') => void;
@@ -145,9 +147,16 @@ export const MetricasTab = ({ onToast }: MetricasTabProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-card rounded-xl p-6 shadow-sm border border-border">
-        <h2 className="text-xl font-bold mb-4">Adicionar Métricas</h2>
-        <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <Tabs defaultValue="manual" className="w-full">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="manual">📝 Manual</TabsTrigger>
+          <TabsTrigger value="ai">📸 Importar por IA</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="manual" className="mt-6">
+          <div className="bg-card rounded-xl p-6 shadow-sm border border-border">
+            <h2 className="text-xl font-bold mb-4">Adicionar Métricas</h2>
+            <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div>
             <Label htmlFor="imovel">Imóvel *</Label>
             <Select value={formData.imovelId} onValueChange={(value) => setFormData((prev) => ({ ...prev, imovelId: value }))}>
@@ -217,6 +226,16 @@ export const MetricasTab = ({ onToast }: MetricasTabProps) => {
           </div>
         </form>
       </div>
+        </TabsContent>
+
+        <TabsContent value="ai" className="mt-6">
+          <AIMetricsImport
+            imoveis={imoveis}
+            onSuccess={loadData}
+            onToast={onToast}
+          />
+        </TabsContent>
+      </Tabs>
 
       <div>
         <h2 className="text-xl font-bold mb-4">Histórico de Métricas</h2>
