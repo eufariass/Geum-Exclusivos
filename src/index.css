@@ -12,72 +12,76 @@
   :root {
     /* Base Colors */
     --background: 0 0% 100%;
-    /* Pure White */
-    --foreground: 0 0% 10%;
-    /* Almost Black */
+    --foreground: 220 15% 20%;
 
     /* Card & Surfaces */
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 10%;
+    --card-foreground: 220 15% 20%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 10%;
+    --popover-foreground: 220 15% 20%;
 
-    /* Primary Brand Color (Black) */
-    --primary: 0 0% 0%;
+    /* Primary Brand Color (Azul Escuro) */
+    --primary: 220 80% 30%;
     --primary-foreground: 0 0% 100%;
 
-    /* Secondary (Light Gray) */
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 10%;
+    /* Secondary (Light Blue) */
+    --secondary: 220 60% 96%;
+    --secondary-foreground: 220 80% 30%;
 
     /* Muted Elements */
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 220 20% 96%;
+    --muted-foreground: 220 15% 45%;
 
-    /* Accent Color (Dark Gray - replacing Gold) */
-    --accent: 0 0% 20%;
-    --accent-foreground: 0 0% 98%;
+    /* Accent Color (Light Blue for highlights) */
+    --accent: 220 80% 95%;
+    --accent-foreground: 220 80% 30%;
+
+    /* Success */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
 
     /* Destructive */
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
 
     /* Borders & Inputs */
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 0 0% 10%;
-    /* Black ring focus */
+    --border: 220 20% 90%;
+    --input: 220 20% 90%;
+    --ring: 220 80% 30%;
 
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 0 0% 5%;
+    --background: 220 20% 8%;
     --foreground: 0 0% 98%;
 
-    --card: 0 0% 8%;
+    --card: 220 20% 10%;
     --card-foreground: 0 0% 98%;
-    --popover: 0 0% 8%;
+    --popover: 220 20% 10%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
+    --primary: 220 80% 60%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 0 0% 12%;
+    --secondary: 220 20% 15%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 0 0% 12%;
+    --muted: 220 20% 15%;
     --muted-foreground: 0 0% 60%;
 
-    --accent: 0 0% 80%;
-    --accent-foreground: 0 0% 10%;
+    --accent: 220 80% 25%;
+    --accent-foreground: 0 0% 98%;
 
-    --destructive: 0 62% 30%;
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --destructive: 0 62% 40%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 15%;
-    --input: 0 0% 15%;
-    --ring: 0 0% 80%;
+    --border: 220 20% 20%;
+    --input: 220 20% 20%;
+    --ring: 220 80% 60%;
   }
 }
 
@@ -87,12 +91,11 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
-    font-family: 'Montserrat', sans-serif;
-    /* Body text */
+    @apply bg-secondary text-foreground antialiased;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
 
-  /* Headings - Montserrat for Modern/Standard Feel */
+  /* Headings */
   h1,
   h2,
   h3,
@@ -100,7 +103,7 @@
   h5,
   h6 {
     @apply font-sans font-semibold tracking-tight;
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
 }
 
