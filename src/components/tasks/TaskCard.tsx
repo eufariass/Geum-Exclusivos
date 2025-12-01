@@ -16,6 +16,7 @@ import {
   Building2,
   MoreVertical,
   Clock,
+  GripVertical,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -35,6 +36,7 @@ interface TaskCardProps {
   onComplete?: () => void;
   onDelete?: () => void;
   isDragging?: boolean;
+  dragHandleProps?: any;
 }
 
 const taskTypeIcons: Record<TaskType, any> = {
@@ -92,6 +94,7 @@ export const TaskCard = ({
   onComplete,
   onDelete,
   isDragging = false,
+  dragHandleProps,
 }: TaskCardProps) => {
   const TypeIcon = taskTypeIcons[task.type];
 
@@ -128,11 +131,21 @@ export const TaskCard = ({
       )}
       onClick={onClick}
     >
-      <CardContent className="p-4 space-y-3">
-        {/* Header: Type icon, title, menu */}
+      <CardContent className="p-3 space-y-2.5">
+        {/* Header: Drag handle, type icon, title, menu */}
         <div className="flex items-start gap-2">
+          {/* Drag Handle */}
+          {dragHandleProps && (
+            <div
+              {...dragHandleProps}
+              className="flex-shrink-0 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground transition-colors pt-0.5 -ml-1"
+            >
+              <GripVertical className="h-4 w-4" />
+            </div>
+          )}
+
           <div className="flex-shrink-0 mt-0.5">
-            <div className={cn('p-2 rounded-lg', priorityColors[task.priority])}>
+            <div className={cn('p-1.5 rounded-lg', priorityColors[task.priority])}>
               <TypeIcon className="h-4 w-4" />
             </div>
           </div>
