@@ -13,6 +13,7 @@ export const usePermissions = () => {
   const loadRole = async () => {
     try {
       const userRole = await usersService.getCurrentUserRole();
+      console.log('🔐 Role carregada:', userRole);
       setRole(userRole);
     } catch (error) {
       console.error('Erro ao carregar permissões:', error);
