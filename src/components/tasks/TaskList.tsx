@@ -336,13 +336,13 @@ const TaskColumn = ({
   });
 
   return (
-    <div className="flex-1 min-w-[280px] max-w-[350px] flex flex-col">
+    <div className="flex-1 min-w-[300px] max-w-[400px] flex flex-col bg-muted/30 rounded-xl p-3">
       {/* Column Header */}
-      <div className="flex items-center justify-between mb-3 px-2">
+      <div className="flex items-center justify-between mb-4 px-1">
         <div className="flex items-center gap-2">
-          <div className={cn('w-2 h-2 rounded-full', color)} />
-          <h3 className="font-medium text-sm">{label}</h3>
-          <Badge variant="secondary" className="text-xs h-5">
+          <div className={cn('w-3 h-3 rounded-full', color)} />
+          <h3 className="font-semibold text-sm">{label}</h3>
+          <Badge variant="secondary" className="text-xs px-2">
             {tasks.length}
           </Badge>
         </div>
@@ -352,31 +352,29 @@ const TaskColumn = ({
       <div 
         ref={setNodeRef}
         className={cn(
-          "flex-1 rounded-xl border-2 border-dashed p-3 min-h-[400px] transition-all",
-          isOver ? "border-primary bg-primary/5" : "border-transparent bg-muted/20"
+          "flex-1 rounded-lg min-h-[300px] transition-all p-2",
+          isOver ? "bg-primary/10 ring-2 ring-primary ring-inset" : ""
         )}
       >
         <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
-          <ScrollArea className="h-[calc(100vh-340px)] pr-2">
-            <div className="space-y-2.5">
-              {tasks.length === 0 ? (
-                <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
-                  Nenhuma tarefa
-                </div>
-              ) : (
-                tasks.map((task) => (
-                  <SortableTaskCard
-                    key={task.id}
-                    task={task}
-                    onClick={() => onViewTask(task)}
-                    onEdit={() => onEditTask(task)}
-                    onComplete={() => onCompleteTask(task.id)}
-                    onDelete={() => onDeleteTask(task.id)}
-                  />
-                ))
-              )}
-            </div>
-          </ScrollArea>
+          <div className="flex flex-col gap-3 overflow-y-auto max-h-[calc(100vh-380px)] pr-1">
+            {tasks.length === 0 ? (
+              <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
+                Nenhuma tarefa
+              </div>
+            ) : (
+              tasks.map((task) => (
+                <SortableTaskCard
+                  key={task.id}
+                  task={task}
+                  onClick={() => onViewTask(task)}
+                  onEdit={() => onEditTask(task)}
+                  onComplete={() => onCompleteTask(task.id)}
+                  onDelete={() => onDeleteTask(task.id)}
+                />
+              ))
+            )}
+          </div>
         </SortableContext>
       </div>
     </div>
