@@ -13,30 +13,52 @@ export const usersService = {
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (profilesError) throw profilesError;
+      if (profilesError) {
+        console.error('Erro ao buscar profiles:', profilesError);
+        throw profilesError;
+      }
+
+      console.log('Profiles carregados:', profiles);
 
       // Buscar todas as roles
       const { data: roles, error: rolesError } = await supabase
         .from('user_roles')
         .select('user_id, role');
 
-      if (rolesError) throw rolesError;
+      if (rolesError) {
+        console.error('Erro ao buscar roles:', rolesError);
+        throw rolesError;
+      }
+
+      console.log('Roles carregadas:', roles);
 
       // Mapear roles para cada usuário
       const roleMap = new Map(roles?.map(r => [r.user_id, r.role]) || []);
+      console.log('Role Map:', roleMap);
 
       // Combinar dados
-      const usersWithRoles: UserWithRole[] = profiles?.map(profile => ({
-        id: profile.id,
-        nome_completo: profile.nome_completo,
-        email: profile.email || undefined,
-        avatar_url: profile.avatar_url || undefined,
-        cargo: profile.cargo || undefined,
-        status: (profile.status as 'ativo' | 'inativo') || 'ativo',
-        role: (roleMap.get(profile.id) as UserRole) || 'corretor',
-        created_at: profile.created_at || undefined,
-      })) || [];
+      const usersWithRoles: UserWithRole[] = profiles?.map(profile => {
+        const userRole = roleMap.get(profile.id) as UserRole;
+        console.log(`User ${profile.nome_completo}:`, {
+          id: profile.id,
+          status: profile.status,
+          role: userRole,
+          rawStatus: profile.status,
+        });
+        
+        return {
+          id: profile.id,
+          nome_completo: profile.nome_completo,
+          email: profile.email || undefined,
+          avatar_url: profile.avatar_url || undefined,
+          cargo: profile.cargo || undefined,
+          status: (profile.status as 'ativo' | 'inativo') || 'ativo',
+          role: userRole || 'corretor',
+          created_at: profile.created_at || undefined,
+        };
+      }) || [];
 
+      console.log('Users with roles final:', usersWithRoles);
       return usersWithRoles;
     } catch (error) {
       console.error('Erro ao buscar usuários:', error);
