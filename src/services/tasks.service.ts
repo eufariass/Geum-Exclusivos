@@ -33,7 +33,8 @@ export const tasksService = {
         .from('tasks')
         .select(`
           *,
-          lead:leads(id, nome, telefone)
+          lead:leads(id, nome, telefone),
+          imovel:imoveis(id, codigo, endereco)
         `)
         .order('due_date', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: false });
@@ -59,10 +60,9 @@ export const tasksService = {
         query = query.eq('lead_id', filters.leadId);
       }
 
-      // imovel_id não existe na tabela tasks
-      // if (filters?.imovelId) {
-      //   query = query.eq('imovel_id', filters.imovelId);
-      // }
+      if (filters?.imovelId) {
+        query = query.eq('imovel_id', filters.imovelId);
+      }
 
       if (filters?.assignedTo) {
         query = query.eq('assigned_to', filters.assignedTo);
@@ -80,15 +80,8 @@ export const tasksService = {
 
       if (error) throw error;
 
-      // Mapear dados para incluir type padrão
-      const tasks: Task[] = (data || []).map((task: any) => ({
-        ...task,
-        type: 'other' as const, // Campo não existe na tabela, usar padrão
-        lead: task.lead as any, // Partial Lead
-      }));
-
-      logger.info('Tasks fetched', { count: tasks.length, filters });
-      return tasks;
+      logger.info('Tasks fetched', { count: data?.length || 0, filters });
+      return (data || []) as any as Task[];
     } catch (error) {
       logger.error('Error fetching tasks', error);
       throw new Error('Erro ao buscar tarefas');
@@ -103,13 +96,10 @@ export const tasksService = {
   },
 
   /**
-   * Buscar tarefas por imóvel - DESABILITADO (campo não existe na tabela)
+   * Buscar tarefas por imóvel
    */
   async getTasksByImovel(imovelId: string): Promise<Task[]> {
-    // Campo imovel_id não existe na tabela tasks
-    // Pode ser necessário adicionar à migração futura
-    return [];
-    // return this.getTasks({ imovelId });
+    return this.getTasks({ imovelId });
   },
 
   /**
@@ -121,7 +111,8 @@ export const tasksService = {
         .from('tasks')
         .select(`
           *,
-          lead:leads(id, nome, telefone, email)
+          lead:leads(id, nome, telefone, email),
+          imovel:imoveis(id, codigo, endereco)
         `)
         .eq('id', id)
         .single();
@@ -131,10 +122,8 @@ export const tasksService = {
       logger.info('Task fetched by ID', { id });
       return {
         ...data,
-        type: 'other' as const,
         checklist: [], // Tabela não existe ainda
-        lead: data.lead as any, // Partial Lead
-      } as Task;
+      } as any as Task;
     } catch (error) {
       logger.error('Error fetching task by ID', error);
       return null;
@@ -146,13 +135,10 @@ export const tasksService = {
    */
   async createTask(input: CreateTaskInput): Promise<Task> {
     try {
-      // Remover imovel_id se existir, pois não está na tabela
-      const { imovel_id, ...taskInput } = input as any;
-      
       const { data, error } = await supabase
         .from('tasks')
         .insert({
-          ...taskInput,
+          ...input,
           status: 'pending',
         })
         .select()
@@ -161,10 +147,7 @@ export const tasksService = {
       if (error) throw error;
 
       logger.info('Task created', { taskId: data.id, title: input.title });
-      return {
-        ...data,
-        type: input.type,
-      } as Task;
+      return data as Task;
     } catch (error) {
       logger.error('Error creating task', error);
       throw new Error('Erro ao criar tarefa');
@@ -186,10 +169,7 @@ export const tasksService = {
       if (error) throw error;
 
       logger.info('Task updated', { taskId: id, updates });
-      return {
-        ...data,
-        type: updates.type || 'other' as const,
-      } as Task;
+      return data as Task;
     } catch (error) {
       logger.error('Error updating task', error);
       throw new Error('Erro ao atualizar tarefa');
@@ -214,10 +194,7 @@ export const tasksService = {
       if (error) throw error;
 
       logger.info('Task completed', { taskId: id });
-      return {
-        ...data,
-        type: 'other' as const,
-      } as Task;
+      return data as Task;
     } catch (error) {
       logger.error('Error completing task', error);
       throw new Error('Erro ao completar tarefa');
@@ -254,7 +231,8 @@ export const tasksService = {
         .from('tasks')
         .select(`
           *,
-          lead:leads(id, nome, telefone)
+          lead:leads(id, nome, telefone),
+          imovel:imoveis(id, codigo, endereco)
         `)
         .lt('due_date', now)
         .in('status', ['pending', 'in_progress'])
@@ -262,14 +240,8 @@ export const tasksService = {
 
       if (error) throw error;
 
-      const tasks: Task[] = (data || []).map((task: any) => ({
-        ...task,
-        type: 'other' as const,
-        lead: task.lead as any,
-      }));
-
-      logger.info('Overdue tasks fetched', { count: tasks.length });
-      return tasks;
+      logger.info('Overdue tasks fetched', { count: data?.length || 0 });
+      return (data || []) as any as Task[];
     } catch (error) {
       logger.error('Error fetching overdue tasks', error);
       throw new Error('Erro ao buscar tarefas vencidas');
