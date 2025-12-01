@@ -213,4 +213,30 @@ export const leadsService = {
   async updateLeadStatus(id: string, status: Lead['status']): Promise<Lead> {
     return this.updateLead(id, { status });
   },
+
+  /**
+   * Update lead stage with history tracking
+   */
+  async updateLeadStage(leadId: string, newStageId: string): Promise<Lead> {
+    try {
+      // Get current lead to track from_stage
+      const currentLead = await this.getLeadById(leadId);
+      
+      // Update lead
+      const updatedLead = await this.updateLead(leadId, { stage_id: newStageId });
+      
+      // Record stage history
+      await supabase.from('lead_stage_history').insert({
+        lead_id: leadId,
+        from_stage_id: currentLead.stage_id,
+        to_stage_id: newStageId,
+      });
+      
+      logger.info('Lead stage updated with history', { leadId, newStageId });
+      return updatedLead;
+    } catch (error) {
+      logger.error('Error updating lead stage', { leadId, newStageId, error });
+      throw error;
+    }
+  },
 };

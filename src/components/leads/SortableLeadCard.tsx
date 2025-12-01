@@ -5,9 +5,10 @@ import { PipelineLeadCard } from './PipelineLeadCard';
 
 interface SortableLeadCardProps {
   lead: Lead;
+  onClick?: (lead: Lead) => void;
 }
 
-export const SortableLeadCard = ({ lead }: SortableLeadCardProps) => {
+export const SortableLeadCard = ({ lead, onClick }: SortableLeadCardProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: lead.id,
   });
@@ -19,7 +20,19 @@ export const SortableLeadCard = ({ lead }: SortableLeadCardProps) => {
   };
 
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      {...attributes} 
+      {...listeners}
+      onClick={(e) => {
+        // Só abre o modal se não estiver arrastando
+        if (!isDragging) {
+          e.stopPropagation();
+          onClick?.(lead);
+        }
+      }}
+    >
       <PipelineLeadCard lead={lead} isDragging={isDragging} />
     </div>
   );
