@@ -74,6 +74,10 @@ export const DashboardTab = () => {
       return metricas.filter((m) => m.mes === month).reduce((sum, m) => sum + m.visitas_realizadas, 0);
     });
 
+    const viewsData = last6Months.map((month) => {
+      return metricas.filter((m) => m.mes === month).reduce((sum, m) => sum + m.visualizacoes, 0);
+    });
+
     // Create gradient for the area chart
     const createGradient = (ctx: CanvasRenderingContext2D, color: string) => {
       const gradient = ctx.createLinearGradient(0, 0, 0, 320);
@@ -100,6 +104,26 @@ export const DashboardTab = () => {
           pointHoverRadius: 6,
           pointBackgroundColor: '#fff',
           pointBorderColor: 'rgb(139, 92, 246)',
+          pointBorderWidth: 2,
+        },
+        {
+          label: 'Visualizações',
+          data: viewsData,
+          borderColor: 'rgb(34, 197, 94)',
+          backgroundColor: (context: any) => {
+            const ctx = context.chart.ctx;
+            const gradient = ctx.createLinearGradient(0, 0, 0, 320);
+            gradient.addColorStop(0, 'rgba(34, 197, 94, 0.4)');
+            gradient.addColorStop(1, 'rgba(34, 197, 94, 0)');
+            return gradient;
+          },
+          fill: true,
+          tension: 0.4,
+          borderWidth: 2.5,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: 'rgb(34, 197, 94)',
           pointBorderWidth: 2,
         },
         {
@@ -193,7 +217,7 @@ export const DashboardTab = () => {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-lg font-semibold">Evolução - Últimos 6 Meses</h2>
-            <p className="text-sm text-muted-foreground mt-1">Acompanhamento de leads e visitas</p>
+            <p className="text-sm text-muted-foreground mt-1">Acompanhamento de leads, visualizações e visitas</p>
           </div>
         </div>
         <div className="h-[320px]">
