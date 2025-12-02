@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -7,6 +7,8 @@ import type { Imovel } from '@/types';
 import { supabaseStorageService } from '@/lib/supabaseStorage';
 import { formatCurrency } from '@/lib/dateUtils';
 import { Building2, MapPin, User, DollarSign, Pencil, Trash2, Home } from 'lucide-react';
+import metaLogo from '@/assets/meta-logo.png';
+import googleAdsLogo from '@/assets/google-ads-logo.png';
 
 interface ImoveisTabProps {
   onToast: (message: string, type: 'success' | 'error') => void;
@@ -121,14 +123,26 @@ export const ImoveisTab = ({ onToast }: ImoveisTabProps) => {
                 <div className="absolute top-3 left-3 px-3 py-1 bg-background/90 backdrop-blur-sm rounded-full text-xs font-medium">
                   {imovel.tipo}
                 </div>
-                <Link 
-                  to={`/${imovel.codigo}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="absolute top-3 right-3 px-3 py-1 bg-primary text-primary-foreground rounded-full text-xs font-bold hover:bg-primary/90 transition-colors cursor-pointer"
-                >
-                  {imovel.codigo}
-                </Link>
+                <div className="absolute top-3 right-3 flex items-center gap-1.5">
+                  {imovel.plataformas_anuncio?.includes('Meta Ads') && (
+                    <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-sm">
+                      <img src={metaLogo} alt="Meta Ads" className="w-4 h-4 object-contain" />
+                    </div>
+                  )}
+                  {imovel.plataformas_anuncio?.includes('Google Ads') && (
+                    <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-sm">
+                      <img src={googleAdsLogo} alt="Google Ads" className="w-4 h-4 object-contain" />
+                    </div>
+                  )}
+                  <Link 
+                    to={`/${imovel.codigo}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1 bg-primary text-primary-foreground rounded-full text-xs font-bold hover:bg-primary/90 transition-colors cursor-pointer"
+                  >
+                    {imovel.codigo}
+                  </Link>
+                </div>
               </div>
 
               <div className="p-4 space-y-3">
