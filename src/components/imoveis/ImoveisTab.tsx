@@ -124,12 +124,12 @@ export const ImoveisTab = ({ onToast }: ImoveisTabProps) => {
                   {imovel.tipo}
                 </div>
                 <div className="absolute top-3 right-3 flex items-center gap-1.5">
-                  {imovel.plataformas_anuncio?.includes('Meta Ads') && (
+                  {imovel.plataformas_anuncio?.includes('Meta') && (
                     <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-sm">
                       <img src={metaLogo} alt="Meta Ads" className="w-4 h-4 object-contain" />
                     </div>
                   )}
-                  {imovel.plataformas_anuncio?.includes('Google Ads') && (
+                  {imovel.plataformas_anuncio?.includes('Google') && (
                     <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-sm">
                       <img src={googleAdsLogo} alt="Google Ads" className="w-4 h-4 object-contain" />
                     </div>
