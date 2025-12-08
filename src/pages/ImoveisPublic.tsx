@@ -12,7 +12,7 @@ const ImoveisPublic = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    document.title = 'Exclusividades Geum.';
+    document.title = 'Exclusividade Geum';
   }, []);
 
   useEffect(() => {
@@ -71,7 +71,7 @@ const ImoveisPublic = () => {
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
           <div className="space-y-4 max-w-2xl">
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-primary tracking-tight">
-              Exclusividades Geum
+              Exclusividade Geum
             </h1>
             <p className="text-lg text-muted-foreground font-normal max-w-xl leading-relaxed">
               Uma curadoria de imóveis selecionados pela Imobiliária Geum.
