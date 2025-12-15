@@ -182,7 +182,9 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
 
     if (!formData.codigo.trim()) newErrors.codigo = 'Código é obrigatório';
     if (!formData.cliente.trim()) newErrors.cliente = 'Cliente é obrigatório';
-    if (!formData.endereco.trim()) newErrors.endereco = 'Endereço é obrigatório';
+    if (!formData.cep.trim()) newErrors.cep = 'CEP é obrigatório';
+    if (!formData.rua.trim()) newErrors.rua = 'Rua é obrigatória';
+    if (!formData.numero.trim()) newErrors.numero = 'Número é obrigatório';
 
     // Check unique codigo
     if (formData.codigo.trim()) {
@@ -391,19 +393,23 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
               placeholder="00000-000"
               maxLength={9}
               disabled={loadingCep}
+              className={errors.cep ? 'border-destructive' : ''}
             />
+            {errors.cep && <p className="text-xs text-destructive mt-1">{errors.cep}</p>}
             {loadingCep && <p className="text-xs text-muted-foreground mt-1">Buscando endereço...</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2 sm:col-span-1">
-              <Label htmlFor="rua">Rua/Avenida</Label>
+              <Label htmlFor="rua">Rua/Avenida *</Label>
               <Input
                 id="rua"
                 value={formData.rua}
                 onChange={(e) => setFormData((prev) => ({ ...prev, rua: e.target.value }))}
                 placeholder="Preenchido automaticamente pelo CEP"
+                className={errors.rua ? 'border-destructive' : ''}
               />
+              {errors.rua && <p className="text-xs text-destructive mt-1">{errors.rua}</p>}
             </div>
 
             <div className="col-span-2 sm:col-span-1">
@@ -413,7 +419,9 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
                 value={formData.numero}
                 onChange={(e) => setFormData((prev) => ({ ...prev, numero: e.target.value }))}
                 placeholder="Ex: 123, S/N"
+                className={errors.numero ? 'border-destructive' : ''}
               />
+              {errors.numero && <p className="text-xs text-destructive mt-1">{errors.numero}</p>}
             </div>
           </div>
 
