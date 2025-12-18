@@ -63,7 +63,7 @@ const ImoveisPublic = () => {
             <a href="https://geumimob.com" target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Home</a>
             <a href="#" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Imóveis</a>
             <a href="#" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Sobre</a>
-            <a href="#" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Contato</a>
+            <a href="https://wa.link/sgqkpd" target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Contato</a>
           </nav>
         </div>
       </header>
