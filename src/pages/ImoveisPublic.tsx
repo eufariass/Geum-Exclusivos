@@ -46,7 +46,7 @@ const ImoveisPublic = () => {
       {/* Header */}
       <header className="border-b border-border/40 bg-background/95 backdrop-blur-sm sticky top-0 z-50 transition-all duration-300">
         <div className="container mx-auto px-6 py-5 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <a href="https://geumimob.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
             <img
               src={logoBlack}
               alt="Imobiliária Geum"
@@ -57,7 +57,7 @@ const ImoveisPublic = () => {
               alt="Imobiliária Geum"
               className="h-10 hidden dark:block"
             />
-          </div>
+          </a>
 
           <nav className="hidden md:flex items-center gap-8">
             <a href="#" className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">Imóveis</a>
