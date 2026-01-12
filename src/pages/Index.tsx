@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { TopHeader } from '@/components/TopHeader';
+import { PageTransition } from '@/components/PageTransition';
 import { AppSidebar } from '@/components/AppSidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { DashboardTab } from '@/components/dashboard/DashboardTab';
@@ -28,25 +29,51 @@ const Index = () => {
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
         <AppSidebar activeTab={activeTab} onTabChange={setActiveTab} />
-        
+
         <div className="flex-1 flex flex-col">
           <TopHeader />
-          
+
           <main className="flex-1 p-6 overflow-auto">
-            {activeTab === 'dashboard' && <DashboardTab key={refreshKey} />}
+            {activeTab === 'dashboard' && (
+              <PageTransition>
+                <DashboardTab key={refreshKey} />
+              </PageTransition>
+            )}
             {activeTab === 'imoveis' && (
-              <ImoveisTab onToast={showToast} key={refreshKey} />
+              <PageTransition>
+                <ImoveisTab onToast={showToast} key={refreshKey} />
+              </PageTransition>
             )}
             {activeTab === 'leads' && (
-              <LeadsTab onToast={showToast} key={refreshKey} />
+              <PageTransition>
+                <LeadsTab onToast={showToast} key={refreshKey} />
+              </PageTransition>
             )}
-            {activeTab === 'tasks' && <TasksTab key={refreshKey} />}
+            {activeTab === 'tasks' && (
+              <PageTransition>
+                <TasksTab key={refreshKey} />
+              </PageTransition>
+            )}
             {activeTab === 'metricas' && (
-              <MetricasTab onToast={showToast} key={refreshKey} />
+              <PageTransition>
+                <MetricasTab onToast={showToast} key={refreshKey} />
+              </PageTransition>
             )}
-            {activeTab === 'relatorios' && <RelatoriosTab showToast={showToast} key={refreshKey} />}
-            {activeTab === 'chat-ia' && <ChatIATab key={refreshKey} />}
-            {activeTab === 'usuarios' && isAdmin && <UsuariosTab key={refreshKey} />}
+            {activeTab === 'relatorios' && (
+              <PageTransition>
+                <RelatoriosTab showToast={showToast} key={refreshKey} />
+              </PageTransition>
+            )}
+            {activeTab === 'chat-ia' && (
+              <PageTransition>
+                <ChatIATab key={refreshKey} />
+              </PageTransition>
+            )}
+            {activeTab === 'usuarios' && isAdmin && (
+              <PageTransition>
+                <UsuariosTab key={refreshKey} />
+              </PageTransition>
+            )}
           </main>
         </div>
 

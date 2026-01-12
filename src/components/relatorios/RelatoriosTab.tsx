@@ -19,9 +19,19 @@ import { supabaseStorageService } from '@/lib/supabaseStorage';
 import { getCurrentMonth, getMonthName, getPreviousMonth, getLast6Months, formatDate } from '@/lib/dateUtils';
 import type { Imovel, Metrica } from '@/types';
 import logoBlack from '@/assets/logo-geum-black.png';
-import leadsIcon from '@/assets/leads-icon.jpg';
-import visualizacoesIcon from '@/assets/visualizacoes-icon.jpg';
-import visitasIcon from '@/assets/visitas-icon.jpg';
+import { motion } from 'framer-motion';
+import {
+  Users,
+  Eye,
+  CalendarCheck,
+  ArrowUp,
+  ArrowDown,
+  Minus,
+  FileText,
+  FileX,
+  TrendingUp,
+  Percent
+} from 'lucide-react';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -84,12 +94,20 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
     const current = currentMetrics || { leads: 0, visualizacoes: 0, visitas_realizadas: 0 };
     const previous = previousMetrics || { leads: 0, visualizacoes: 0, visitas_realizadas: 0 };
 
+    const conversionRate = current.visualizacoes > 0 ? (current.leads / current.visualizacoes) * 100 : 0;
+    const previousConversionRate = previous.visualizacoes > 0 ? (previous.leads / previous.visualizacoes) * 100 : 0;
+
+    const visitsRatio = current.leads > 0 ? (current.visitas_realizadas / current.leads) * 100 : 0;
+    const previousVisitsRatio = previous.leads > 0 ? (previous.visitas_realizadas / previous.leads) * 100 : 0;
+
     return {
       imovel: selectedImovel,
       mes: selectedMes,
       leads: { value: current.leads, trend: getTrend(current.leads, previous.leads) },
       visualizacoes: { value: current.visualizacoes, trend: getTrend(current.visualizacoes, previous.visualizacoes) },
       visitas: { value: current.visitas_realizadas, trend: getTrend(current.visitas_realizadas, previous.visitas_realizadas) },
+      conversion: { value: conversionRate.toFixed(1), trend: getTrend(conversionRate, previousConversionRate) },
+      visitsRatio: { value: visitsRatio.toFixed(1), trend: getTrend(visitsRatio, previousVisitsRatio) },
     };
   }, [selectedImovel, selectedImovelId, selectedMes, metricas]);
 
@@ -157,7 +175,7 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
 
     try {
       const element = reportRef.current;
-      const canvas = await html2canvas(element, { 
+      const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
         allowTaint: true,
@@ -255,7 +273,14 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
       </div>
 
       {showReport && reportData && (
-        <div ref={reportRef} className="bg-white rounded-2xl shadow-xl overflow-hidden" id="report-content">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          ref={reportRef}
+          className="bg-white rounded-2xl shadow-xl overflow-hidden"
+          id="report-content"
+        >
           {/* Header com gradiente azul */}
           <div className="bg-gradient-to-r from-[#325df9] to-[#1e3a8a] p-8 text-white">
             <div className="flex items-center justify-between mb-6">
@@ -312,22 +337,21 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
                 <div className="absolute top-0 right-0 w-24 h-24 bg-[#325df9]/5 rounded-full -mr-12 -mt-12"></div>
                 <div className="relative">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 flex items-center justify-center">
-                      <img src={leadsIcon} alt="Leads" className="w-10 h-10 object-contain" />
+                    <div className="w-12 h-12 flex items-center justify-center bg-blue-100 rounded-lg">
+                      <Users className="w-6 h-6 text-blue-600" />
                     </div>
                     <span
-                      className={`text-xs font-bold px-3 py-1.5 rounded-full ${
-                        reportData.leads.trend.direction === 'up'
-                          ? 'bg-[#325df9]/10 text-[#325df9]'
-                          : reportData.leads.trend.direction === 'down'
+                      className={`flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full ${reportData.leads.trend.direction === 'up'
+                        ? 'bg-[#325df9]/10 text-[#325df9]'
+                        : reportData.leads.trend.direction === 'down'
                           ? 'bg-red-50 text-red-600'
                           : 'bg-gray-100 text-gray-600'
-                      }`}
+                        }`}
                     >
-                      {reportData.leads.trend.direction === 'up' && '↑'}
-                      {reportData.leads.trend.direction === 'down' && '↓'}
-                      {reportData.leads.trend.direction === 'neutral' && '→'}
-                      {reportData.leads.trend.direction === 'new' && '↑'}
+                      {reportData.leads.trend.direction === 'up' && <ArrowUp className="w-3 h-3" />}
+                      {reportData.leads.trend.direction === 'down' && <ArrowDown className="w-3 h-3" />}
+                      {reportData.leads.trend.direction === 'neutral' && <Minus className="w-3 h-3" />}
+                      {reportData.leads.trend.direction === 'new' && <ArrowUp className="w-3 h-3" />}
                       {reportData.leads.trend.direction === 'new' ? ' Novo' : ` ${reportData.leads.trend.value}%`}
                     </span>
                   </div>
@@ -340,22 +364,21 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
                 <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-full -mr-12 -mt-12"></div>
                 <div className="relative">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 flex items-center justify-center">
-                      <img src={visualizacoesIcon} alt="Visualizações" className="w-10 h-10 object-contain" />
+                    <div className="w-12 h-12 flex items-center justify-center bg-purple-100 rounded-lg">
+                      <Eye className="w-6 h-6 text-purple-600" />
                     </div>
                     <span
-                      className={`text-xs font-bold px-3 py-1.5 rounded-full ${
-                        reportData.visualizacoes.trend.direction === 'up'
-                          ? 'bg-purple-50 text-purple-600'
-                          : reportData.visualizacoes.trend.direction === 'down'
+                      className={`flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full ${reportData.visualizacoes.trend.direction === 'up'
+                        ? 'bg-purple-50 text-purple-600'
+                        : reportData.visualizacoes.trend.direction === 'down'
                           ? 'bg-red-50 text-red-600'
                           : 'bg-gray-100 text-gray-600'
-                      }`}
+                        }`}
                     >
-                      {reportData.visualizacoes.trend.direction === 'up' && '↑'}
-                      {reportData.visualizacoes.trend.direction === 'down' && '↓'}
-                      {reportData.visualizacoes.trend.direction === 'neutral' && '→'}
-                      {reportData.visualizacoes.trend.direction === 'new' && '↑'}
+                      {reportData.visualizacoes.trend.direction === 'up' && <ArrowUp className="w-3 h-3" />}
+                      {reportData.visualizacoes.trend.direction === 'down' && <ArrowDown className="w-3 h-3" />}
+                      {reportData.visualizacoes.trend.direction === 'neutral' && <Minus className="w-3 h-3" />}
+                      {reportData.visualizacoes.trend.direction === 'new' && <ArrowUp className="w-3 h-3" />}
                       {reportData.visualizacoes.trend.direction === 'new' ? ' Novo' : ` ${reportData.visualizacoes.trend.value}%`}
                     </span>
                   </div>
@@ -368,27 +391,83 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
                 <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/5 rounded-full -mr-12 -mt-12"></div>
                 <div className="relative">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 flex items-center justify-center">
-                      <img src={visitasIcon} alt="Visitas" className="w-10 h-10 object-contain" />
+                    <div className="w-12 h-12 flex items-center justify-center bg-orange-100 rounded-lg">
+                      <CalendarCheck className="w-6 h-6 text-orange-600" />
                     </div>
                     <span
-                      className={`text-xs font-bold px-3 py-1.5 rounded-full ${
-                        reportData.visitas.trend.direction === 'up'
-                          ? 'bg-orange-50 text-orange-600'
-                          : reportData.visitas.trend.direction === 'down'
+                      className={`flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full ${reportData.visitas.trend.direction === 'up'
+                        ? 'bg-orange-50 text-orange-600'
+                        : reportData.visitas.trend.direction === 'down'
                           ? 'bg-red-50 text-red-600'
                           : 'bg-gray-100 text-gray-600'
-                      }`}
+                        }`}
                     >
-                      {reportData.visitas.trend.direction === 'up' && '↑'}
-                      {reportData.visitas.trend.direction === 'down' && '↓'}
-                      {reportData.visitas.trend.direction === 'neutral' && '→'}
-                      {reportData.visitas.trend.direction === 'new' && '↑'}
+                      {reportData.visitas.trend.direction === 'up' && <ArrowUp className="w-3 h-3" />}
+                      {reportData.visitas.trend.direction === 'down' && <ArrowDown className="w-3 h-3" />}
+                      {reportData.visitas.trend.direction === 'neutral' && <Minus className="w-3 h-3" />}
+                      {reportData.visitas.trend.direction === 'new' && <ArrowUp className="w-3 h-3" />}
                       {reportData.visitas.trend.direction === 'new' ? ' Novo' : ` ${reportData.visitas.trend.value}%`}
                     </span>
                   </div>
                   <p className="text-xs text-gray-500 font-medium mb-1">Visitas Realizadas</p>
                   <p className="text-3xl font-bold text-black">{reportData.visitas.value}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Novos Cards de Métricas (Taxa de Conversão) */}
+            <div className="grid grid-cols-2 gap-6 mb-8">
+              <div className="relative overflow-hidden rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-green-500/5 rounded-full -mr-12 -mt-12"></div>
+                <div className="relative">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-12 h-12 flex items-center justify-center bg-green-100 rounded-lg">
+                      <Percent className="w-6 h-6 text-green-600" />
+                    </div>
+                    <span
+                      className={`flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full ${reportData.conversion.trend.direction === 'up'
+                        ? 'bg-green-50 text-green-600'
+                        : reportData.conversion.trend.direction === 'down'
+                          ? 'bg-red-50 text-red-600'
+                          : 'bg-gray-100 text-gray-600'
+                        }`}
+                    >
+                      {reportData.conversion.trend.direction === 'up' && <ArrowUp className="w-3 h-3" />}
+                      {reportData.conversion.trend.direction === 'down' && <ArrowDown className="w-3 h-3" />}
+                      {reportData.conversion.trend.direction === 'neutral' && <Minus className="w-3 h-3" />}
+                      {reportData.conversion.trend.direction === 'new' && <ArrowUp className="w-3 h-3" />}
+                      {reportData.conversion.trend.direction === 'new' ? ' Novo' : ` ${reportData.conversion.trend.value}%`}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 font-medium mb-1">Conversão (Leads/Visualizações)</p>
+                  <p className="text-3xl font-bold text-black">{reportData.conversion.value}%</p>
+                </div>
+              </div>
+
+              <div className="relative overflow-hidden rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 rounded-full -mr-12 -mt-12"></div>
+                <div className="relative">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-12 h-12 flex items-center justify-center bg-cyan-100 rounded-lg">
+                      <TrendingUp className="w-6 h-6 text-cyan-600" />
+                    </div>
+                    <span
+                      className={`flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full ${reportData.visitsRatio.trend.direction === 'up'
+                        ? 'bg-cyan-50 text-cyan-600'
+                        : reportData.visitsRatio.trend.direction === 'down'
+                          ? 'bg-red-50 text-red-600'
+                          : 'bg-gray-100 text-gray-600'
+                        }`}
+                    >
+                      {reportData.visitsRatio.trend.direction === 'up' && <ArrowUp className="w-3 h-3" />}
+                      {reportData.visitsRatio.trend.direction === 'down' && <ArrowDown className="w-3 h-3" />}
+                      {reportData.visitsRatio.trend.direction === 'neutral' && <Minus className="w-3 h-3" />}
+                      {reportData.visitsRatio.trend.direction === 'new' && <ArrowUp className="w-3 h-3" />}
+                      {reportData.visitsRatio.trend.direction === 'new' ? ' Novo' : ` ${reportData.visitsRatio.trend.value}%`}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 font-medium mb-1">Conversão (Visitas/Leads)</p>
+                  <p className="text-3xl font-bold text-black">{reportData.visitsRatio.value}%</p>
                 </div>
               </div>
             </div>
@@ -410,7 +489,7 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
                           legend: { display: false },
                         },
                         scales: {
-                          y: { 
+                          y: {
                             beginAtZero: true,
                             grid: {
                               color: 'rgba(0, 0, 0, 0.05)',
@@ -443,7 +522,7 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
                           legend: { display: false },
                         },
                         scales: {
-                          y: { 
+                          y: {
                             beginAtZero: true,
                             grid: {
                               color: 'rgba(0, 0, 0, 0.05)',
@@ -478,12 +557,14 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
               Relatório gerado em {formatDate(new Date())} | <span className="font-semibold">Imobiliária Geum</span>
             </p>
           </div>
-        </div>
+        </motion.div>
       )}
 
       {showReport && !reportData && (
         <div className="bg-card rounded-xl p-12 text-center shadow-sm border border-border">
-          <p className="text-4xl mb-2">📄</p>
+          <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+            <FileX className="h-8 w-8 text-muted-foreground" />
+          </div>
           <p className="text-muted-foreground">Imóvel não encontrado</p>
         </div>
       )}
