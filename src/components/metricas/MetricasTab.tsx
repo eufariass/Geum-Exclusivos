@@ -24,9 +24,37 @@ export const MetricasTab = ({ onToast }: MetricasTabProps) => {
     imovelId: '',
     mes: getCurrentMonth(),
     leads: '',
+    leads_portais: '',
+    leads_meta: '',
+    leads_google: '',
     visualizacoes: '',
+    visualizacoes_portais: '',
+    visualizacoes_meta: '',
+    visualizacoes_google: '',
     visitasRealizadas: '',
   });
+
+  // Auto-calculate totals when granular data changes
+  useEffect(() => {
+    const lPortais = parseInt(formData.leads_portais) || 0;
+    const lMeta = parseInt(formData.leads_meta) || 0;
+    const lGoogle = parseInt(formData.leads_google) || 0;
+    const totalLeads = lPortais + lMeta + lGoogle;
+
+    const vPortais = parseInt(formData.visualizacoes_portais) || 0;
+    const vMeta = parseInt(formData.visualizacoes_meta) || 0;
+    const vGoogle = parseInt(formData.visualizacoes_google) || 0;
+    const totalViews = vPortais + vMeta + vGoogle;
+
+    if (lPortais > 0 || lMeta > 0 || lGoogle > 0) {
+      setFormData(prev => ({ ...prev, leads: totalLeads.toString() }));
+    }
+
+    if (vPortais > 0 || vMeta > 0 || vGoogle > 0) {
+      setFormData(prev => ({ ...prev, visualizacoes: totalViews.toString() }));
+    }
+  }, [formData.leads_portais, formData.leads_meta, formData.leads_google,
+  formData.visualizacoes_portais, formData.visualizacoes_meta, formData.visualizacoes_google]);
 
   useEffect(() => {
     loadData();
@@ -63,7 +91,15 @@ export const MetricasTab = ({ onToast }: MetricasTabProps) => {
 
     try {
       const leads = parseInt(formData.leads) || 0;
+      const leads_portais = parseInt(formData.leads_portais) || 0;
+      const leads_meta = parseInt(formData.leads_meta) || 0;
+      const leads_google = parseInt(formData.leads_google) || 0;
+
       const visualizacoes = parseInt(formData.visualizacoes) || 0;
+      const visualizacoes_portais = parseInt(formData.visualizacoes_portais) || 0;
+      const visualizacoes_meta = parseInt(formData.visualizacoes_meta) || 0;
+      const visualizacoes_google = parseInt(formData.visualizacoes_google) || 0;
+
       const visitas_realizadas = parseInt(formData.visitasRealizadas) || 0;
 
       console.log('Salvando métrica com user:', user.id);
@@ -74,7 +110,13 @@ export const MetricasTab = ({ onToast }: MetricasTabProps) => {
         if (window.confirm('Já existe uma métrica para este imóvel neste mês. Deseja substituir?')) {
           await supabaseStorageService.updateMetrica(formData.imovelId, formData.mes, {
             leads,
+            leads_portais,
+            leads_meta,
+            leads_google,
             visualizacoes,
+            visualizacoes_portais,
+            visualizacoes_meta,
+            visualizacoes_google,
             visitas_realizadas,
             data_registro: new Date().toISOString(),
             updated_by: user.id,
@@ -88,7 +130,13 @@ export const MetricasTab = ({ onToast }: MetricasTabProps) => {
           imovel_id: formData.imovelId,
           mes: formData.mes,
           leads,
+          leads_portais,
+          leads_meta,
+          leads_google,
           visualizacoes,
+          visualizacoes_portais,
+          visualizacoes_meta,
+          visualizacoes_google,
           visitas_realizadas,
           data_registro: new Date().toISOString(),
           created_by: user.id,
@@ -102,7 +150,13 @@ export const MetricasTab = ({ onToast }: MetricasTabProps) => {
         imovelId: '',
         mes: getCurrentMonth(),
         leads: '',
+        leads_portais: '',
+        leads_meta: '',
+        leads_google: '',
         visualizacoes: '',
+        visualizacoes_portais: '',
+        visualizacoes_meta: '',
+        visualizacoes_google: '',
         visitasRealizadas: '',
       });
     } catch (error) {
@@ -157,75 +211,159 @@ export const MetricasTab = ({ onToast }: MetricasTabProps) => {
           <div className="bg-card rounded-xl p-6 shadow-sm border border-border">
             <h2 className="text-xl font-bold mb-4">Adicionar Métricas</h2>
             <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div>
-            <Label htmlFor="imovel">Imóvel *</Label>
-            <Select value={formData.imovelId} onValueChange={(value) => setFormData((prev) => ({ ...prev, imovelId: value }))}>
-              <SelectTrigger id="imovel">
-                <SelectValue placeholder="Selecione..." />
-              </SelectTrigger>
-              <SelectContent>
-                {imoveis.map((imovel) => (
-                  <SelectItem key={imovel.id} value={imovel.id}>
-                    {imovel.codigo} - {imovel.endereco}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+              <div>
+                <Label htmlFor="imovel">Imóvel *</Label>
+                <Select value={formData.imovelId} onValueChange={(value) => setFormData((prev) => ({ ...prev, imovelId: value }))}>
+                  <SelectTrigger id="imovel">
+                    <SelectValue placeholder="Selecione..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {imoveis.map((imovel) => (
+                      <SelectItem key={imovel.id} value={imovel.id}>
+                        {imovel.codigo} - {imovel.endereco}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <div>
-            <Label htmlFor="mes">Mês *</Label>
-            <Input
-              id="mes"
-              type="month"
-              value={formData.mes}
-              onChange={(e) => setFormData((prev) => ({ ...prev, mes: e.target.value }))}
-            />
-          </div>
+              <div>
+                <Label htmlFor="mes">Mês *</Label>
+                <Input
+                  id="mes"
+                  type="month"
+                  value={formData.mes}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, mes: e.target.value }))}
+                />
+              </div>
 
-          <div>
-            <Label htmlFor="leads">Leads</Label>
-            <Input
-              id="leads"
-              type="number"
-              min="0"
-              value={formData.leads}
-              onChange={(e) => setFormData((prev) => ({ ...prev, leads: e.target.value }))}
-              placeholder="0"
-            />
-          </div>
+              <div className="space-y-4 border p-4 rounded-lg bg-gray-50/50">
+                <h3 className="font-semibold text-sm text-gray-700">Funil de Leads</h3>
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <Label htmlFor="leads_portais" className="text-xs">Portais</Label>
+                    <Input
+                      id="leads_portais"
+                      type="number"
+                      min="0"
+                      value={formData.leads_portais}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, leads_portais: e.target.value }))}
+                      placeholder="0"
+                      className="h-8"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="leads_meta" className="text-xs">Meta Ads</Label>
+                    <Input
+                      id="leads_meta"
+                      type="number"
+                      min="0"
+                      value={formData.leads_meta}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, leads_meta: e.target.value }))}
+                      placeholder="0"
+                      className="h-8"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="leads_google" className="text-xs">Google</Label>
+                    <Input
+                      id="leads_google"
+                      type="number"
+                      min="0"
+                      value={formData.leads_google}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, leads_google: e.target.value }))}
+                      placeholder="0"
+                      className="h-8"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="leads">Total de Leads (Auto)</Label>
+                  <Input
+                    id="leads"
+                    type="number"
+                    min="0"
+                    value={formData.leads}
+                    readOnly
+                    className="bg-gray-100"
+                    placeholder="0"
+                  />
+                </div>
+              </div>
 
-          <div>
-            <Label htmlFor="visualizacoes">Visualizações</Label>
-            <Input
-              id="visualizacoes"
-              type="number"
-              min="0"
-              value={formData.visualizacoes}
-              onChange={(e) => setFormData((prev) => ({ ...prev, visualizacoes: e.target.value }))}
-              placeholder="0"
-            />
-          </div>
+              <div className="space-y-4 border p-4 rounded-lg bg-gray-50/50">
+                <h3 className="font-semibold text-sm text-gray-700">Funil de Visualizações</h3>
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <Label htmlFor="visualizacoes_portais" className="text-xs">Portais</Label>
+                    <Input
+                      id="visualizacoes_portais"
+                      type="number"
+                      min="0"
+                      value={formData.visualizacoes_portais}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, visualizacoes_portais: e.target.value }))}
+                      placeholder="0"
+                      className="h-8"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="visualizacoes_meta" className="text-xs">Meta Ads</Label>
+                    <Input
+                      id="visualizacoes_meta"
+                      type="number"
+                      min="0"
+                      value={formData.visualizacoes_meta}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, visualizacoes_meta: e.target.value }))}
+                      placeholder="0"
+                      className="h-8"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="visualizacoes_google" className="text-xs">Google</Label>
+                    <Input
+                      id="visualizacoes_google"
+                      type="number"
+                      min="0"
+                      value={formData.visualizacoes_google}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, visualizacoes_google: e.target.value }))}
+                      placeholder="0"
+                      className="h-8"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="visualizacoes">Total de Visualizações (Auto)</Label>
+                  <Input
+                    id="visualizacoes"
+                    type="number"
+                    min="0"
+                    value={formData.visualizacoes}
+                    readOnly
+                    className="bg-gray-100"
+                    placeholder="0"
+                  />
+                </div>
+              </div>
 
-          <div>
-            <Label htmlFor="visitas">Visitas Realizadas</Label>
-            <Input
-              id="visitas"
-              type="number"
-              min="0"
-              value={formData.visitasRealizadas}
-              onChange={(e) => setFormData((prev) => ({ ...prev, visitasRealizadas: e.target.value }))}
-              placeholder="0"
-            />
-          </div>
+              <div>
+                <Label htmlFor="visitas">Visitas Realizadas</Label>
+                <Input
+                  id="visitas"
+                  type="number"
+                  min="0"
+                  value={formData.visitasRealizadas}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, visitasRealizadas: e.target.value }))}
+                  placeholder="0"
+                />
+              </div>
 
-          <div className="flex items-end">
-            <Button type="submit" className="w-full">
-              Adicionar Métricas
-            </Button>
+              <div className="flex items-end">
+                <Button type="submit" className="w-full">
+                  Adicionar Métricas
+                </Button>
+              </div>
+            </form>
           </div>
-        </form>
-      </div>
         </TabsContent>
 
         <TabsContent value="ai" className="mt-6">

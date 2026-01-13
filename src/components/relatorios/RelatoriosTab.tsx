@@ -91,7 +91,11 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
       return { value: 0, direction: 'neutral' as const };
     };
 
-    const current = currentMetrics || { leads: 0, visualizacoes: 0, visitas_realizadas: 0 };
+    const current = currentMetrics || {
+      leads: 0, leads_portais: 0, leads_meta: 0, leads_google: 0,
+      visualizacoes: 0, visualizacoes_portais: 0, visualizacoes_meta: 0, visualizacoes_google: 0,
+      visitas_realizadas: 0
+    };
     const previous = previousMetrics || { leads: 0, visualizacoes: 0, visitas_realizadas: 0 };
 
     const conversionRate = current.visualizacoes > 0 ? (current.leads / current.visualizacoes) * 100 : 0;
@@ -103,8 +107,24 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
     return {
       imovel: selectedImovel,
       mes: selectedMes,
-      leads: { value: current.leads, trend: getTrend(current.leads, previous.leads) },
-      visualizacoes: { value: current.visualizacoes, trend: getTrend(current.visualizacoes, previous.visualizacoes) },
+      leads: {
+        value: current.leads,
+        trend: getTrend(current.leads, previous.leads),
+        breakdown: {
+          portais: current.leads_portais || 0,
+          meta: current.leads_meta || 0,
+          google: current.leads_google || 0
+        }
+      },
+      visualizacoes: {
+        value: current.visualizacoes,
+        trend: getTrend(current.visualizacoes, previous.visualizacoes),
+        breakdown: {
+          portais: current.visualizacoes_portais || 0,
+          meta: current.visualizacoes_meta || 0,
+          google: current.visualizacoes_google || 0
+        }
+      },
       visitas: { value: current.visitas_realizadas, trend: getTrend(current.visitas_realizadas, previous.visitas_realizadas) },
       conversion: { value: conversionRate.toFixed(1), trend: getTrend(conversionRate, previousConversionRate) },
       visitsRatio: { value: visitsRatio.toFixed(1), trend: getTrend(visitsRatio, previousVisitsRatio) },
@@ -332,142 +352,147 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
           {/* Conteúdo principal */}
           <div className="p-8">
             {/* Cards de métricas com design moderno */}
-            <div className="grid grid-cols-3 gap-6 mb-8">
-              <div className="relative overflow-hidden rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-[#325df9]/5 rounded-full -mr-12 -mt-12"></div>
-                <div className="relative">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 flex items-center justify-center bg-blue-100 rounded-lg">
-                      <Users className="w-6 h-6 text-blue-600" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              {/* Funil de Visualizações */}
+              <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <Eye className="w-5 h-5 text-purple-600" />
+                  <h3 className="font-bold text-gray-800">Funil de Visualizações</h3>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-gray-600">Portais Imobiliários</span>
+                      <span className="font-medium">{reportData.visualizacoes.breakdown.portais.toLocaleString('pt-BR')}</span>
                     </div>
-                    <span
-                      className={`flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full ${reportData.leads.trend.direction === 'up'
-                        ? 'bg-[#325df9]/10 text-[#325df9]'
-                        : reportData.leads.trend.direction === 'down'
-                          ? 'bg-red-50 text-red-600'
-                          : 'bg-gray-100 text-gray-600'
-                        }`}
-                    >
-                      {reportData.leads.trend.direction === 'up' && <ArrowUp className="w-3 h-3" />}
-                      {reportData.leads.trend.direction === 'down' && <ArrowDown className="w-3 h-3" />}
-                      {reportData.leads.trend.direction === 'neutral' && <Minus className="w-3 h-3" />}
-                      {reportData.leads.trend.direction === 'new' && <ArrowUp className="w-3 h-3" />}
-                      {reportData.leads.trend.direction === 'new' ? ' Novo' : ` ${reportData.leads.trend.value}%`}
-                    </span>
+                    <div className="w-full bg-gray-100 rounded-full h-2">
+                      <div
+                        className="bg-purple-500 h-2 rounded-full"
+                        style={{ width: `${reportData.visualizacoes.value > 0 ? (reportData.visualizacoes.breakdown.portais / reportData.visualizacoes.value) * 100 : 0}%` }}
+                      ></div>
+                    </div>
                   </div>
-                  <p className="text-xs text-gray-500 font-medium mb-1">Leads</p>
-                  <p className="text-3xl font-bold text-black">{reportData.leads.value}</p>
+
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-gray-600">Meta Ads</span>
+                      <span className="font-medium">{reportData.visualizacoes.breakdown.meta.toLocaleString('pt-BR')}</span>
+                    </div>
+                    <div className="w-full bg-gray-100 rounded-full h-2">
+                      <div
+                        className="bg-purple-500 h-2 rounded-full"
+                        style={{ width: `${reportData.visualizacoes.value > 0 ? (reportData.visualizacoes.breakdown.meta / reportData.visualizacoes.value) * 100 : 0}%` }}
+                      ></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-gray-600">Google Ads/Orgânico</span>
+                      <span className="font-medium">{reportData.visualizacoes.breakdown.google.toLocaleString('pt-BR')}</span>
+                    </div>
+                    <div className="w-full bg-gray-100 rounded-full h-2">
+                      <div
+                        className="bg-purple-500 h-2 rounded-full"
+                        style={{ width: `${reportData.visualizacoes.value > 0 ? (reportData.visualizacoes.breakdown.google / reportData.visualizacoes.value) * 100 : 0}%` }}
+                      ></div>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 mt-2 border-t border-gray-100">
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-gray-800">TOTAL de Visualizações</span>
+                      <span className="text-xl font-bold text-purple-600">{reportData.visualizacoes.value.toLocaleString('pt-BR')}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="relative overflow-hidden rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/5 rounded-full -mr-12 -mt-12"></div>
-                <div className="relative">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 flex items-center justify-center bg-purple-100 rounded-lg">
-                      <Eye className="w-6 h-6 text-purple-600" />
+              {/* Funil de Leads */}
+              <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                  <Users className="w-5 h-5 text-blue-600" />
+                  <h3 className="font-bold text-gray-800">Funil de Leads</h3>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-gray-600">Origem: Portais</span>
+                      <span className="font-medium">{reportData.leads.breakdown.portais}</span>
                     </div>
-                    <span
-                      className={`flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full ${reportData.visualizacoes.trend.direction === 'up'
-                        ? 'bg-purple-50 text-purple-600'
-                        : reportData.visualizacoes.trend.direction === 'down'
-                          ? 'bg-red-50 text-red-600'
-                          : 'bg-gray-100 text-gray-600'
-                        }`}
-                    >
-                      {reportData.visualizacoes.trend.direction === 'up' && <ArrowUp className="w-3 h-3" />}
-                      {reportData.visualizacoes.trend.direction === 'down' && <ArrowDown className="w-3 h-3" />}
-                      {reportData.visualizacoes.trend.direction === 'neutral' && <Minus className="w-3 h-3" />}
-                      {reportData.visualizacoes.trend.direction === 'new' && <ArrowUp className="w-3 h-3" />}
-                      {reportData.visualizacoes.trend.direction === 'new' ? ' Novo' : ` ${reportData.visualizacoes.trend.value}%`}
-                    </span>
+                    <div className="w-full bg-gray-100 rounded-full h-2">
+                      <div
+                        className="bg-blue-500 h-2 rounded-full"
+                        style={{ width: `${reportData.leads.value > 0 ? (reportData.leads.breakdown.portais / reportData.leads.value) * 100 : 0}%` }}
+                      ></div>
+                    </div>
                   </div>
-                  <p className="text-xs text-gray-500 font-medium mb-1">Visualizações</p>
-                  <p className="text-3xl font-bold text-black">{reportData.visualizacoes.value.toLocaleString('pt-BR')}</p>
+
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-gray-600">Origem: Meta</span>
+                      <span className="font-medium">{reportData.leads.breakdown.meta}</span>
+                    </div>
+                    <div className="w-full bg-gray-100 rounded-full h-2">
+                      <div
+                        className="bg-blue-500 h-2 rounded-full"
+                        style={{ width: `${reportData.leads.value > 0 ? (reportData.leads.breakdown.meta / reportData.leads.value) * 100 : 0}%` }}
+                      ></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between text-sm mb-1">
+                      <span className="text-gray-600">Origem: Google</span>
+                      <span className="font-medium">{reportData.leads.breakdown.google}</span>
+                    </div>
+                    <div className="w-full bg-gray-100 rounded-full h-2">
+                      <div
+                        className="bg-blue-500 h-2 rounded-full"
+                        style={{ width: `${reportData.leads.value > 0 ? (reportData.leads.breakdown.google / reportData.leads.value) * 100 : 0}%` }}
+                      ></div>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 mt-2 border-t border-gray-100">
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-gray-800">TOTAL de Leads</span>
+                      <span className="text-xl font-bold text-blue-600">{reportData.leads.value}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="relative overflow-hidden rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/5 rounded-full -mr-12 -mt-12"></div>
-                <div className="relative">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 flex items-center justify-center bg-orange-100 rounded-lg">
-                      <CalendarCheck className="w-6 h-6 text-orange-600" />
-                    </div>
-                    <span
-                      className={`flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full ${reportData.visitas.trend.direction === 'up'
-                        ? 'bg-orange-50 text-orange-600'
-                        : reportData.visitas.trend.direction === 'down'
-                          ? 'bg-red-50 text-red-600'
-                          : 'bg-gray-100 text-gray-600'
-                        }`}
-                    >
-                      {reportData.visitas.trend.direction === 'up' && <ArrowUp className="w-3 h-3" />}
-                      {reportData.visitas.trend.direction === 'down' && <ArrowDown className="w-3 h-3" />}
-                      {reportData.visitas.trend.direction === 'neutral' && <Minus className="w-3 h-3" />}
-                      {reportData.visitas.trend.direction === 'new' && <ArrowUp className="w-3 h-3" />}
-                      {reportData.visitas.trend.direction === 'new' ? ' Novo' : ` ${reportData.visitas.trend.value}%`}
-                    </span>
+              {/* Visitas e Conversão */}
+              <div className="space-y-6">
+                <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                  <div className="flex items-center gap-2 mb-4">
+                    <CalendarCheck className="w-5 h-5 text-orange-600" />
+                    <h3 className="font-bold text-gray-800">Visitas</h3>
                   </div>
-                  <p className="text-xs text-gray-500 font-medium mb-1">Visitas Realizadas</p>
-                  <p className="text-3xl font-bold text-black">{reportData.visitas.value}</p>
+                  <div className="text-center py-4">
+                    <span className="text-4xl font-bold text-orange-600">{reportData.visitas.value}</span>
+                    <p className="text-sm text-gray-500 mt-1">Visitas Realizadas no Mês</p>
+                  </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Novos Cards de Métricas (Taxa de Conversão) */}
-            <div className="grid grid-cols-2 gap-6 mb-8">
-              <div className="relative overflow-hidden rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-green-500/5 rounded-full -mr-12 -mt-12"></div>
-                <div className="relative">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 flex items-center justify-center bg-green-100 rounded-lg">
-                      <Percent className="w-6 h-6 text-green-600" />
-                    </div>
-                    <span
-                      className={`flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full ${reportData.conversion.trend.direction === 'up'
-                        ? 'bg-green-50 text-green-600'
-                        : reportData.conversion.trend.direction === 'down'
-                          ? 'bg-red-50 text-red-600'
-                          : 'bg-gray-100 text-gray-600'
-                        }`}
-                    >
-                      {reportData.conversion.trend.direction === 'up' && <ArrowUp className="w-3 h-3" />}
-                      {reportData.conversion.trend.direction === 'down' && <ArrowDown className="w-3 h-3" />}
-                      {reportData.conversion.trend.direction === 'neutral' && <Minus className="w-3 h-3" />}
-                      {reportData.conversion.trend.direction === 'new' && <ArrowUp className="w-3 h-3" />}
-                      {reportData.conversion.trend.direction === 'new' ? ' Novo' : ` ${reportData.conversion.trend.value}%`}
-                    </span>
+                <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Percent className="w-5 h-5 text-green-600" />
+                    <h3 className="font-bold text-gray-800">Conversão Global</h3>
                   </div>
-                  <p className="text-xs text-gray-500 font-medium mb-1">Conversão (Leads/Visualizações)</p>
-                  <p className="text-3xl font-bold text-black">{reportData.conversion.value}%</p>
-                </div>
-              </div>
-
-              <div className="relative overflow-hidden rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 rounded-full -mr-12 -mt-12"></div>
-                <div className="relative">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="w-12 h-12 flex items-center justify-center bg-cyan-100 rounded-lg">
-                      <TrendingUp className="w-6 h-6 text-cyan-600" />
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Leads / Visitas</span>
+                      <span className="font-bold text-green-600">{reportData.visitsRatio.value}%</span>
                     </div>
-                    <span
-                      className={`flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full ${reportData.visitsRatio.trend.direction === 'up'
-                        ? 'bg-cyan-50 text-cyan-600'
-                        : reportData.visitsRatio.trend.direction === 'down'
-                          ? 'bg-red-50 text-red-600'
-                          : 'bg-gray-100 text-gray-600'
-                        }`}
-                    >
-                      {reportData.visitsRatio.trend.direction === 'up' && <ArrowUp className="w-3 h-3" />}
-                      {reportData.visitsRatio.trend.direction === 'down' && <ArrowDown className="w-3 h-3" />}
-                      {reportData.visitsRatio.trend.direction === 'neutral' && <Minus className="w-3 h-3" />}
-                      {reportData.visitsRatio.trend.direction === 'new' && <ArrowUp className="w-3 h-3" />}
-                      {reportData.visitsRatio.trend.direction === 'new' ? ' Novo' : ` ${reportData.visitsRatio.trend.value}%`}
-                    </span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Views / Leads</span>
+                      <span className="font-bold text-green-600">{reportData.conversion.value}%</span>
+                    </div>
                   </div>
-                  <p className="text-xs text-gray-500 font-medium mb-1">Conversão (Visitas/Leads)</p>
-                  <p className="text-3xl font-bold text-black">{reportData.visitsRatio.value}%</p>
                 </div>
               </div>
             </div>

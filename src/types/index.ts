@@ -37,7 +37,13 @@ export interface Metrica {
   imovel_id: string;
   mes: string; // YYYY-MM
   leads: number;
+  leads_portais?: number;
+  leads_meta?: number;
+  leads_google?: number;
   visualizacoes: number;
+  visualizacoes_portais?: number;
+  visualizacoes_meta?: number;
+  visualizacoes_google?: number;
   visitas_realizadas: number;
   data_registro: string;
   created_at?: string;
