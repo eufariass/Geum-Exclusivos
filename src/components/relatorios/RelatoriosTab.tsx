@@ -352,7 +352,8 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
           {/* Conteúdo principal */}
           <div className="p-8">
             {/* Cards de métricas com design moderno */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {/* Cards de métricas com design moderno */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               {/* Funil de Visualizações */}
               <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
                 <div className="flex items-center gap-2 mb-4">
@@ -389,7 +390,7 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
 
                   <div>
                     <div className="flex justify-between text-sm mb-1">
-                      <span className="text-gray-600">Google Ads/Orgânico</span>
+                      <span className="text-gray-600">Google</span>
                       <span className="font-medium">{reportData.visualizacoes.breakdown.google.toLocaleString('pt-BR')}</span>
                     </div>
                     <div className="w-full bg-gray-100 rounded-full h-2">
@@ -419,7 +420,7 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
                 <div className="space-y-4">
                   <div>
                     <div className="flex justify-between text-sm mb-1">
-                      <span className="text-gray-600">Origem: Portais</span>
+                      <span className="text-gray-600">Portais Imobiliários</span>
                       <span className="font-medium">{reportData.leads.breakdown.portais}</span>
                     </div>
                     <div className="w-full bg-gray-100 rounded-full h-2">
@@ -432,7 +433,7 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
 
                   <div>
                     <div className="flex justify-between text-sm mb-1">
-                      <span className="text-gray-600">Origem: Meta</span>
+                      <span className="text-gray-600">Meta Ads</span>
                       <span className="font-medium">{reportData.leads.breakdown.meta}</span>
                     </div>
                     <div className="w-full bg-gray-100 rounded-full h-2">
@@ -445,7 +446,7 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
 
                   <div>
                     <div className="flex justify-between text-sm mb-1">
-                      <span className="text-gray-600">Origem: Google</span>
+                      <span className="text-gray-600">Google</span>
                       <span className="font-medium">{reportData.leads.breakdown.google}</span>
                     </div>
                     <div className="w-full bg-gray-100 rounded-full h-2">
@@ -465,33 +466,20 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
                 </div>
               </div>
 
-              {/* Visitas e Conversão */}
-              <div className="space-y-6">
-                <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                  <div className="flex items-center gap-2 mb-4">
-                    <CalendarCheck className="w-5 h-5 text-orange-600" />
-                    <h3 className="font-bold text-gray-800">Visitas</h3>
-                  </div>
-                  <div className="text-center py-4">
-                    <span className="text-4xl font-bold text-orange-600">{reportData.visitas.value}</span>
-                    <p className="text-sm text-gray-500 mt-1">Visitas Realizadas no Mês</p>
-                  </div>
-                </div>
-
-                <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Percent className="w-5 h-5 text-green-600" />
-                    <h3 className="font-bold text-gray-800">Conversão Global</h3>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Leads / Visitas</span>
-                      <span className="font-bold text-green-600">{reportData.visitsRatio.value}%</span>
+              {/* Visitas (Full Width Row below funnels) */}
+              <div className="md:col-span-2">
+                <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="p-3 bg-orange-100 rounded-full">
+                      <CalendarCheck className="w-8 h-8 text-orange-600" />
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Views / Leads</span>
-                      <span className="font-bold text-green-600">{reportData.conversion.value}%</span>
+                    <div>
+                      <h3 className="font-bold text-gray-800 text-lg">Visitas Realizadas</h3>
+                      <p className="text-sm text-gray-500">Total de visitas ao imóvel neste mês</p>
                     </div>
+                  </div>
+                  <div className="text-4xl font-bold text-orange-600">
+                    {reportData.visitas.value}
                   </div>
                 </div>
               </div>
