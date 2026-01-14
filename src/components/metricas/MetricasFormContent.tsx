@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Eye, Users, Calendar, BarChart3, Save } from 'lucide-react';
 import type { Imovel } from '@/types';
+import { MonthPicker } from '@/components/ui/month-picker';
 
 interface MetricasFormContentProps {
     formData: any;
@@ -33,6 +34,14 @@ export const MetricasFormContent = ({
     setSelectedYear,
     editingId,
 }: MetricasFormContentProps) => {
+    const currentMonthValue = `${selectedYear}-${selectedMonth}`;
+
+    const handleMonthChange = (newMonth: string) => {
+        const [year, month] = newMonth.split('-');
+        setSelectedYear(year);
+        setSelectedMonth(month);
+    };
+
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
             {/* Context Section */}
@@ -63,31 +72,11 @@ export const MetricasFormContent = ({
                     <div className="space-y-2">
                         <Label>Mês de Referência *</Label>
                         <div className="flex gap-2">
-                            <Select value={selectedMonth} onValueChange={setSelectedMonth} disabled={!!editingId}>
-                                <SelectTrigger className="h-11 flex-1">
-                                    <SelectValue placeholder="Mês" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {MONTHS.map((month) => (
-                                        <SelectItem key={month.value} value={month.value}>
-                                            {month.label}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-
-                            <Select value={selectedYear} onValueChange={setSelectedYear} disabled={!!editingId}>
-                                <SelectTrigger className="h-11 w-32">
-                                    <SelectValue placeholder="Ano" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {YEARS.map((year) => (
-                                        <SelectItem key={year} value={year.toString()}>
-                                            {year}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                            <MonthPicker
+                                currentMonth={currentMonthValue}
+                                onMonthChange={handleMonthChange}
+                                disabled={!!editingId}
+                            />
                         </div>
                     </div>
                 </CardContent>

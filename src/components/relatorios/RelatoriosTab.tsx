@@ -234,7 +234,7 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
     try {
       const element = reportRef.current;
       const canvas = await html2canvas(element, {
-        scale: 2,
+        scale: 4,
         useCORS: true,
         allowTaint: true,
         logging: false
