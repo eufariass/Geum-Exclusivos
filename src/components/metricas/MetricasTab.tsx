@@ -1,16 +1,20 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Eye, Users, Calendar, BarChart3, Edit2, Trash2, Save, Undo2 } from 'lucide-react';
+import { Eye, Users, Calendar, BarChart3, Edit2, Trash2 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import type { Imovel, Metrica } from '@/types';
 import { supabaseStorageService } from '@/lib/supabaseStorage';
 import { getCurrentMonth, getMonthName } from '@/lib/dateUtils';
 import { useAuth } from '@/contexts/AuthContext';
 import { AIMetricsImport } from './AIMetricsImport';
+import { MetricasFormContent } from './MetricasFormContent';
 
 interface MetricasTabProps {
   onToast: (message: string, type: 'success' | 'error') => void;
@@ -38,8 +42,12 @@ export const MetricasTab = ({ onToast }: MetricasTabProps) => {
   const [imoveis, setImoveis] = useState<Imovel[]>([]);
   const [metricas, setMetricas] = useState<Metrica[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editingId, setEditingId] = useState<string | null>(null);
 
+  // Edit State
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
+  // Form State
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth().split('-')[1]);
   const [selectedYear, setSelectedYear] = useState(getCurrentMonth().split('-')[0]);
 
@@ -101,6 +109,24 @@ export const MetricasTab = ({ onToast }: MetricasTabProps) => {
     }
   };
 
+  const resetForm = () => {
+    setFormData({
+      imovelId: '',
+      leads: '',
+      leads_portais: '',
+      leads_meta: '',
+      leads_google: '',
+      visualizacoes: '',
+      visualizacoes_portais: '',
+      visualizacoes_meta: '',
+      visualizacoes_google: '',
+      visitasRealizadas: '',
+    });
+    setSelectedMonth(getCurrentMonth().split('-')[1]);
+    setSelectedYear(getCurrentMonth().split('-')[0]);
+    setEditingId(null);
+  };
+
   const handleEdit = (metrica: Metrica) => {
     setEditingId(metrica.id);
     const [year, month] = metrica.mes.split('-');
@@ -120,26 +146,15 @@ export const MetricasTab = ({ onToast }: MetricasTabProps) => {
       visitasRealizadas: metrica.visitas_realizadas.toString(),
     });
 
-    // Scroll to top of form
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setIsEditDialogOpen(true);
   };
 
-  const cancelEdit = () => {
-    setEditingId(null);
-    setFormData({
-      imovelId: '',
-      leads: '',
-      leads_portais: '',
-      leads_meta: '',
-      leads_google: '',
-      visualizacoes: '',
-      visualizacoes_portais: '',
-      visualizacoes_meta: '',
-      visualizacoes_google: '',
-      visitasRealizadas: '',
-    });
-    setSelectedMonth(getCurrentMonth().split('-')[1]);
-    setSelectedYear(getCurrentMonth().split('-')[0]);
+  const onOpenChange = (open: boolean) => {
+    setIsEditDialogOpen(open);
+    if (!open) {
+      // Reset form when closing dialog without saving
+      resetForm();
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -183,7 +198,7 @@ export const MetricasTab = ({ onToast }: MetricasTabProps) => {
           updated_by: user.id,
         });
         onToast('Métrica atualizada com sucesso!', 'success');
-        setEditingId(null);
+        setIsEditDialogOpen(false);
       } else {
         const existing = await supabaseStorageService.getMetricaByImovelMes(formData.imovelId, currentMonthValue);
 
@@ -228,20 +243,8 @@ export const MetricasTab = ({ onToast }: MetricasTabProps) => {
       }
 
       await loadData();
-      if (!editingId) {
-        setFormData({
-          imovelId: '',
-          leads: '',
-          leads_portais: '',
-          leads_meta: '',
-          leads_google: '',
-          visualizacoes: '',
-          visualizacoes_portais: '',
-          visualizacoes_meta: '',
-          visualizacoes_google: '',
-          visitasRealizadas: '',
-        });
-      }
+      resetForm();
+
     } catch (error) {
       console.error('Erro detalhado ao salvar métrica:', error);
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
@@ -293,233 +296,22 @@ export const MetricasTab = ({ onToast }: MetricasTabProps) => {
         <TabsContent value="manual" className="mt-6">
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold">
-                {editingId ? 'Editar Métrica' : 'Adicionar Métricas'}
-              </h2>
-              {editingId && (
-                <Button variant="ghost" onClick={cancelEdit} className="text-muted-foreground mr-2">
-                  <Undo2 className="w-4 h-4 mr-2" />
-                  Cancelar Edição
-                </Button>
-              )}
+              <h2 className="text-xl font-bold">Adicionar Métricas</h2>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Context Section */}
-              <Card className="border-l-4 border-l-black">
-                <CardHeader className="pb-4">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-zinc-700" />
-                    Informações do Registro
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="grid gap-6 md:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="imovel">Imóvel *</Label>
-                    <Select value={formData.imovelId} onValueChange={(value) => setFormData((prev) => ({ ...prev, imovelId: value }))} disabled={!!editingId}>
-                      <SelectTrigger id="imovel" className="h-11">
-                        <SelectValue placeholder="Selecione o imóvel..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {imoveis.map((imovel) => (
-                          <SelectItem key={imovel.id} value={imovel.id}>
-                            {imovel.codigo} - {imovel.endereco}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>Mês de Referência *</Label>
-                    <div className="flex gap-2">
-                      <Select value={selectedMonth} onValueChange={setSelectedMonth} disabled={!!editingId}>
-                        <SelectTrigger className="h-11 flex-1">
-                          <SelectValue placeholder="Mês" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {MONTHS.map((month) => (
-                            <SelectItem key={month.value} value={month.value}>
-                              {month.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-
-                      <Select value={selectedYear} onValueChange={setSelectedYear} disabled={!!editingId}>
-                        <SelectTrigger className="h-11 w-32">
-                          <SelectValue placeholder="Ano" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {YEARS.map((year) => (
-                            <SelectItem key={year} value={year.toString()}>
-                              {year}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Funnels Section */}
-              <div className="grid gap-6 md:grid-cols-2">
-                {/* Views Funnel */}
-                <Card className="overflow-hidden border border-zinc-200 shadow-sm">
-                  <CardHeader className="bg-zinc-50 pb-4 border-b border-zinc-100">
-                    <CardTitle className="text-lg flex items-center gap-2 text-zinc-800">
-                      <Eye className="w-5 h-5 text-zinc-600" />
-                      Funil de Visualizações
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6 pt-6">
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-4">
-                        <Label htmlFor="visualizacoes_portais" className="w-32 text-sm font-normal text-zinc-500">Portais Imobiliários</Label>
-                        <Input
-                          id="visualizacoes_portais"
-                          type="number"
-                          min="0"
-                          value={formData.visualizacoes_portais}
-                          onChange={(e) => setFormData((prev) => ({ ...prev, visualizacoes_portais: e.target.value }))}
-                          placeholder="0"
-                          className="font-mono"
-                        />
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <Label htmlFor="visualizacoes_meta" className="w-32 text-sm font-normal text-zinc-500">Meta Ads</Label>
-                        <Input
-                          id="visualizacoes_meta"
-                          type="number"
-                          min="0"
-                          value={formData.visualizacoes_meta}
-                          onChange={(e) => setFormData((prev) => ({ ...prev, visualizacoes_meta: e.target.value }))}
-                          placeholder="0"
-                          className="font-mono"
-                        />
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <Label htmlFor="visualizacoes_google" className="w-32 text-sm font-normal text-zinc-500">Google</Label>
-                        <Input
-                          id="visualizacoes_google"
-                          type="number"
-                          min="0"
-                          value={formData.visualizacoes_google}
-                          onChange={(e) => setFormData((prev) => ({ ...prev, visualizacoes_google: e.target.value }))}
-                          placeholder="0"
-                          className="font-mono"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="pt-4 border-t flex items-center justify-between bg-zinc-50/50 -mx-6 px-6 pb-2">
-                      <span className="font-semibold text-xs uppercase tracking-widest text-zinc-500">Total Visualizações</span>
-                      <span className="text-2xl font-light text-black">
-                        {parseInt(formData.visualizacoes || '0').toLocaleString('pt-BR')}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Leads Funnel */}
-                <Card className="overflow-hidden border border-zinc-200 shadow-sm">
-                  <CardHeader className="bg-zinc-50 pb-4 border-b border-zinc-100">
-                    <CardTitle className="text-lg flex items-center gap-2 text-zinc-800">
-                      <Users className="w-5 h-5 text-zinc-600" />
-                      Funil de Leads
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-6 pt-6">
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-4">
-                        <Label htmlFor="leads_portais" className="w-32 text-sm font-normal text-zinc-500">Portais Imobiliários</Label>
-                        <Input
-                          id="leads_portais"
-                          type="number"
-                          min="0"
-                          value={formData.leads_portais}
-                          onChange={(e) => setFormData((prev) => ({ ...prev, leads_portais: e.target.value }))}
-                          placeholder="0"
-                          className="font-mono"
-                        />
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <Label htmlFor="leads_meta" className="w-32 text-sm font-normal text-zinc-500">Meta Ads</Label>
-                        <Input
-                          id="leads_meta"
-                          type="number"
-                          min="0"
-                          value={formData.leads_meta}
-                          onChange={(e) => setFormData((prev) => ({ ...prev, leads_meta: e.target.value }))}
-                          placeholder="0"
-                          className="font-mono"
-                        />
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <Label htmlFor="leads_google" className="w-32 text-sm font-normal text-zinc-500">Google</Label>
-                        <Input
-                          id="leads_google"
-                          type="number"
-                          min="0"
-                          value={formData.leads_google}
-                          onChange={(e) => setFormData((prev) => ({ ...prev, leads_google: e.target.value }))}
-                          placeholder="0"
-                          className="font-mono"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="pt-4 border-t flex items-center justify-between bg-zinc-50/50 -mx-6 px-6 pb-2">
-                      <span className="font-semibold text-xs uppercase tracking-widest text-zinc-500">Total Leads</span>
-                      <span className="text-2xl font-light text-black">
-                        {parseInt(formData.leads || '0').toLocaleString('pt-BR')}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Visits Section */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Calendar className="w-5 h-5 text-zinc-800" />
-                    Visitas e Fechamento
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-4 max-w-sm">
-                    <Label htmlFor="visitas" className="w-32 text-sm font-normal text-zinc-500">Visitas Realizadas</Label>
-                    <Input
-                      id="visitas"
-                      type="number"
-                      min="0"
-                      value={formData.visitasRealizadas}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, visitasRealizadas: e.target.value }))}
-                      placeholder="0"
-                      className="font-mono h-12 text-lg"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <div className="flex justify-end pt-4">
-                <Button type="submit" size="lg" className="w-full md:w-48 h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all bg-black hover:bg-zinc-800 text-white">
-                  {editingId ? (
-                    <>
-                      <Save className="w-4 h-4 mr-2" />
-                      Atualizar
-                    </>
-                  ) : (
-                    <>
-                      <Save className="w-4 h-4 mr-2" />
-                      Salvar Métricas
-                    </>
-                  )}
-                </Button>
-              </div>
-            </form>
+            <MetricasFormContent
+              formData={formData}
+              setFormData={setFormData}
+              handleSubmit={handleSubmit}
+              imoveis={imoveis}
+              MONTHS={MONTHS}
+              YEARS={YEARS}
+              selectedMonth={selectedMonth}
+              setSelectedMonth={setSelectedMonth}
+              selectedYear={selectedYear}
+              setSelectedYear={setSelectedYear}
+              editingId={editingId}
+            />
           </div>
         </TabsContent>
 
@@ -598,6 +390,27 @@ export const MetricasTab = ({ onToast }: MetricasTabProps) => {
           </div>
         )}
       </div>
+
+      <Dialog open={isEditDialogOpen} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar Métrica</DialogTitle>
+          </DialogHeader>
+          <MetricasFormContent
+            formData={formData}
+            setFormData={setFormData}
+            handleSubmit={handleSubmit}
+            imoveis={imoveis}
+            MONTHS={MONTHS}
+            YEARS={YEARS}
+            selectedMonth={selectedMonth}
+            setSelectedMonth={setSelectedMonth}
+            selectedYear={selectedYear}
+            setSelectedYear={setSelectedYear}
+            editingId={editingId}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
