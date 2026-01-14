@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Eye, Users, Calendar, BarChart3 } from 'lucide-react';
 import type { Imovel, Metrica } from '@/types';
 import { supabaseStorageService } from '@/lib/supabaseStorage';
 import { getCurrentMonth, getMonthName } from '@/lib/dateUtils';
@@ -210,18 +211,24 @@ export const MetricasTab = ({ onToast }: MetricasTabProps) => {
 
         <TabsContent value="manual" className="mt-6">
           <div className="space-y-6">
-            <h2 className="text-xl font-bold">Adicionar Métricas</h2>
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold">Adicionar Métricas</h2>
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Context Section */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Informações do Registro</CardTitle>
+              <Card className="border-l-4 border-l-primary/50">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5 text-muted-foreground" />
+                    Informações do Registro
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="grid gap-6 md:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="imovel" className="text-sm font-medium">Imóvel *</Label>
+                    <Label htmlFor="imovel" className="text-sm font-medium text-foreground/80">Imóvel *</Label>
                     <Select value={formData.imovelId} onValueChange={(value) => setFormData((prev) => ({ ...prev, imovelId: value }))}>
-                      <SelectTrigger id="imovel" className="h-10">
+                      <SelectTrigger id="imovel" className="h-11 bg-muted/20 border-border/50 focus:bg-background transition-colors">
                         <SelectValue placeholder="Selecione o imóvel..." />
                       </SelectTrigger>
                       <SelectContent>
@@ -235,13 +242,13 @@ export const MetricasTab = ({ onToast }: MetricasTabProps) => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="mes" className="text-sm font-medium">Mês de Referência *</Label>
+                    <Label htmlFor="mes" className="text-sm font-medium text-foreground/80">Mês de Referência *</Label>
                     <Input
                       id="mes"
                       type="month"
                       value={formData.mes}
                       onChange={(e) => setFormData((prev) => ({ ...prev, mes: e.target.value }))}
-                      className="h-10"
+                      className="h-11 bg-muted/20 border-border/50 focus:bg-background transition-colors"
                     />
                   </div>
                 </CardContent>
@@ -249,69 +256,18 @@ export const MetricasTab = ({ onToast }: MetricasTabProps) => {
 
               {/* Funnels Section */}
               <div className="grid gap-6 md:grid-cols-2">
-                {/* Leads Funnel */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center justify-between">
-                      Funil de Leads
-                      <div className="text-sm font-normal bg-primary/10 text-primary px-3 py-1 rounded-full">
-                        Total: {parseInt(formData.leads) || 0}
-                      </div>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="leads_portais" className="text-sm">Portais</Label>
-                        <Input
-                          id="leads_portais"
-                          type="number"
-                          min="0"
-                          value={formData.leads_portais}
-                          onChange={(e) => setFormData((prev) => ({ ...prev, leads_portais: e.target.value }))}
-                          placeholder="0"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="leads_meta" className="text-sm">Meta Ads</Label>
-                        <Input
-                          id="leads_meta"
-                          type="number"
-                          min="0"
-                          value={formData.leads_meta}
-                          onChange={(e) => setFormData((prev) => ({ ...prev, leads_meta: e.target.value }))}
-                          placeholder="0"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="leads_google" className="text-sm">Google</Label>
-                        <Input
-                          id="leads_google"
-                          type="number"
-                          min="0"
-                          value={formData.leads_google}
-                          onChange={(e) => setFormData((prev) => ({ ...prev, leads_google: e.target.value }))}
-                          placeholder="0"
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
                 {/* Views Funnel */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center justify-between">
+                <Card className="overflow-hidden">
+                  <CardHeader className="bg-muted/10 pb-4 border-b border-border/50">
+                    <CardTitle className="text-lg flex items-center gap-2 text-violet-600">
+                      <Eye className="w-5 h-5" />
                       Funil de Visualizações
-                      <div className="text-sm font-normal bg-blue-50 text-blue-700 px-3 py-1 rounded-full">
-                        Total: {parseInt(formData.visualizacoes) || 0}
-                      </div>
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="visualizacoes_portais" className="text-sm">Portais</Label>
+                  <CardContent className="space-y-6 pt-6">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-4">
+                        <Label htmlFor="visualizacoes_portais" className="w-32 text-sm text-muted-foreground font-normal">Portais Imobiliários</Label>
                         <Input
                           id="visualizacoes_portais"
                           type="number"
@@ -319,10 +275,11 @@ export const MetricasTab = ({ onToast }: MetricasTabProps) => {
                           value={formData.visualizacoes_portais}
                           onChange={(e) => setFormData((prev) => ({ ...prev, visualizacoes_portais: e.target.value }))}
                           placeholder="0"
+                          className="font-mono"
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="visualizacoes_meta" className="text-sm">Meta Ads</Label>
+                      <div className="flex items-center gap-4">
+                        <Label htmlFor="visualizacoes_meta" className="w-32 text-sm text-muted-foreground font-normal">Meta Ads</Label>
                         <Input
                           id="visualizacoes_meta"
                           type="number"
@@ -330,10 +287,11 @@ export const MetricasTab = ({ onToast }: MetricasTabProps) => {
                           value={formData.visualizacoes_meta}
                           onChange={(e) => setFormData((prev) => ({ ...prev, visualizacoes_meta: e.target.value }))}
                           placeholder="0"
+                          className="font-mono"
                         />
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="visualizacoes_google" className="text-sm">Google</Label>
+                      <div className="flex items-center gap-4">
+                        <Label htmlFor="visualizacoes_google" className="w-32 text-sm text-muted-foreground font-normal">Google</Label>
                         <Input
                           id="visualizacoes_google"
                           type="number"
@@ -341,8 +299,73 @@ export const MetricasTab = ({ onToast }: MetricasTabProps) => {
                           value={formData.visualizacoes_google}
                           onChange={(e) => setFormData((prev) => ({ ...prev, visualizacoes_google: e.target.value }))}
                           placeholder="0"
+                          className="font-mono"
                         />
                       </div>
+                    </div>
+
+                    <div className="pt-4 border-t flex items-center justify-between">
+                      <span className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Total Visualizações</span>
+                      <span className="text-2xl font-bold text-violet-600">
+                        {parseInt(formData.visualizacoes || '0').toLocaleString('pt-BR')}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Leads Funnel */}
+                <Card className="overflow-hidden">
+                  <CardHeader className="bg-muted/10 pb-4 border-b border-border/50">
+                    <CardTitle className="text-lg flex items-center gap-2 text-blue-600">
+                      <Users className="w-5 h-5" />
+                      Funil de Leads
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-6 pt-6">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-4">
+                        <Label htmlFor="leads_portais" className="w-32 text-sm text-muted-foreground font-normal">Portais Imobiliários</Label>
+                        <Input
+                          id="leads_portais"
+                          type="number"
+                          min="0"
+                          value={formData.leads_portais}
+                          onChange={(e) => setFormData((prev) => ({ ...prev, leads_portais: e.target.value }))}
+                          placeholder="0"
+                          className="font-mono"
+                        />
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <Label htmlFor="leads_meta" className="w-32 text-sm text-muted-foreground font-normal">Meta Ads</Label>
+                        <Input
+                          id="leads_meta"
+                          type="number"
+                          min="0"
+                          value={formData.leads_meta}
+                          onChange={(e) => setFormData((prev) => ({ ...prev, leads_meta: e.target.value }))}
+                          placeholder="0"
+                          className="font-mono"
+                        />
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <Label htmlFor="leads_google" className="w-32 text-sm text-muted-foreground font-normal">Google</Label>
+                        <Input
+                          id="leads_google"
+                          type="number"
+                          min="0"
+                          value={formData.leads_google}
+                          onChange={(e) => setFormData((prev) => ({ ...prev, leads_google: e.target.value }))}
+                          placeholder="0"
+                          className="font-mono"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t flex items-center justify-between">
+                      <span className="font-semibold text-sm uppercase tracking-wide text-muted-foreground">Total Leads</span>
+                      <span className="text-2xl font-bold text-blue-600">
+                        {parseInt(formData.leads || '0').toLocaleString('pt-BR')}
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
@@ -351,29 +374,30 @@ export const MetricasTab = ({ onToast }: MetricasTabProps) => {
               {/* Visits Section */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-lg">Visitas e Fechamento</CardTitle>
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-orange-500" />
+                    Visitas e Fechamento
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid gap-6 md:grid-cols-3">
-                    <div className="space-y-2">
-                      <Label htmlFor="visitas" className="text-sm font-medium">Visitas Realizadas</Label>
-                      <Input
-                        id="visitas"
-                        type="number"
-                        min="0"
-                        value={formData.visitasRealizadas}
-                        onChange={(e) => setFormData((prev) => ({ ...prev, visitasRealizadas: e.target.value }))}
-                        placeholder="0"
-                        className="h-10"
-                      />
-                    </div>
+                  <div className="flex items-center gap-4 max-w-sm">
+                    <Label htmlFor="visitas" className="w-32 text-sm text-muted-foreground font-normal">Visitas Realizadas</Label>
+                    <Input
+                      id="visitas"
+                      type="number"
+                      min="0"
+                      value={formData.visitasRealizadas}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, visitasRealizadas: e.target.value }))}
+                      placeholder="0"
+                      className="font-mono h-12 text-lg"
+                    />
                   </div>
                 </CardContent>
               </Card>
 
-              <div className="flex justify-end">
-                <Button type="submit" size="lg" className="w-full md:w-auto px-8">
-                  Adicionar Métricas
+              <div className="flex justify-end pt-4">
+                <Button type="submit" size="lg" className="w-full md:w-48 h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all">
+                  Salvar Métricas
                 </Button>
               </div>
             </form>
