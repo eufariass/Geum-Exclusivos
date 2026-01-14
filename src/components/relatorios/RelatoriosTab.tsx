@@ -30,13 +30,22 @@ import {
   FileText,
   FileX,
   TrendingUp,
-  Percent
+  Percent,
+  Clock,
+  History
 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 interface RelatoriosTabProps {
   showToast: (message: string, type: 'success' | 'error') => void;
+}
+
+interface RecentReport {
+  imovelId: string;
+  mes: string;
+  timestamp: number;
 }
 
 export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
@@ -48,11 +57,13 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
   const [selectedMes, setSelectedMes] = useState(getCurrentMonth());
   const [showReport, setShowReport] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [recentReports, setRecentReports] = useState<RecentReport[]>([]);
 
   const reportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadData();
+    loadRecentReports();
   }, []);
 
   const loadData = async () => {
@@ -69,6 +80,25 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadRecentReports = () => {
+    const saved = localStorage.getItem('recentReports');
+    if (saved) {
+      try {
+        setRecentReports(JSON.parse(saved));
+      } catch (e) {
+        console.error('Error parsing recent reports', e);
+      }
+    }
+  };
+
+  const saveRecentReport = (imovelId: string, mes: string) => {
+    const newItem: RecentReport = { imovelId, mes, timestamp: Date.now() };
+    const filtered = recentReports.filter(r => !(r.imovelId === imovelId && r.mes === mes));
+    const newReports = [newItem, ...filtered].slice(0, 3);
+    setRecentReports(newReports);
+    localStorage.setItem('recentReports', JSON.stringify(newReports));
   };
 
   const selectedImovel = useMemo(() => {
@@ -126,8 +156,6 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
         }
       },
       visitas: { value: current.visitas_realizadas, trend: getTrend(current.visitas_realizadas, previous.visitas_realizadas) },
-      conversion: { value: conversionRate.toFixed(1), trend: getTrend(conversionRate, previousConversionRate) },
-      visitsRatio: { value: visitsRatio.toFixed(1), trend: getTrend(visitsRatio, previousVisitsRatio) },
     };
   }, [selectedImovel, selectedImovelId, selectedMes, metricas]);
 
@@ -147,9 +175,10 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
         {
           label: 'Leads',
           data: [previousLeads, currentLeads],
-          backgroundColor: ['hsla(210, 15%, 60%, 0.6)', 'hsla(223, 94%, 59%, 1)'],
-          borderRadius: 8,
+          backgroundColor: ['#e5e7eb', '#18181b'], // Gray-200, Zinc-900
+          borderRadius: 4,
           borderWidth: 0,
+          barPercentage: 0.6,
         },
       ],
     };
@@ -171,9 +200,10 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
         {
           label: 'Visitas Realizadas',
           data: [previousVisitas, currentVisitas],
-          backgroundColor: ['hsla(210, 15%, 60%, 0.6)', 'hsla(27, 100%, 55%, 1)'],
-          borderRadius: 8,
+          backgroundColor: ['#e5e7eb', '#52525b'], // Gray-200, Zinc-600
+          borderRadius: 4,
           borderWidth: 0,
+          barPercentage: 0.6,
         },
       ],
     };
@@ -185,6 +215,14 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
       return;
     }
     setShowReport(true);
+    saveRecentReport(selectedImovelId, selectedMes);
+  };
+
+  const handleLoadRecent = (report: RecentReport) => {
+    setSelectedImovelId(report.imovelId);
+    setSelectedMes(report.mes);
+    setShowReport(true);
+    // Optional: could auto-scroll to report
   };
 
   const handleExportPDF = async () => {
@@ -250,45 +288,78 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
 
   return (
     <div className="space-y-6">
-      <div className="bg-card rounded-xl p-6 shadow-sm border border-border no-print">
-        <h2 className="text-xl font-bold mb-4">Gerar Relatório</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div>
-            <Label htmlFor="rel-imovel">Imóvel *</Label>
-            <Select value={selectedImovelId} onValueChange={setSelectedImovelId}>
-              <SelectTrigger id="rel-imovel">
-                <SelectValue placeholder="Selecione..." />
-              </SelectTrigger>
-              <SelectContent>
-                {imoveis.map((imovel) => (
-                  <SelectItem key={imovel.id} value={imovel.id}>
-                    {imovel.codigo} - {imovel.endereco}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+      <div className="grid gap-6 md:grid-cols-3">
+        {/* Generator Card */}
+        <div className="md:col-span-2 bg-card rounded-xl p-6 shadow-sm border border-border no-print">
+          <h2 className="text-xl font-bold mb-4">Gerar Relatório</h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <Label htmlFor="rel-imovel">Imóvel *</Label>
+              <Select value={selectedImovelId} onValueChange={setSelectedImovelId}>
+                <SelectTrigger id="rel-imovel">
+                  <SelectValue placeholder="Selecione..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {imoveis.map((imovel) => (
+                    <SelectItem key={imovel.id} value={imovel.id}>
+                      {imovel.codigo} - {imovel.endereco}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-          <div>
-            <Label htmlFor="rel-mes">Mês *</Label>
-            <Input
-              id="rel-mes"
-              type="month"
-              value={selectedMes}
-              onChange={(e) => setSelectedMes(e.target.value)}
-            />
-          </div>
+            <div>
+              <Label htmlFor="rel-mes">Mês *</Label>
+              <Input
+                id="rel-mes"
+                type="month"
+                value={selectedMes}
+                onChange={(e) => setSelectedMes(e.target.value)}
+              />
+            </div>
 
-          <div className="flex items-end gap-2">
-            <Button onClick={handleGenerate} className="flex-1">
-              Gerar Relatório
-            </Button>
-            {showReport && (
-              <Button onClick={handleExportPDF} variant="outline" disabled={isExporting}>
-                📄 PDF
+            <div className="sm:col-span-2 flex items-end gap-2">
+              <Button onClick={handleGenerate} className="flex-1 bg-black hover:bg-zinc-800 text-white">
+                Gerar Relatório
               </Button>
-            )}
+              {showReport && (
+                <Button onClick={handleExportPDF} variant="outline" disabled={isExporting}>
+                  📄 PDF
+                </Button>
+              )}
+            </div>
           </div>
+        </div>
+
+        {/* Recent Reports Card */}
+        <div className="bg-card rounded-xl p-6 shadow-sm border border-border no-print">
+          <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+            <History className="w-5 h-5" />
+            Últimos Relatórios
+          </h2>
+          {recentReports.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">Nenhum relatório recente.</p>
+          ) : (
+            <div className="space-y-3">
+              {recentReports.map((report, idx) => {
+                const imovel = imoveis.find(i => i.id === report.imovelId);
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => handleLoadRecent(report)}
+                    className="w-full text-left p-3 rounded-lg border border-border hover:bg-accent/50 transition-colors text-sm group"
+                  >
+                    <div className="font-medium truncate">{imovel?.codigo || 'Imóvel removido'}</div>
+                    <div className="flex justify-between items-center text-xs text-muted-foreground mt-1">
+                      <span>{getMonthName(report.mes)}</span>
+                      <span className="opacity-0 group-hover:opacity-100 transition-opacity">Abrir →</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
@@ -298,29 +369,29 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           ref={reportRef}
-          className="bg-white rounded-2xl shadow-xl overflow-hidden"
+          className="bg-white rounded-none shadow-xl overflow-hidden max-w-5xl mx-auto"
           id="report-content"
         >
-          {/* Header com gradiente azul */}
-          <div className="bg-gradient-to-r from-[#325df9] to-[#1e3a8a] p-8 text-white">
-            <div className="flex items-center justify-between mb-6">
-              <img src={logoBlack} alt="Geum" className="h-12 w-auto brightness-0 invert" />
+          {/* Header Monochrome */}
+          <div className="bg-black p-10 text-white">
+            <div className="flex items-center justify-between mb-8">
+              <img src={logoBlack} alt="Geum" className="h-14 w-auto brightness-0 invert" />
               <div className="text-right">
-                <h1 className="text-3xl font-bold">Relatório Mensal</h1>
-                <p className="text-sm opacity-90 mt-1">{getMonthName(selectedMes)}</p>
+                <h1 className="text-3xl font-light tracking-wide uppercase">Relatório de Performance</h1>
+                <p className="text-sm text-gray-400 mt-2 font-light uppercase tracking-widest">{getMonthName(selectedMes)}</p>
               </div>
             </div>
 
             {/* Layout com foto e informações lado a lado */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
               {/* Foto de capa do imóvel */}
               {reportData.imovel.image_urls && reportData.imovel.image_urls.length > 0 && (
                 <div className="md:col-span-1">
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg overflow-hidden border border-white/20 h-full">
+                  <div className="bg-zinc-900 rounded-sm overflow-hidden h-full">
                     <img
                       src={reportData.imovel.image_urls[reportData.imovel.cover_image_index || 0]}
                       alt={reportData.imovel.codigo}
-                      className="w-full h-48 md:h-full object-cover"
+                      className="w-full h-48 md:h-full object-cover opacity-90"
                       crossOrigin="anonymous"
                     />
                   </div>
@@ -328,171 +399,166 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
               )}
 
               {/* Informações do imóvel */}
-              <div className={`grid grid-cols-2 gap-3 ${reportData.imovel.image_urls && reportData.imovel.image_urls.length > 0 ? 'md:col-span-2' : 'md:col-span-3'}`}>
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
-                  <p className="text-xs opacity-80 mb-1">Código</p>
-                  <p className="font-semibold text-sm">{reportData.imovel.codigo}</p>
+              <div className={`grid grid-cols-2 gap-4 ${reportData.imovel.image_urls && reportData.imovel.image_urls.length > 0 ? 'md:col-span-2' : 'md:col-span-3'}`}>
+                <div className="bg-zinc-900/50 p-4 border-l-2 border-white/20">
+                  <p className="text-[10px] uppercase tracking-widest text-gray-400 mb-1">Código</p>
+                  <p className="font-medium text-sm text-white">{reportData.imovel.codigo}</p>
                 </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
-                  <p className="text-xs opacity-80 mb-1">Tipo</p>
-                  <p className="font-semibold text-sm">{reportData.imovel.tipo}</p>
+                <div className="bg-zinc-900/50 p-4 border-l-2 border-white/20">
+                  <p className="text-[10px] uppercase tracking-widest text-gray-400 mb-1">Tipo</p>
+                  <p className="font-medium text-sm text-white">{reportData.imovel.tipo}</p>
                 </div>
-                <div className="col-span-2 bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
-                  <p className="text-xs opacity-80 mb-1">Endereço</p>
-                  <p className="font-semibold text-sm">{reportData.imovel.endereco}</p>
+                <div className="col-span-2 bg-zinc-900/50 p-4 border-l-2 border-white/20">
+                  <p className="text-[10px] uppercase tracking-widest text-gray-400 mb-1">Endereço</p>
+                  <p className="font-medium text-sm text-white">{reportData.imovel.endereco}</p>
                 </div>
-                <div className="col-span-2 bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/20">
-                  <p className="text-xs opacity-80 mb-1">Cliente</p>
-                  <p className="font-semibold text-sm">{reportData.imovel.cliente}</p>
+                <div className="col-span-2 bg-zinc-900/50 p-4 border-l-2 border-white/20">
+                  <p className="text-[10px] uppercase tracking-widest text-gray-400 mb-1">Cliente Propriétario</p>
+                  <p className="font-medium text-sm text-white">{reportData.imovel.cliente}</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Conteúdo principal */}
-          <div className="p-8">
-            {/* Cards de métricas com design moderno */}
-            {/* Cards de métricas com design moderno */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="p-10 bg-white">
+            {/* Cards de métricas */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
               {/* Funil de Visualizações */}
-              <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                <div className="flex items-center gap-2 mb-4">
-                  <Eye className="w-5 h-5 text-purple-600" />
-                  <h3 className="font-bold text-gray-800">Funil de Visualizações</h3>
+              <div className="bg-white border-b-2 border-black pb-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <Eye className="w-5 h-5 text-black" />
+                  <h3 className="font-bold text-black uppercase tracking-wider text-sm">Funil de Visualizações</h3>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-5">
                   <div>
-                    <div className="flex justify-between text-sm mb-1">
+                    <div className="flex justify-between text-sm mb-2">
                       <span className="text-gray-600">Portais Imobiliários</span>
                       <span className="font-medium">{reportData.visualizacoes.breakdown.portais.toLocaleString('pt-BR')}</span>
                     </div>
-                    <div className="w-full bg-gray-100 rounded-full h-2">
+                    <div className="w-full bg-gray-100 h-1.5">
                       <div
-                        className="bg-purple-500 h-2 rounded-full"
+                        className="bg-black h-1.5"
                         style={{ width: `${reportData.visualizacoes.value > 0 ? (reportData.visualizacoes.breakdown.portais / reportData.visualizacoes.value) * 100 : 0}%` }}
                       ></div>
                     </div>
                   </div>
 
                   <div>
-                    <div className="flex justify-between text-sm mb-1">
+                    <div className="flex justify-between text-sm mb-2">
                       <span className="text-gray-600">Meta Ads</span>
                       <span className="font-medium">{reportData.visualizacoes.breakdown.meta.toLocaleString('pt-BR')}</span>
                     </div>
-                    <div className="w-full bg-gray-100 rounded-full h-2">
+                    <div className="w-full bg-gray-100 h-1.5">
                       <div
-                        className="bg-purple-500 h-2 rounded-full"
+                        className="bg-zinc-600 h-1.5"
                         style={{ width: `${reportData.visualizacoes.value > 0 ? (reportData.visualizacoes.breakdown.meta / reportData.visualizacoes.value) * 100 : 0}%` }}
                       ></div>
                     </div>
                   </div>
 
                   <div>
-                    <div className="flex justify-between text-sm mb-1">
+                    <div className="flex justify-between text-sm mb-2">
                       <span className="text-gray-600">Google</span>
                       <span className="font-medium">{reportData.visualizacoes.breakdown.google.toLocaleString('pt-BR')}</span>
                     </div>
-                    <div className="w-full bg-gray-100 rounded-full h-2">
+                    <div className="w-full bg-gray-100 h-1.5">
                       <div
-                        className="bg-purple-500 h-2 rounded-full"
+                        className="bg-zinc-400 h-1.5"
                         style={{ width: `${reportData.visualizacoes.value > 0 ? (reportData.visualizacoes.breakdown.google / reportData.visualizacoes.value) * 100 : 0}%` }}
                       ></div>
                     </div>
                   </div>
 
-                  <div className="pt-4 mt-2 border-t border-gray-100">
-                    <div className="flex justify-between items-center">
-                      <span className="font-bold text-gray-800">TOTAL de Visualizações</span>
-                      <span className="text-xl font-bold text-purple-600">{reportData.visualizacoes.value.toLocaleString('pt-BR')}</span>
-                    </div>
+                  <div className="pt-4 mt-2 border-t border-gray-100 flex justify-between items-end">
+                    <span className="text-xs uppercase tracking-widest text-gray-500">Total Visualizações</span>
+                    <span className="text-3xl font-light text-black">{reportData.visualizacoes.value.toLocaleString('pt-BR')}</span>
                   </div>
                 </div>
               </div>
 
               {/* Funil de Leads */}
-              <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                <div className="flex items-center gap-2 mb-4">
-                  <Users className="w-5 h-5 text-blue-600" />
-                  <h3 className="font-bold text-gray-800">Funil de Leads</h3>
+              <div className="bg-white border-b-2 border-black pb-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <Users className="w-5 h-5 text-black" />
+                  <h3 className="font-bold text-black uppercase tracking-wider text-sm">Funil de Leads</h3>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-5">
                   <div>
-                    <div className="flex justify-between text-sm mb-1">
+                    <div className="flex justify-between text-sm mb-2">
                       <span className="text-gray-600">Portais Imobiliários</span>
                       <span className="font-medium">{reportData.leads.breakdown.portais}</span>
                     </div>
-                    <div className="w-full bg-gray-100 rounded-full h-2">
+                    <div className="w-full bg-gray-100 h-1.5">
                       <div
-                        className="bg-blue-500 h-2 rounded-full"
+                        className="bg-black h-1.5"
                         style={{ width: `${reportData.leads.value > 0 ? (reportData.leads.breakdown.portais / reportData.leads.value) * 100 : 0}%` }}
                       ></div>
                     </div>
                   </div>
 
                   <div>
-                    <div className="flex justify-between text-sm mb-1">
+                    <div className="flex justify-between text-sm mb-2">
                       <span className="text-gray-600">Meta Ads</span>
                       <span className="font-medium">{reportData.leads.breakdown.meta}</span>
                     </div>
-                    <div className="w-full bg-gray-100 rounded-full h-2">
+                    <div className="w-full bg-gray-100 h-1.5">
                       <div
-                        className="bg-blue-500 h-2 rounded-full"
+                        className="bg-zinc-600 h-1.5"
                         style={{ width: `${reportData.leads.value > 0 ? (reportData.leads.breakdown.meta / reportData.leads.value) * 100 : 0}%` }}
                       ></div>
                     </div>
                   </div>
 
                   <div>
-                    <div className="flex justify-between text-sm mb-1">
+                    <div className="flex justify-between text-sm mb-2">
                       <span className="text-gray-600">Google</span>
                       <span className="font-medium">{reportData.leads.breakdown.google}</span>
                     </div>
-                    <div className="w-full bg-gray-100 rounded-full h-2">
+                    <div className="w-full bg-gray-100 h-1.5">
                       <div
-                        className="bg-blue-500 h-2 rounded-full"
+                        className="bg-zinc-400 h-1.5"
                         style={{ width: `${reportData.leads.value > 0 ? (reportData.leads.breakdown.google / reportData.leads.value) * 100 : 0}%` }}
                       ></div>
                     </div>
                   </div>
 
-                  <div className="pt-4 mt-2 border-t border-gray-100">
-                    <div className="flex justify-between items-center">
-                      <span className="font-bold text-gray-800">TOTAL de Leads</span>
-                      <span className="text-xl font-bold text-blue-600">{reportData.leads.value}</span>
-                    </div>
+                  <div className="pt-4 mt-2 border-t border-gray-100 flex justify-between items-end">
+                    <span className="text-xs uppercase tracking-widest text-gray-500">Total Leads</span>
+                    <span className="text-3xl font-light text-black">{reportData.leads.value.toLocaleString('pt-BR')}</span>
                   </div>
                 </div>
               </div>
 
               {/* Visitas (Full Width Row below funnels) */}
               <div className="md:col-span-2">
-                <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-orange-100 rounded-full">
-                      <CalendarCheck className="w-8 h-8 text-orange-600" />
+                <div className="bg-zinc-50 border border-zinc-200 p-8 flex items-center justify-between">
+                  <div className="flex items-center gap-6">
+                    <div className="p-4 bg-white border border-zinc-200 rounded-full">
+                      <CalendarCheck className="w-8 h-8 text-black" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-gray-800 text-lg">Visitas Realizadas</h3>
-                      <p className="text-sm text-gray-500">Total de visitas ao imóvel neste mês</p>
+                      <h3 className="font-bold text-black text-xl uppercase tracking-wider">Visitas Realizadas</h3>
+                      <p className="text-sm text-gray-500">Total de visitas presenciais ao imóvel</p>
                     </div>
                   </div>
-                  <div className="text-4xl font-bold text-orange-600">
+                  <div className="text-5xl font-light text-black">
                     {reportData.visitas.value}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Gráficos de comparação com design moderno */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Gráficos de comparação */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {leadsChartData && (
-                <div className="rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
-                  <div className="flex items-center gap-3 mb-6">
-                    <h3 className="text-base font-bold text-black">Acompanhamento Mensal de Leads</h3>
+                <div className="p-6 border border-gray-100 bg-white">
+                  <div className="mb-6">
+                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Evolução de Leads</h3>
                   </div>
-                  <div className="h-[280px]">
+                  <div className="h-[200px]">
                     <Bar
                       data={leadsChartData}
                       options={{
@@ -504,14 +570,12 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
                         scales: {
                           y: {
                             beginAtZero: true,
-                            grid: {
-                              color: 'rgba(0, 0, 0, 0.05)',
-                            },
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                            ticks: { font: { family: 'monospace' } }
                           },
                           x: {
-                            grid: {
-                              display: false,
-                            },
+                            grid: { display: false },
+                            ticks: { font: { family: 'monospace' } }
                           },
                         },
                       }}
@@ -521,11 +585,11 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
               )}
 
               {visitasChartData && (
-                <div className="rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
-                  <div className="flex items-center gap-3 mb-6">
-                    <h3 className="text-base font-bold text-black">Acompanhamento Mensal de Visitas</h3>
+                <div className="p-6 border border-gray-100 bg-white">
+                  <div className="mb-6">
+                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Evolução de Visitas</h3>
                   </div>
-                  <div className="h-[280px]">
+                  <div className="h-[200px]">
                     <Bar
                       data={visitasChartData}
                       options={{
@@ -537,14 +601,12 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
                         scales: {
                           y: {
                             beginAtZero: true,
-                            grid: {
-                              color: 'rgba(0, 0, 0, 0.05)',
-                            },
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                            ticks: { font: { family: 'monospace' } }
                           },
                           x: {
-                            grid: {
-                              display: false,
-                            },
+                            grid: { display: false },
+                            ticks: { font: { family: 'monospace' } }
                           },
                         },
                       }}
@@ -555,20 +617,12 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
             </div>
           </div>
 
-          {/* Mensagem de agradecimento */}
-          <div className="px-8 pb-6">
-            <div className="bg-gradient-to-r from-[#325df9]/5 to-[#1e3a8a]/5 rounded-xl p-6 border border-[#325df9]/20">
-              <p className="text-center text-sm text-gray-700 leading-relaxed">
-                <span className="font-semibold text-[#325df9]">Agradecemos</span> por escolher a <span className="font-semibold">Exclusividade Geum</span>.
-              </p>
-            </div>
-          </div>
-
           {/* Footer */}
-          <div className="border-t border-gray-200 bg-gray-50 px-8 py-4">
-            <p className="text-center text-xs text-gray-500">
-              Relatório gerado em {formatDate(new Date())} | <span className="font-semibold">Imobiliária Geum</span>
-            </p>
+          <div className="bg-black text-white px-10 py-6">
+            <div className="flex justify-between items-center text-xs opacity-60 font-light tracking-wider">
+              <p>IMOBILIÁRIA GEUM EXCLUSIVOS</p>
+              <p>{formatDate(new Date())}</p>
+            </div>
           </div>
         </motion.div>
       )}
@@ -578,7 +632,7 @@ export const RelatoriosTab = ({ showToast }: RelatoriosTabProps) => {
           <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
             <FileX className="h-8 w-8 text-muted-foreground" />
           </div>
-          <p className="text-muted-foreground">Imóvel não encontrado</p>
+          <p className="text-muted-foreground">Imóvel não encontrado ou sem dados para o período.</p>
         </div>
       )}
     </div>
