@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -208,157 +209,170 @@ export const MetricasTab = ({ onToast }: MetricasTabProps) => {
         </TabsList>
 
         <TabsContent value="manual" className="mt-6">
-          <div className="bg-card rounded-xl p-6 shadow-sm border border-border">
-            <h2 className="text-xl font-bold mb-4">Adicionar Métricas</h2>
-            <form onSubmit={handleSubmit} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <div>
-                <Label htmlFor="imovel">Imóvel *</Label>
-                <Select value={formData.imovelId} onValueChange={(value) => setFormData((prev) => ({ ...prev, imovelId: value }))}>
-                  <SelectTrigger id="imovel">
-                    <SelectValue placeholder="Selecione..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {imoveis.map((imovel) => (
-                      <SelectItem key={imovel.id} value={imovel.id}>
-                        {imovel.codigo} - {imovel.endereco}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+          <div className="space-y-6">
+            <h2 className="text-xl font-bold">Adicionar Métricas</h2>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Context Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Informações do Registro</CardTitle>
+                </CardHeader>
+                <CardContent className="grid gap-6 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="imovel" className="text-sm font-medium">Imóvel *</Label>
+                    <Select value={formData.imovelId} onValueChange={(value) => setFormData((prev) => ({ ...prev, imovelId: value }))}>
+                      <SelectTrigger id="imovel" className="h-10">
+                        <SelectValue placeholder="Selecione o imóvel..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {imoveis.map((imovel) => (
+                          <SelectItem key={imovel.id} value={imovel.id}>
+                            {imovel.codigo} - {imovel.endereco}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="mes" className="text-sm font-medium">Mês de Referência *</Label>
+                    <Input
+                      id="mes"
+                      type="month"
+                      value={formData.mes}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, mes: e.target.value }))}
+                      className="h-10"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Funnels Section */}
+              <div className="grid gap-6 md:grid-cols-2">
+                {/* Leads Funnel */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center justify-between">
+                      Funil de Leads
+                      <div className="text-sm font-normal bg-primary/10 text-primary px-3 py-1 rounded-full">
+                        Total: {parseInt(formData.leads) || 0}
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="leads_portais" className="text-sm">Portais</Label>
+                        <Input
+                          id="leads_portais"
+                          type="number"
+                          min="0"
+                          value={formData.leads_portais}
+                          onChange={(e) => setFormData((prev) => ({ ...prev, leads_portais: e.target.value }))}
+                          placeholder="0"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="leads_meta" className="text-sm">Meta Ads</Label>
+                        <Input
+                          id="leads_meta"
+                          type="number"
+                          min="0"
+                          value={formData.leads_meta}
+                          onChange={(e) => setFormData((prev) => ({ ...prev, leads_meta: e.target.value }))}
+                          placeholder="0"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="leads_google" className="text-sm">Google</Label>
+                        <Input
+                          id="leads_google"
+                          type="number"
+                          min="0"
+                          value={formData.leads_google}
+                          onChange={(e) => setFormData((prev) => ({ ...prev, leads_google: e.target.value }))}
+                          placeholder="0"
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Views Funnel */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg flex items-center justify-between">
+                      Funil de Visualizações
+                      <div className="text-sm font-normal bg-blue-50 text-blue-700 px-3 py-1 rounded-full">
+                        Total: {parseInt(formData.visualizacoes) || 0}
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="visualizacoes_portais" className="text-sm">Portais</Label>
+                        <Input
+                          id="visualizacoes_portais"
+                          type="number"
+                          min="0"
+                          value={formData.visualizacoes_portais}
+                          onChange={(e) => setFormData((prev) => ({ ...prev, visualizacoes_portais: e.target.value }))}
+                          placeholder="0"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="visualizacoes_meta" className="text-sm">Meta Ads</Label>
+                        <Input
+                          id="visualizacoes_meta"
+                          type="number"
+                          min="0"
+                          value={formData.visualizacoes_meta}
+                          onChange={(e) => setFormData((prev) => ({ ...prev, visualizacoes_meta: e.target.value }))}
+                          placeholder="0"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="visualizacoes_google" className="text-sm">Google</Label>
+                        <Input
+                          id="visualizacoes_google"
+                          type="number"
+                          min="0"
+                          value={formData.visualizacoes_google}
+                          onChange={(e) => setFormData((prev) => ({ ...prev, visualizacoes_google: e.target.value }))}
+                          placeholder="0"
+                        />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
 
-              <div>
-                <Label htmlFor="mes">Mês *</Label>
-                <Input
-                  id="mes"
-                  type="month"
-                  value={formData.mes}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, mes: e.target.value }))}
-                />
-              </div>
+              {/* Visits Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-lg">Visitas e Fechamento</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-6 md:grid-cols-3">
+                    <div className="space-y-2">
+                      <Label htmlFor="visitas" className="text-sm font-medium">Visitas Realizadas</Label>
+                      <Input
+                        id="visitas"
+                        type="number"
+                        min="0"
+                        value={formData.visitasRealizadas}
+                        onChange={(e) => setFormData((prev) => ({ ...prev, visitasRealizadas: e.target.value }))}
+                        placeholder="0"
+                        className="h-10"
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
-              <div className="space-y-4 border p-4 rounded-lg bg-gray-50/50">
-                <h3 className="font-semibold text-sm text-gray-700">Funil de Leads</h3>
-                <div className="grid grid-cols-3 gap-2">
-                  <div>
-                    <Label htmlFor="leads_portais" className="text-xs">Portais</Label>
-                    <Input
-                      id="leads_portais"
-                      type="number"
-                      min="0"
-                      value={formData.leads_portais}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, leads_portais: e.target.value }))}
-                      placeholder="0"
-                      className="h-8"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="leads_meta" className="text-xs">Meta Ads</Label>
-                    <Input
-                      id="leads_meta"
-                      type="number"
-                      min="0"
-                      value={formData.leads_meta}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, leads_meta: e.target.value }))}
-                      placeholder="0"
-                      className="h-8"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="leads_google" className="text-xs">Google</Label>
-                    <Input
-                      id="leads_google"
-                      type="number"
-                      min="0"
-                      value={formData.leads_google}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, leads_google: e.target.value }))}
-                      placeholder="0"
-                      className="h-8"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="leads">Total de Leads (Auto)</Label>
-                  <Input
-                    id="leads"
-                    type="number"
-                    min="0"
-                    value={formData.leads}
-                    readOnly
-                    className="bg-gray-100"
-                    placeholder="0"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-4 border p-4 rounded-lg bg-gray-50/50">
-                <h3 className="font-semibold text-sm text-gray-700">Funil de Visualizações</h3>
-                <div className="grid grid-cols-3 gap-2">
-                  <div>
-                    <Label htmlFor="visualizacoes_portais" className="text-xs">Portais</Label>
-                    <Input
-                      id="visualizacoes_portais"
-                      type="number"
-                      min="0"
-                      value={formData.visualizacoes_portais}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, visualizacoes_portais: e.target.value }))}
-                      placeholder="0"
-                      className="h-8"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="visualizacoes_meta" className="text-xs">Meta Ads</Label>
-                    <Input
-                      id="visualizacoes_meta"
-                      type="number"
-                      min="0"
-                      value={formData.visualizacoes_meta}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, visualizacoes_meta: e.target.value }))}
-                      placeholder="0"
-                      className="h-8"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="visualizacoes_google" className="text-xs">Google</Label>
-                    <Input
-                      id="visualizacoes_google"
-                      type="number"
-                      min="0"
-                      value={formData.visualizacoes_google}
-                      onChange={(e) => setFormData((prev) => ({ ...prev, visualizacoes_google: e.target.value }))}
-                      placeholder="0"
-                      className="h-8"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="visualizacoes">Total de Visualizações (Auto)</Label>
-                  <Input
-                    id="visualizacoes"
-                    type="number"
-                    min="0"
-                    value={formData.visualizacoes}
-                    readOnly
-                    className="bg-gray-100"
-                    placeholder="0"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="visitas">Visitas Realizadas</Label>
-                <Input
-                  id="visitas"
-                  type="number"
-                  min="0"
-                  value={formData.visitasRealizadas}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, visitasRealizadas: e.target.value }))}
-                  placeholder="0"
-                />
-              </div>
-
-              <div className="flex items-end">
-                <Button type="submit" className="w-full">
+              <div className="flex justify-end">
+                <Button type="submit" size="lg" className="w-full md:w-auto px-8">
                   Adicionar Métricas
                 </Button>
               </div>
