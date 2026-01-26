@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { X, Image as ImageIcon, GripVertical } from 'lucide-react';
 
@@ -18,6 +18,11 @@ export const ImageUpload = ({ currentImages = [], coverIndex = 0, onImagesSelect
   const [previews, setPreviews] = useState<string[]>(currentImages);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Sync previews with currentImages when they change
+  useEffect(() => {
+    setPreviews(currentImages);
+  }, [currentImages]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
