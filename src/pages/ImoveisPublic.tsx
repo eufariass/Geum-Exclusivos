@@ -1,15 +1,24 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { supabaseStorageService } from '@/lib/supabaseStorage';
-import type { Imovel } from '@/types';
+import type { Imovel, TipoImovel } from '@/types';
 import { Card, CardContent } from '@/components/ui/card';
-import { BedDouble, Bath, Car, Maximize, Home, MapPin, Phone, Mail, ArrowRight } from 'lucide-react';
+import { BedDouble, Bath, Car, Maximize, Home, MapPin, Phone, Mail, ArrowRight, Search, X, SlidersHorizontal } from 'lucide-react';
 import logoBlack from '@/assets/logo-geum-black.png';
 import logoWhite from '@/assets/logo-geum-white.png';
+
+const tiposImovel: TipoImovel[] = ['Casa', 'Apartamento', 'Terreno', 'Comercial', 'Rural'];
 
 const ImoveisPublic = () => {
   const [imoveis, setImoveis] = useState<Imovel[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Filter states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedTipo, setSelectedTipo] = useState<TipoImovel | ''>('');
+  const [selectedBairro, setSelectedBairro] = useState('');
+  const [priceRange, setPriceRange] = useState<{ min: string; max: string }>({ min: '', max: '' });
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     document.title = 'Exclusividade Geum';
@@ -29,6 +38,69 @@ const ImoveisPublic = () => {
 
     loadImoveis();
   }, []);
+
+  // Extract unique bairros from imoveis
+  const bairros = useMemo(() => {
+    const bairroSet = new Set<string>();
+    imoveis.forEach((imovel) => {
+      const imovelAny = imovel as any;
+      if (imovelAny.bairro) {
+        bairroSet.add(imovelAny.bairro);
+      }
+    });
+    return Array.from(bairroSet).sort();
+  }, [imoveis]);
+
+  // Filter imoveis based on criteria
+  const filteredImoveis = useMemo(() => {
+    return imoveis.filter((imovel) => {
+      const imovelAny = imovel as any;
+
+      // Search term filter (title, address, codigo)
+      if (searchTerm) {
+        const search = searchTerm.toLowerCase();
+        const matchesSearch =
+          imovel.titulo?.toLowerCase().includes(search) ||
+          imovel.endereco?.toLowerCase().includes(search) ||
+          imovel.codigo?.toLowerCase().includes(search) ||
+          imovelAny.bairro?.toLowerCase().includes(search);
+        if (!matchesSearch) return false;
+      }
+
+      // Type filter
+      if (selectedTipo && imovel.tipo !== selectedTipo) {
+        return false;
+      }
+
+      // Bairro filter
+      if (selectedBairro && imovelAny.bairro !== selectedBairro) {
+        return false;
+      }
+
+      // Price range filter
+      if (priceRange.min) {
+        const minPrice = parseFloat(priceRange.min.replace(/\D/g, ''));
+        if (imovel.valor && imovel.valor < minPrice) return false;
+      }
+      if (priceRange.max) {
+        const maxPrice = parseFloat(priceRange.max.replace(/\D/g, ''));
+        if (imovel.valor && imovel.valor > maxPrice) return false;
+      }
+
+      return true;
+    });
+  }, [imoveis, searchTerm, selectedTipo, selectedBairro, priceRange]);
+
+  // Check if any filter is active
+  const hasActiveFilters = searchTerm || selectedTipo || selectedBairro || priceRange.min || priceRange.max;
+
+  // Clear all filters
+  const clearFilters = () => {
+    setSearchTerm('');
+    setSelectedTipo('');
+    setSelectedBairro('');
+    setPriceRange({ min: '', max: '' });
+  };
 
   if (loading) {
     return (
@@ -69,7 +141,7 @@ const ImoveisPublic = () => {
       </header>
 
       <main className="flex-grow container mx-auto px-6 py-16 max-w-7xl">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-10 gap-6">
           <div className="space-y-4 max-w-2xl">
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-primary tracking-tight">
               Exclusividade Geum
@@ -81,15 +153,215 @@ const ImoveisPublic = () => {
           <div className="hidden md:block h-px flex-grow bg-border/60 ml-8 mb-4" />
         </div>
 
-        {imoveis.length === 0 ? (
+        {/* Filter Section */}
+        <div className="mb-12 space-y-4">
+          {/* Search Bar */}
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Buscar por nome, endereço ou código..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full h-12 pl-12 pr-4 bg-card border border-border/60 rounded-lg text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+              />
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+            </div>
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`h-12 px-5 flex items-center gap-2 border rounded-lg text-sm font-medium transition-all ${
+                showFilters || hasActiveFilters
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'bg-card border-border/60 text-muted-foreground hover:border-primary hover:text-primary'
+              }`}
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              <span className="hidden sm:inline">Filtros</span>
+              {hasActiveFilters && (
+                <span className="h-5 w-5 flex items-center justify-center bg-white text-primary text-xs font-bold rounded-full">
+                  {[selectedTipo, selectedBairro, priceRange.min, priceRange.max].filter(Boolean).length}
+                </span>
+              )}
+            </button>
+          </div>
+
+          {/* Expandable Filters */}
+          <div className={`grid gap-4 overflow-hidden transition-all duration-300 ${
+            showFilters ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+          }`}>
+            <div className="overflow-hidden">
+              <div className="bg-card border border-border/60 rounded-lg p-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Tipo de Imóvel */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      Tipo de Imóvel
+                    </label>
+                    <select
+                      value={selectedTipo}
+                      onChange={(e) => setSelectedTipo(e.target.value as TipoImovel | '')}
+                      className="w-full h-11 px-3 bg-background border border-border/60 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                    >
+                      <option value="">Todos os tipos</option>
+                      {tiposImovel.map((tipo) => (
+                        <option key={tipo} value={tipo}>
+                          {tipo}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Bairro */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      Bairro
+                    </label>
+                    <select
+                      value={selectedBairro}
+                      onChange={(e) => setSelectedBairro(e.target.value)}
+                      className="w-full h-11 px-3 bg-background border border-border/60 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                    >
+                      <option value="">Todos os bairros</option>
+                      {bairros.map((bairro) => (
+                        <option key={bairro} value={bairro}>
+                          {bairro}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Preço Mínimo */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      Preço Mínimo
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">R$</span>
+                      <input
+                        type="text"
+                        placeholder="0"
+                        value={priceRange.min}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, '');
+                          setPriceRange((prev) => ({ ...prev, min: value }));
+                        }}
+                        className="w-full h-11 pl-10 pr-3 bg-background border border-border/60 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Preço Máximo */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      Preço Máximo
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">R$</span>
+                      <input
+                        type="text"
+                        placeholder="Sem limite"
+                        value={priceRange.max}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, '');
+                          setPriceRange((prev) => ({ ...prev, max: value }));
+                        }}
+                        className="w-full h-11 pl-10 pr-3 bg-background border border-border/60 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Clear Filters */}
+                {hasActiveFilters && (
+                  <div className="mt-4 pt-4 border-t border-border/40 flex justify-end">
+                    <button
+                      onClick={clearFilters}
+                      className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
+                    >
+                      <X className="h-4 w-4" />
+                      Limpar filtros
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Active Filters Tags & Results Count */}
+          <div className="flex flex-wrap items-center gap-3">
+            {hasActiveFilters && (
+              <>
+                {selectedTipo && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary text-xs font-medium rounded-full">
+                    {selectedTipo}
+                    <button onClick={() => setSelectedTipo('')} className="hover:text-primary/70">
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                )}
+                {selectedBairro && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary text-xs font-medium rounded-full">
+                    {selectedBairro}
+                    <button onClick={() => setSelectedBairro('')} className="hover:text-primary/70">
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                )}
+                {priceRange.min && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary text-xs font-medium rounded-full">
+                    Mín: R$ {parseInt(priceRange.min).toLocaleString('pt-BR')}
+                    <button onClick={() => setPriceRange((prev) => ({ ...prev, min: '' }))} className="hover:text-primary/70">
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                )}
+                {priceRange.max && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary text-xs font-medium rounded-full">
+                    Máx: R$ {parseInt(priceRange.max).toLocaleString('pt-BR')}
+                    <button onClick={() => setPriceRange((prev) => ({ ...prev, max: '' }))} className="hover:text-primary/70">
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                )}
+              </>
+            )}
+            <span className="text-sm text-muted-foreground ml-auto">
+              {filteredImoveis.length} {filteredImoveis.length === 1 ? 'imóvel encontrado' : 'imóveis encontrados'}
+            </span>
+          </div>
+        </div>
+
+        {filteredImoveis.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 text-center border border-dashed border-border rounded-xl bg-card/50">
             <Home className="h-16 w-16 text-muted-foreground/20 mb-6" />
-            <h2 className="text-2xl font-bold text-primary mb-2">Nenhum imóvel disponível</h2>
-            <p className="text-muted-foreground">Em breve teremos novidades em nossa coleção.</p>
+            <h2 className="text-2xl font-bold text-primary mb-2">
+              {hasActiveFilters ? 'Nenhum imóvel encontrado' : 'Nenhum imóvel disponível'}
+            </h2>
+            <p className="text-muted-foreground">
+              {hasActiveFilters
+                ? 'Tente ajustar os filtros para encontrar mais opções.'
+                : 'Em breve teremos novidades em nossa coleção.'}
+            </p>
+            {hasActiveFilters && (
+              <button
+                onClick={clearFilters}
+                className="mt-4 px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
+              >
+                Limpar filtros
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
-            {imoveis.map((imovel) => (
+            {filteredImoveis.map((imovel) => (
               <Link
                 key={imovel.id}
                 to={`/${imovel.codigo}`}
