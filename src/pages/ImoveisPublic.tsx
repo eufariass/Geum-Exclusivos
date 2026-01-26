@@ -599,7 +599,7 @@ const ImoveisPublic = () => {
 
           <div className="mt-16 pt-8 border-t border-primary-foreground/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-primary-foreground/40">
             <p>© {new Date().getFullYear()} Imobiliária Geum. Todos os direitos reservados.</p>
-            <p>Desenvolvido por Felipe Farias.</p>
+            <p>Desenvolvido por Marketing Imobiliária Geum.</p>
           </div>
         </div>
       </footer>
