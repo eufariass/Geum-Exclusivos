@@ -133,7 +133,7 @@ const ImoveisPublic = () => {
                   <CardContent className="p-6 flex flex-col flex-grow gap-4">
                     <div className="space-y-2">
                       {imovel.titulo && (
-                        <h2 className="text-lg font-bold text-primary line-clamp-1 group-hover:text-accent transition-colors">
+                        <h2 className="text-lg font-bold text-primary line-clamp-1">
                           {imovel.titulo}
                         </h2>
                       )}
