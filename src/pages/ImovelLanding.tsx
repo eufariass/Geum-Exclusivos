@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabaseStorageService } from '@/lib/supabaseStorage';
 import type { Imovel } from '@/types';
@@ -16,21 +16,106 @@ const ImovelLanding = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    document.title = 'Imóveis Exclusivos Geum.';
+  // Update document metadata when imovel loads
+  const updateSEO = useCallback((imovelData: Imovel) => {
+    // Update title
+    const title = imovelData.titulo
+      ? `${imovelData.titulo} | ${imovelData.tipo} em Londrina | Imobiliária Geum`
+      : `${imovelData.tipo} em ${imovelData.endereco} | Imobiliária Geum`;
+    document.title = title;
+
+    // Update meta description
+    const description = imovelData.descricao
+      ? imovelData.descricao.substring(0, 160)
+      : `${imovelData.tipo} ${imovelData.quartos ? `com ${imovelData.quartos} quartos` : ''} em ${imovelData.endereco}. ${imovelData.valor ? `Valor: R$ ${imovelData.valor.toLocaleString('pt-BR')}` : ''} Imobiliária Geum Londrina.`;
+
+    let metaDescription = document.querySelector('meta[name="description"]');
+    if (!metaDescription) {
+      metaDescription = document.createElement('meta');
+      metaDescription.setAttribute('name', 'description');
+      document.head.appendChild(metaDescription);
+    }
+    metaDescription.setAttribute('content', description);
+
+    // Update Open Graph tags
+    const updateOrCreateMeta = (property: string, content: string) => {
+      let meta = document.querySelector(`meta[property="${property}"]`);
+      if (!meta) {
+        meta = document.createElement('meta');
+        meta.setAttribute('property', property);
+        document.head.appendChild(meta);
+      }
+      meta.setAttribute('content', content);
+    };
+
+    updateOrCreateMeta('og:title', title);
+    updateOrCreateMeta('og:description', description);
+    updateOrCreateMeta('og:url', `https://exclusivos.geumimob.com/${imovelData.codigo}`);
+    updateOrCreateMeta('og:type', 'website');
+    if (imovelData.image_urls && imovelData.image_urls.length > 0) {
+      updateOrCreateMeta('og:image', imovelData.image_urls[imovelData.cover_image_index || 0]);
+    }
+
+    // Inject JSON-LD structured data for the property
+    const existingSchema = document.getElementById('property-schema');
+    if (existingSchema) {
+      existingSchema.remove();
+    }
+
+    const schema = {
+      "@context": "https://schema.org",
+      "@type": "RealEstateListing",
+      "name": imovelData.titulo || `${imovelData.tipo} em ${imovelData.endereco}`,
+      "description": imovelData.descricao || `${imovelData.tipo} disponível em ${imovelData.endereco}`,
+      "url": `https://exclusivos.geumimob.com/${imovelData.codigo}`,
+      "image": imovelData.image_urls || [],
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": imovelData.endereco,
+        "addressLocality": "Londrina",
+        "addressRegion": "PR",
+        "addressCountry": "BR"
+      },
+      "offers": imovelData.valor ? {
+        "@type": "Offer",
+        "price": imovelData.valor,
+        "priceCurrency": "BRL",
+        "availability": "https://schema.org/InStock"
+      } : undefined,
+      "numberOfRooms": imovelData.quartos,
+      "numberOfBathroomsTotal": imovelData.banheiros,
+      "floorSize": imovelData.area_m2 ? {
+        "@type": "QuantitativeValue",
+        "value": imovelData.area_m2,
+        "unitCode": "MTK"
+      } : undefined,
+      "broker": {
+        "@type": "RealEstateAgent",
+        "name": "Imobiliária Geum",
+        "url": "https://geumimob.com",
+        "telephone": "+55-43-3341-3000"
+      }
+    };
+
+    const script = document.createElement('script');
+    script.id = 'property-schema';
+    script.type = 'application/ld+json';
+    script.textContent = JSON.stringify(schema);
+    document.head.appendChild(script);
   }, []);
 
   useEffect(() => {
     const loadImovel = async () => {
       if (!codigo) return;
-      
+
       try {
         const imoveis = await supabaseStorageService.getImoveis();
         const found = imoveis.find(i => i.codigo === codigo.toUpperCase());
-        
+
         if (found) {
           setImovel(found);
           setCurrentImageIndex(found.cover_image_index || 0);
+          updateSEO(found);
         }
       } catch (error) {
         console.error('Erro ao carregar imóvel:', error);
@@ -40,7 +125,15 @@ const ImovelLanding = () => {
     };
 
     loadImovel();
-  }, [codigo]);
+
+    // Cleanup SEO tags when leaving the page
+    return () => {
+      const propertySchema = document.getElementById('property-schema');
+      if (propertySchema) {
+        propertySchema.remove();
+      }
+    };
+  }, [codigo, updateSEO]);
 
   const nextImage = () => {
     if (imovel?.image_urls && imovel.image_urls.length > 0) {
@@ -56,8 +149,49 @@ const ImovelLanding = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Carregando...</p>
+      <div className="min-h-screen bg-background">
+        {/* Header skeleton */}
+        <header className="border-b border-border bg-card sticky top-0 z-10 shadow-sm">
+          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+            <div className="h-10 w-32 bg-muted rounded animate-pulse" />
+            <div className="h-4 w-16 bg-muted rounded animate-pulse" />
+          </div>
+        </header>
+        <main className="container mx-auto px-4 py-8 max-w-7xl">
+          {/* Image gallery skeleton */}
+          <div className="mb-6 rounded-xl overflow-hidden border border-border">
+            <div className="aspect-video bg-muted animate-pulse" />
+            <div className="p-4 flex gap-2">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="w-20 h-20 bg-muted rounded-md animate-pulse" />
+              ))}
+            </div>
+          </div>
+          {/* Content skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              <div className="bg-card border border-border rounded-xl p-6 space-y-4">
+                <div className="h-8 bg-muted rounded w-3/4 animate-pulse" />
+                <div className="h-4 bg-muted rounded w-1/2 animate-pulse" />
+                <div className="h-4 bg-muted rounded w-full animate-pulse" />
+                <div className="flex gap-4">
+                  <div className="h-6 bg-muted rounded w-20 animate-pulse" />
+                  <div className="h-6 bg-muted rounded w-20 animate-pulse" />
+                  <div className="h-6 bg-muted rounded w-20 animate-pulse" />
+                </div>
+              </div>
+            </div>
+            <div className="lg:col-span-1">
+              <div className="bg-card border border-border rounded-xl p-6 space-y-4">
+                <div className="h-8 bg-muted rounded w-1/2 animate-pulse" />
+                <div className="h-10 bg-muted rounded w-full animate-pulse" />
+                <div className="h-10 bg-muted rounded w-full animate-pulse" />
+                <div className="h-10 bg-muted rounded w-full animate-pulse" />
+                <div className="h-12 bg-muted rounded w-full animate-pulse" />
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
     );
   }
@@ -104,8 +238,10 @@ const ImovelLanding = () => {
               <div className="relative aspect-video bg-muted">
                 <img
                   src={imovel.image_urls[currentImageIndex]}
-                  alt={`${imovel.endereco} - Foto ${currentImageIndex + 1}`}
+                  alt={`${imovel.titulo || imovel.tipo} em ${imovel.endereco} - Foto ${currentImageIndex + 1} de ${imovel.image_urls.length} | Imobiliária Geum Londrina`}
+                  title={`${imovel.titulo || imovel.tipo} - ${imovel.endereco}`}
                   className="w-full h-full object-cover"
+                  fetchPriority="high"
                 />
                 
                 {/* Botões de navegação */}
@@ -151,7 +287,9 @@ const ImovelLanding = () => {
                     >
                       <img
                         src={url}
-                        alt={`Miniatura ${index + 1}`}
+                        alt={`${imovel.titulo || imovel.tipo} - Miniatura ${index + 1}`}
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-full object-cover"
                       />
                     </button>

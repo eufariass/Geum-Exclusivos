@@ -1,18 +1,35 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { supabaseStorageService } from '@/lib/supabaseStorage';
 import type { Imovel, TipoImovel } from '@/types';
-import { Card, CardContent } from '@/components/ui/card';
-import { BedDouble, Bath, Car, Maximize, Home, MapPin, Phone, Mail, ArrowRight, Search, X, SlidersHorizontal } from 'lucide-react';
+import { CardContent } from '@/components/ui/card';
+import { BedDouble, Bath, Maximize, Home, MapPin, Phone, Mail, ArrowRight, Search, X, SlidersHorizontal } from 'lucide-react';
 import logoBlack from '@/assets/logo-geum-black.png';
 import logoWhite from '@/assets/logo-geum-white.png';
 import bannerExclusividade from '@/assets/banner-exclusividade.jpg';
 
 const tiposImovel: TipoImovel[] = ['Casa', 'Casa em condomínio', 'Apartamento', 'Terreno', 'Comercial', 'Rural'];
 
+// Skeleton component for loading states
+const PropertySkeleton = () => (
+  <div className="bg-card border border-border/40 rounded-lg overflow-hidden animate-pulse">
+    <div className="aspect-[4/3] bg-muted" />
+    <div className="p-6 space-y-4">
+      <div className="h-5 bg-muted rounded w-3/4" />
+      <div className="h-4 bg-muted rounded w-full" />
+      <div className="pt-4 border-t border-border/40 flex gap-4">
+        <div className="h-4 bg-muted rounded w-12" />
+        <div className="h-4 bg-muted rounded w-12" />
+        <div className="h-4 bg-muted rounded w-12" />
+      </div>
+    </div>
+  </div>
+);
+
 const ImoveisPublic = () => {
   const [imoveis, setImoveis] = useState<Imovel[]>([]);
   const [loading, setLoading] = useState(true);
+  const [imagesLoaded, setImagesLoaded] = useState<Record<string, boolean>>({});
 
   // Applied filter states (what's actually being used to filter)
   const [appliedFilters, setAppliedFilters] = useState({
@@ -34,8 +51,9 @@ const ImoveisPublic = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
-  useEffect(() => {
-    document.title = 'Exclusividade Geum';
+  // Track image loading for performance
+  const handleImageLoad = useCallback((id: string) => {
+    setImagesLoaded(prev => ({ ...prev, [id]: true }));
   }, []);
 
   useEffect(() => {
@@ -185,13 +203,95 @@ const ImoveisPublic = () => {
     setShowFilters(!showFilters);
   };
 
+  // Update document title
+  useEffect(() => {
+    document.title = 'Imóveis Exclusivos em Londrina | Casas, Apartamentos e Terrenos | Imobiliária Geum';
+  }, []);
+
+  // Generate and inject JSON-LD structured data for properties
+  useEffect(() => {
+    if (filteredImoveis.length === 0) return;
+
+    const schema = {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "Imóveis Exclusivos em Londrina",
+      "description": "Lista de imóveis exclusivos disponíveis na Imobiliária Geum",
+      "numberOfItems": filteredImoveis.length,
+      "itemListElement": filteredImoveis.slice(0, 10).map((imovel, index) => ({
+        "@type": "ListItem",
+        "position": index + 1,
+        "item": {
+          "@type": "RealEstateListing",
+          "name": imovel.titulo || imovel.endereco,
+          "url": `https://exclusivos.geumimob.com/${imovel.codigo}`,
+          "description": imovel.descricao || `${imovel.tipo} em ${imovel.endereco}`,
+          "image": imovel.image_urls?.[imovel.cover_image_index || 0],
+          "price": imovel.valor ? `R$ ${imovel.valor.toLocaleString('pt-BR')}` : undefined,
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": imovel.endereco,
+            "addressLocality": "Londrina",
+            "addressRegion": "PR",
+            "addressCountry": "BR"
+          }
+        }
+      }))
+    };
+
+    // Remove existing dynamic schema if present
+    const existingSchema = document.getElementById('property-list-schema');
+    if (existingSchema) {
+      existingSchema.remove();
+    }
+
+    // Inject new schema
+    const script = document.createElement('script');
+    script.id = 'property-list-schema';
+    script.type = 'application/ld+json';
+    script.textContent = JSON.stringify(schema);
+    document.head.appendChild(script);
+
+    return () => {
+      const schemaToRemove = document.getElementById('property-list-schema');
+      if (schemaToRemove) {
+        schemaToRemove.remove();
+      }
+    };
+  }, [filteredImoveis]);
+
+  // Show skeleton loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-pulse flex flex-col items-center gap-4">
-          <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-          <p className="text-muted-foreground font-medium tracking-wide">Carregando exclusividades...</p>
-        </div>
+      <div className="min-h-screen bg-background flex flex-col font-sans">
+        {/* Header skeleton */}
+        <header className="border-b border-border/40 bg-background/95 backdrop-blur-sm sticky top-0 z-50">
+          <div className="container mx-auto px-6 py-5 flex items-center justify-between">
+            <div className="h-10 w-32 bg-muted rounded animate-pulse" />
+            <div className="hidden md:flex items-center gap-8">
+              <div className="h-4 w-16 bg-muted rounded animate-pulse" />
+              <div className="h-4 w-16 bg-muted rounded animate-pulse" />
+              <div className="h-4 w-16 bg-muted rounded animate-pulse" />
+            </div>
+          </div>
+        </header>
+        <main className="flex-grow container mx-auto px-6 py-16 max-w-7xl">
+          {/* Banner skeleton */}
+          <div className="mb-10">
+            <div className="w-full h-48 md:h-64 bg-muted rounded-xl animate-pulse" />
+            <div className="h-5 w-96 max-w-full bg-muted rounded mt-6 mx-auto animate-pulse" />
+          </div>
+          {/* Search skeleton */}
+          <div className="mb-12">
+            <div className="h-12 bg-muted rounded-lg animate-pulse" />
+          </div>
+          {/* Grid skeleton */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <PropertySkeleton key={i} />
+            ))}
+          </div>
+        </main>
       </div>
     );
   }
@@ -229,8 +329,10 @@ const ImoveisPublic = () => {
           <div className="relative w-full rounded-xl overflow-hidden">
             <img
               src={bannerExclusividade}
-              alt="Exclusividade Geum"
+              alt="Exclusividade Geum - Imóveis exclusivos em Londrina"
+              title="Imóveis Exclusivos Imobiliária Geum Londrina"
               className="w-full h-auto object-cover"
+              fetchPriority="high"
             />
           </div>
           <p className="text-lg text-muted-foreground font-normal leading-relaxed mt-6 text-center">
@@ -465,14 +567,26 @@ const ImoveisPublic = () => {
                 <article className="h-full bg-card border border-border/40 rounded-lg overflow-hidden transition-all duration-500 hover:shadow-xl hover:-translate-y-1 flex flex-col">
                   <div className="relative aspect-[4/3] overflow-hidden bg-muted">
                     {imovel.image_urls && imovel.image_urls.length > 0 ? (
-                      <img
-                        src={imovel.image_urls[imovel.cover_image_index || 0]}
-                        alt={imovel.endereco}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
+                      <>
+                        {/* Skeleton placeholder while loading */}
+                        {!imagesLoaded[imovel.id] && (
+                          <div className="absolute inset-0 bg-muted animate-pulse" />
+                        )}
+                        <img
+                          src={imovel.image_urls[imovel.cover_image_index || 0]}
+                          alt={`${imovel.tipo} em ${imovel.endereco} - Imobiliária Geum Londrina`}
+                          title={imovel.titulo || `${imovel.tipo} em ${imovel.endereco}`}
+                          loading="lazy"
+                          decoding="async"
+                          onLoad={() => handleImageLoad(imovel.id)}
+                          className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-105 ${
+                            imagesLoaded[imovel.id] ? 'opacity-100' : 'opacity-0'
+                          }`}
+                        />
+                      </>
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-muted">
-                        <Home className="h-12 w-12 text-muted-foreground/20" />
+                        <Home className="h-12 w-12 text-muted-foreground/20" aria-hidden="true" />
                       </div>
                     )}
 
