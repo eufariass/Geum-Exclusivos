@@ -7,7 +7,7 @@ import { BedDouble, Bath, Car, Maximize, Home, MapPin, Phone, Mail, ArrowRight, 
 import logoBlack from '@/assets/logo-geum-black.png';
 import logoWhite from '@/assets/logo-geum-white.png';
 
-const tiposImovel: TipoImovel[] = ['Casa', 'Apartamento', 'Terreno', 'Comercial', 'Rural'];
+const tiposImovel: TipoImovel[] = ['Casa', 'Casa em condomínio', 'Apartamento', 'Terreno', 'Comercial', 'Rural'];
 
 const ImoveisPublic = () => {
   const [imoveis, setImoveis] = useState<Imovel[]>([]);

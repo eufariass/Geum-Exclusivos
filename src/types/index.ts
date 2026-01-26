@@ -1,4 +1,4 @@
-export type TipoImovel = 'Casa' | 'Apartamento' | 'Terreno' | 'Comercial' | 'Rural';
+export type TipoImovel = 'Casa' | 'Casa em condomínio' | 'Apartamento' | 'Terreno' | 'Comercial' | 'Rural';
 
 export interface Profile {
   id: string;

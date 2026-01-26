@@ -22,7 +22,7 @@ interface ImovelModalProps {
   editingImovel?: Imovel | null;
 }
 
-const tiposImovel: TipoImovel[] = ['Casa', 'Apartamento', 'Terreno', 'Comercial', 'Rural'];
+const tiposImovel: TipoImovel[] = ['Casa', 'Casa em condomínio', 'Apartamento', 'Terreno', 'Comercial', 'Rural'];
 
 export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelModalProps) => {
   const { user } = useAuth();
