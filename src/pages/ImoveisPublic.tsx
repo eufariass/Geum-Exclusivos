@@ -13,11 +13,24 @@ const ImoveisPublic = () => {
   const [imoveis, setImoveis] = useState<Imovel[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Filter states
+  // Applied filter states (what's actually being used to filter)
+  const [appliedFilters, setAppliedFilters] = useState({
+    searchTerm: '',
+    tipos: [] as TipoImovel[],
+    bairro: '',
+    priceMin: '',
+    priceMax: '',
+  });
+
+  // Pending filter states (what user is selecting in the form)
+  const [pendingFilters, setPendingFilters] = useState({
+    tipos: [] as TipoImovel[],
+    bairro: '',
+    priceMin: '',
+    priceMax: '',
+  });
+
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedTipo, setSelectedTipo] = useState<TipoImovel | ''>('');
-  const [selectedBairro, setSelectedBairro] = useState('');
-  const [priceRange, setPriceRange] = useState<{ min: string; max: string }>({ min: '', max: '' });
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
@@ -51,14 +64,14 @@ const ImoveisPublic = () => {
     return Array.from(bairroSet).sort();
   }, [imoveis]);
 
-  // Filter imoveis based on criteria
+  // Filter imoveis based on applied criteria
   const filteredImoveis = useMemo(() => {
     return imoveis.filter((imovel) => {
       const imovelAny = imovel as any;
 
-      // Search term filter (title, address, codigo)
-      if (searchTerm) {
-        const search = searchTerm.toLowerCase();
+      // Search term filter (title, address, codigo) - applies immediately
+      if (appliedFilters.searchTerm) {
+        const search = appliedFilters.searchTerm.toLowerCase();
         const matchesSearch =
           imovel.titulo?.toLowerCase().includes(search) ||
           imovel.endereco?.toLowerCase().includes(search) ||
@@ -67,39 +80,108 @@ const ImoveisPublic = () => {
         if (!matchesSearch) return false;
       }
 
-      // Type filter
-      if (selectedTipo && imovel.tipo !== selectedTipo) {
+      // Type filter (multiple selection)
+      if (appliedFilters.tipos.length > 0 && !appliedFilters.tipos.includes(imovel.tipo)) {
         return false;
       }
 
       // Bairro filter
-      if (selectedBairro && imovelAny.bairro !== selectedBairro) {
+      if (appliedFilters.bairro && imovelAny.bairro !== appliedFilters.bairro) {
         return false;
       }
 
       // Price range filter
-      if (priceRange.min) {
-        const minPrice = parseFloat(priceRange.min.replace(/\D/g, ''));
+      if (appliedFilters.priceMin) {
+        const minPrice = parseFloat(appliedFilters.priceMin.replace(/\D/g, ''));
         if (imovel.valor && imovel.valor < minPrice) return false;
       }
-      if (priceRange.max) {
-        const maxPrice = parseFloat(priceRange.max.replace(/\D/g, ''));
+      if (appliedFilters.priceMax) {
+        const maxPrice = parseFloat(appliedFilters.priceMax.replace(/\D/g, ''));
         if (imovel.valor && imovel.valor > maxPrice) return false;
       }
 
       return true;
     });
-  }, [imoveis, searchTerm, selectedTipo, selectedBairro, priceRange]);
+  }, [imoveis, appliedFilters]);
 
   // Check if any filter is active
-  const hasActiveFilters = searchTerm || selectedTipo || selectedBairro || priceRange.min || priceRange.max;
+  const hasActiveFilters = appliedFilters.searchTerm || appliedFilters.tipos.length > 0 || appliedFilters.bairro || appliedFilters.priceMin || appliedFilters.priceMax;
+
+  // Check if pending filters differ from applied
+  const hasPendingChanges =
+    JSON.stringify(pendingFilters.tipos) !== JSON.stringify(appliedFilters.tipos) ||
+    pendingFilters.bairro !== appliedFilters.bairro ||
+    pendingFilters.priceMin !== appliedFilters.priceMin ||
+    pendingFilters.priceMax !== appliedFilters.priceMax;
+
+  // Apply pending filters
+  const applyFilters = () => {
+    setAppliedFilters((prev) => ({
+      ...prev,
+      tipos: pendingFilters.tipos,
+      bairro: pendingFilters.bairro,
+      priceMin: pendingFilters.priceMin,
+      priceMax: pendingFilters.priceMax,
+    }));
+    setShowFilters(false);
+  };
+
+  // Handle search (applies immediately)
+  const handleSearch = (value: string) => {
+    setSearchTerm(value);
+    setAppliedFilters((prev) => ({ ...prev, searchTerm: value }));
+  };
+
+  // Toggle tipo selection
+  const toggleTipo = (tipo: TipoImovel) => {
+    setPendingFilters((prev) => ({
+      ...prev,
+      tipos: prev.tipos.includes(tipo)
+        ? prev.tipos.filter((t) => t !== tipo)
+        : [...prev.tipos, tipo],
+    }));
+  };
 
   // Clear all filters
   const clearFilters = () => {
     setSearchTerm('');
-    setSelectedTipo('');
-    setSelectedBairro('');
-    setPriceRange({ min: '', max: '' });
+    setPendingFilters({ tipos: [], bairro: '', priceMin: '', priceMax: '' });
+    setAppliedFilters({ searchTerm: '', tipos: [], bairro: '', priceMin: '', priceMax: '' });
+  };
+
+  // Remove single applied filter
+  const removeAppliedTipo = (tipo: TipoImovel) => {
+    const newTipos = appliedFilters.tipos.filter((t) => t !== tipo);
+    setAppliedFilters((prev) => ({ ...prev, tipos: newTipos }));
+    setPendingFilters((prev) => ({ ...prev, tipos: newTipos }));
+  };
+
+  const removeAppliedBairro = () => {
+    setAppliedFilters((prev) => ({ ...prev, bairro: '' }));
+    setPendingFilters((prev) => ({ ...prev, bairro: '' }));
+  };
+
+  const removeAppliedPrice = (type: 'min' | 'max') => {
+    if (type === 'min') {
+      setAppliedFilters((prev) => ({ ...prev, priceMin: '' }));
+      setPendingFilters((prev) => ({ ...prev, priceMin: '' }));
+    } else {
+      setAppliedFilters((prev) => ({ ...prev, priceMax: '' }));
+      setPendingFilters((prev) => ({ ...prev, priceMax: '' }));
+    }
+  };
+
+  // Sync pending with applied when opening filters
+  const handleToggleFilters = () => {
+    if (!showFilters) {
+      setPendingFilters({
+        tipos: appliedFilters.tipos,
+        bairro: appliedFilters.bairro,
+        priceMin: appliedFilters.priceMin,
+        priceMax: appliedFilters.priceMax,
+      });
+    }
+    setShowFilters(!showFilters);
   };
 
   if (loading) {
@@ -163,12 +245,12 @@ const ImoveisPublic = () => {
                 type="text"
                 placeholder="Buscar por nome, endereço ou código..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => handleSearch(e.target.value)}
                 className="w-full h-12 pl-12 pr-4 bg-card border border-border/60 rounded-lg text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
               />
               {searchTerm && (
                 <button
-                  onClick={() => setSearchTerm('')}
+                  onClick={() => handleSearch('')}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors"
                 >
                   <X className="h-4 w-4" />
@@ -176,7 +258,7 @@ const ImoveisPublic = () => {
               )}
             </div>
             <button
-              onClick={() => setShowFilters(!showFilters)}
+              onClick={handleToggleFilters}
               className={`h-12 px-5 flex items-center gap-2 border rounded-lg text-sm font-medium transition-all ${
                 showFilters || hasActiveFilters
                   ? 'bg-primary text-primary-foreground border-primary'
@@ -185,9 +267,9 @@ const ImoveisPublic = () => {
             >
               <SlidersHorizontal className="h-4 w-4" />
               <span className="hidden sm:inline">Filtros</span>
-              {hasActiveFilters && (
+              {(appliedFilters.tipos.length > 0 || appliedFilters.bairro || appliedFilters.priceMin || appliedFilters.priceMax) && (
                 <span className="h-5 w-5 flex items-center justify-center bg-white text-primary text-xs font-bold rounded-full">
-                  {[selectedTipo, selectedBairro, priceRange.min, priceRange.max].filter(Boolean).length}
+                  {appliedFilters.tipos.length + (appliedFilters.bairro ? 1 : 0) + (appliedFilters.priceMin ? 1 : 0) + (appliedFilters.priceMax ? 1 : 0)}
                 </span>
               )}
             </button>
@@ -199,34 +281,37 @@ const ImoveisPublic = () => {
           }`}>
             <div className="overflow-hidden">
               <div className="bg-card border border-border/60 rounded-lg p-5">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {/* Tipo de Imóvel */}
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                      Tipo de Imóvel
-                    </label>
-                    <select
-                      value={selectedTipo}
-                      onChange={(e) => setSelectedTipo(e.target.value as TipoImovel | '')}
-                      className="w-full h-11 px-3 bg-background border border-border/60 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                    >
-                      <option value="">Todos os tipos</option>
-                      {tiposImovel.map((tipo) => (
-                        <option key={tipo} value={tipo}>
-                          {tipo}
-                        </option>
-                      ))}
-                    </select>
+                {/* Tipo de Imóvel - Checkboxes */}
+                <div className="space-y-3 mb-5">
+                  <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                    Tipo de Imóvel
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {tiposImovel.map((tipo) => (
+                      <button
+                        key={tipo}
+                        onClick={() => toggleTipo(tipo)}
+                        className={`px-4 py-2 rounded-lg text-sm font-medium border transition-all ${
+                          pendingFilters.tipos.includes(tipo)
+                            ? 'bg-primary text-primary-foreground border-primary'
+                            : 'bg-background border-border/60 text-muted-foreground hover:border-primary hover:text-primary'
+                        }`}
+                      >
+                        {tipo}
+                      </button>
+                    ))}
                   </div>
+                </div>
 
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {/* Bairro */}
                   <div className="space-y-2">
                     <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       Bairro
                     </label>
                     <select
-                      value={selectedBairro}
-                      onChange={(e) => setSelectedBairro(e.target.value)}
+                      value={pendingFilters.bairro}
+                      onChange={(e) => setPendingFilters((prev) => ({ ...prev, bairro: e.target.value }))}
                       className="w-full h-11 px-3 bg-background border border-border/60 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                     >
                       <option value="">Todos os bairros</option>
@@ -248,10 +333,10 @@ const ImoveisPublic = () => {
                       <input
                         type="text"
                         placeholder="0"
-                        value={priceRange.min}
+                        value={pendingFilters.priceMin}
                         onChange={(e) => {
                           const value = e.target.value.replace(/\D/g, '');
-                          setPriceRange((prev) => ({ ...prev, min: value }));
+                          setPendingFilters((prev) => ({ ...prev, priceMin: value }));
                         }}
                         className="w-full h-11 pl-10 pr-3 bg-background border border-border/60 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                       />
@@ -268,10 +353,10 @@ const ImoveisPublic = () => {
                       <input
                         type="text"
                         placeholder="Sem limite"
-                        value={priceRange.max}
+                        value={pendingFilters.priceMax}
                         onChange={(e) => {
                           const value = e.target.value.replace(/\D/g, '');
-                          setPriceRange((prev) => ({ ...prev, max: value }));
+                          setPendingFilters((prev) => ({ ...prev, priceMax: value }));
                         }}
                         className="w-full h-11 pl-10 pr-3 bg-background border border-border/60 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                       />
@@ -279,18 +364,25 @@ const ImoveisPublic = () => {
                   </div>
                 </div>
 
-                {/* Clear Filters */}
-                {hasActiveFilters && (
-                  <div className="mt-4 pt-4 border-t border-border/40 flex justify-end">
-                    <button
-                      onClick={clearFilters}
-                      className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
-                    >
-                      <X className="h-4 w-4" />
-                      Limpar filtros
-                    </button>
-                  </div>
-                )}
+                {/* Action Buttons */}
+                <div className="mt-5 pt-4 border-t border-border/40 flex flex-col sm:flex-row justify-between gap-3">
+                  <button
+                    onClick={clearFilters}
+                    className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    <X className="h-4 w-4" />
+                    Limpar filtros
+                  </button>
+                  <button
+                    onClick={applyFilters}
+                    className="h-11 px-6 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors flex items-center justify-center gap-2"
+                  >
+                    Aplicar Filtros
+                    {hasPendingChanges && (
+                      <span className="h-2 w-2 bg-white rounded-full animate-pulse" />
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -299,34 +391,34 @@ const ImoveisPublic = () => {
           <div className="flex flex-wrap items-center gap-3">
             {hasActiveFilters && (
               <>
-                {selectedTipo && (
+                {appliedFilters.tipos.map((tipo) => (
+                  <span key={tipo} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary text-xs font-medium rounded-full">
+                    {tipo}
+                    <button onClick={() => removeAppliedTipo(tipo)} className="hover:text-primary/70">
+                      <X className="h-3 w-3" />
+                    </button>
+                  </span>
+                ))}
+                {appliedFilters.bairro && (
                   <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary text-xs font-medium rounded-full">
-                    {selectedTipo}
-                    <button onClick={() => setSelectedTipo('')} className="hover:text-primary/70">
+                    {appliedFilters.bairro}
+                    <button onClick={removeAppliedBairro} className="hover:text-primary/70">
                       <X className="h-3 w-3" />
                     </button>
                   </span>
                 )}
-                {selectedBairro && (
+                {appliedFilters.priceMin && (
                   <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary text-xs font-medium rounded-full">
-                    {selectedBairro}
-                    <button onClick={() => setSelectedBairro('')} className="hover:text-primary/70">
+                    Mín: R$ {parseInt(appliedFilters.priceMin).toLocaleString('pt-BR')}
+                    <button onClick={() => removeAppliedPrice('min')} className="hover:text-primary/70">
                       <X className="h-3 w-3" />
                     </button>
                   </span>
                 )}
-                {priceRange.min && (
+                {appliedFilters.priceMax && (
                   <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary text-xs font-medium rounded-full">
-                    Mín: R$ {parseInt(priceRange.min).toLocaleString('pt-BR')}
-                    <button onClick={() => setPriceRange((prev) => ({ ...prev, min: '' }))} className="hover:text-primary/70">
-                      <X className="h-3 w-3" />
-                    </button>
-                  </span>
-                )}
-                {priceRange.max && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary text-xs font-medium rounded-full">
-                    Máx: R$ {parseInt(priceRange.max).toLocaleString('pt-BR')}
-                    <button onClick={() => setPriceRange((prev) => ({ ...prev, max: '' }))} className="hover:text-primary/70">
+                    Máx: R$ {parseInt(appliedFilters.priceMax).toLocaleString('pt-BR')}
+                    <button onClick={() => removeAppliedPrice('max')} className="hover:text-primary/70">
                       <X className="h-3 w-3" />
                     </button>
                   </span>
