@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -25,6 +25,29 @@ export const LeadForm = ({ imovelId, imovelCodigo, imovelValor, tiposDisponiveis
   });
   const [loading, setLoading] = useState(false);
   const [viewCount] = useState(Math.floor(Math.random() * 50) + 20); // Número aleatório entre 20-70
+  const [firstStageId, setFirstStageId] = useState<string | null>(null);
+
+  // Carregar primeiro estágio do pipeline para atribuir aos novos leads
+  useEffect(() => {
+    const loadFirstStage = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('lead_pipeline_stages')
+          .select('id')
+          .order('order_index', { ascending: true })
+          .limit(1)
+          .single();
+
+        if (!error && data) {
+          setFirstStageId(data.id);
+        }
+      } catch (err) {
+        console.error('Error loading first stage:', err);
+      }
+    };
+
+    loadFirstStage();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +72,7 @@ export const LeadForm = ({ imovelId, imovelCodigo, imovelValor, tiposDisponiveis
         email: formData.email.trim(),
         tipo_interesse: formData.tipo_interesse,
         status: 'Aguardando',
+        stage_id: firstStageId, // Atribuir ao primeiro estágio do pipeline
       }).select().single();
 
       if (error) throw error;
