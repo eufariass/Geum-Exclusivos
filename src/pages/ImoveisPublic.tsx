@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { BedDouble, Bath, Car, Maximize, Home, MapPin, Phone, Mail, ArrowRight, Search, X, SlidersHorizontal } from 'lucide-react';
 import logoBlack from '@/assets/logo-geum-black.png';
 import logoWhite from '@/assets/logo-geum-white.png';
+import bannerExclusividade from '@/assets/banner-exclusividade.jpg';
 
 const tiposImovel: TipoImovel[] = ['Casa', 'Casa em condomínio', 'Apartamento', 'Terreno', 'Comercial', 'Rural'];
 
@@ -223,16 +224,18 @@ const ImoveisPublic = () => {
       </header>
 
       <main className="flex-grow container mx-auto px-6 py-16 max-w-7xl">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-10 gap-6">
-          <div className="space-y-4 max-w-2xl">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-primary tracking-tight">
-              Exclusividade Geum
-            </h1>
-            <p className="text-lg text-muted-foreground font-normal max-w-xl leading-relaxed">
-              Uma curadoria de imóveis selecionados pela Imobiliária Geum.
-            </p>
+        {/* Banner */}
+        <div className="mb-10">
+          <div className="relative w-full rounded-xl overflow-hidden">
+            <img
+              src={bannerExclusividade}
+              alt="Exclusividade Geum"
+              className="w-full h-auto object-cover"
+            />
           </div>
-          <div className="hidden md:block h-px flex-grow bg-border/60 ml-8 mb-4" />
+          <p className="text-lg text-muted-foreground font-normal max-w-xl leading-relaxed mt-6">
+            Uma curadoria de imóveis selecionados pela Imobiliária Geum.
+          </p>
         </div>
 
         {/* Filter Section */}
