@@ -8,7 +8,7 @@ interface ImageUploadProps {
   onImagesSelect: (files: File[]) => void;
   onRemoveImage: (index: number) => void;
   onSetCover: (index: number) => void;
-  onReorderImages: (startIndex: number, endIndex: number) => void;
+  onReorderImages: (newOrder: string[]) => void;
 }
 
 const MAX_IMAGES = 10;
@@ -75,26 +75,30 @@ export const ImageUpload = ({ currentImages = [], coverIndex = 0, onImagesSelect
     onRemoveImage(index);
   };
 
-  const handleDragStart = (index: number) => {
+  const handleDragStart = (e: React.DragEvent, index: number) => {
     setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
   };
 
   const handleDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+
     if (draggedIndex === null || draggedIndex === index) return;
 
     const newPreviews = [...previews];
     const draggedItem = newPreviews[draggedIndex];
     newPreviews.splice(draggedIndex, 1);
     newPreviews.splice(index, 0, draggedItem);
-    
+
     setPreviews(newPreviews);
     setDraggedIndex(index);
   };
 
   const handleDragEnd = () => {
     if (draggedIndex !== null) {
-      onReorderImages(draggedIndex, draggedIndex);
+      // Pass the new order to parent
+      onReorderImages(previews);
     }
     setDraggedIndex(null);
   };
@@ -116,10 +120,10 @@ export const ImageUpload = ({ currentImages = [], coverIndex = 0, onImagesSelect
       {previews.length > 0 && (
         <div className="grid grid-cols-2 gap-3">
           {previews.map((preview, index) => (
-            <div 
-              key={index} 
+            <div
+              key={index}
               draggable
-              onDragStart={() => handleDragStart(index)}
+              onDragStart={(e) => handleDragStart(e, index)}
               onDragOver={(e) => handleDragOver(e, index)}
               onDragEnd={handleDragEnd}
               className={`relative group cursor-move ${

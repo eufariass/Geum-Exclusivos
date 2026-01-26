@@ -663,8 +663,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
                 }
               }}
               onSetCover={(index) => setCoverImageIndex(index)}
-              onReorderImages={(startIndex, endIndex) => {
-                const newOrder = [...(imageOrder.length > 0 ? imageOrder : editingImovel?.image_urls || [])];
+              onReorderImages={(newOrder) => {
                 setImageOrder(newOrder);
               }}
             />
