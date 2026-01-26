@@ -233,7 +233,7 @@ const ImoveisPublic = () => {
               className="w-full h-auto object-cover"
             />
           </div>
-          <p className="text-lg text-muted-foreground font-normal max-w-xl leading-relaxed mt-6">
+          <p className="text-lg text-muted-foreground font-normal leading-relaxed mt-6 text-center">
             Uma curadoria de imóveis selecionados pela Imobiliária Geum.
           </p>
         </div>
