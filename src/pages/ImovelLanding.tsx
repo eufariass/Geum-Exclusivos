@@ -302,9 +302,8 @@ const ImovelLanding = () => {
 
         {/* Layout de 2 Colunas */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Coluna Esquerda - Informações do Imóvel */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Informações Principais */}
+          {/* Informações Principais - Título (ordem 1 em mobile) */}
+          <div className="order-1 lg:col-span-2">
             <Card>
               <CardContent className="p-6 space-y-4">
                 {imovel.titulo && (
@@ -375,9 +374,23 @@ const ImovelLanding = () => {
                 </div>
               </CardContent>
             </Card>
+          </div>
 
-            {/* Descrição */}
-            {imovel.descricao && (
+          {/* Formulário - ordem 2 em mobile, coluna direita no desktop */}
+          <div className="order-2 lg:order-4 lg:col-span-1 lg:row-span-3">
+            <div className="lg:sticky lg:top-24">
+              <LeadForm 
+                imovelId={imovel.id}
+                imovelCodigo={imovel.codigo}
+                imovelValor={imovel.valor}
+                tiposDisponiveis={imovel.tipos_disponiveis}
+              />
+            </div>
+          </div>
+
+          {/* Descrição - Sobre o Imóvel (ordem 3 em mobile) */}
+          {imovel.descricao && (
+            <div className="order-3 lg:col-span-2">
               <Card>
                 <CardContent className="p-6">
                   <h2 className="text-xl font-semibold text-foreground mb-4">Sobre o Imóvel</h2>
@@ -389,22 +402,12 @@ const ImovelLanding = () => {
                   </p>
                 </CardContent>
               </Card>
-            )}
-
-            {/* Mapa de Localização */}
-            <LocationMap cep={(imovel as any).cep} endereco={imovel.endereco} />
-          </div>
-
-          {/* Coluna Direita - Formulário Fixo */}
-          <div className="lg:col-span-1">
-            <div className="lg:sticky lg:top-24">
-              <LeadForm 
-                imovelId={imovel.id}
-                imovelCodigo={imovel.codigo}
-                imovelValor={imovel.valor}
-                tiposDisponiveis={imovel.tipos_disponiveis}
-              />
             </div>
+          )}
+
+          {/* Mapa de Localização (ordem 4 em mobile) */}
+          <div className="order-4 lg:col-span-2">
+            <LocationMap cep={(imovel as any).cep} endereco={imovel.endereco} />
           </div>
         </div>
       </main>
