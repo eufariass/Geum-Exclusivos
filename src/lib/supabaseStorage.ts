@@ -177,7 +177,7 @@ export const supabaseStorageService = {
   // Comentários e Histórico
   async getImovelComments(imovelId: string): Promise<any[]> {
     const { data, error } = await supabase
-      .from('imovel_comments')
+      .from('imovel_comments' as any)
       .select('*')
       .eq('imovel_id', imovelId)
       .order('created_at', { ascending: false });
@@ -191,7 +191,7 @@ export const supabaseStorageService = {
 
   async addImovelComment(comment: { imovel_id: string; content: string; created_by: string; created_by_name: string }): Promise<any> {
     const { data, error } = await supabase
-      .from('imovel_comments')
+      .from('imovel_comments' as any)
       .insert([comment])
       .select()
       .single();
@@ -202,7 +202,7 @@ export const supabaseStorageService = {
 
   async getImovelHistory(imovelId: string): Promise<any[]> {
     const { data, error } = await supabase
-      .from('imovel_history')
+      .from('imovel_history' as any)
       .select('*')
       .eq('imovel_id', imovelId)
       .order('created_at', { ascending: false });
@@ -217,7 +217,7 @@ export const supabaseStorageService = {
   async logImovelHistory(history: { imovel_id: string; action: string; description: string; created_by: string; created_by_name: string }): Promise<void> {
     try {
       await supabase
-        .from('imovel_history')
+        .from('imovel_history' as any)
         .insert([history]);
     } catch (error) {
       console.warn('Error logging history:', error);
