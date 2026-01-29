@@ -200,3 +200,22 @@ export interface TaskSummary {
   overdue_count: number;
   due_today_count: number;
 }
+
+export interface ImovelComment {
+  id: string;
+  imovel_id: string;
+  content: string;
+  created_by?: string;
+  created_by_name?: string;
+  created_at: string;
+}
+
+export interface ImovelHistory {
+  id: string;
+  imovel_id: string;
+  action: 'created' | 'updated' | 'image_added' | 'image_removed' | 'comment_added';
+  description: string;
+  created_by?: string;
+  created_by_name?: string;
+  created_at: string;
+}

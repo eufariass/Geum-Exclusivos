@@ -8,7 +8,7 @@ export const supabaseStorageService = {
       .from('imoveis')
       .select('*')
       .order('created_at', { ascending: false });
-    
+
     if (error) throw error;
     return (data || []) as Imovel[];
   },
@@ -19,7 +19,7 @@ export const supabaseStorageService = {
       .insert([imovel])
       .select()
       .single();
-    
+
     if (error) throw error;
     return data as Imovel;
   },
@@ -29,7 +29,7 @@ export const supabaseStorageService = {
       .from('imoveis')
       .update(updates)
       .eq('id', id);
-    
+
     if (error) throw error;
   },
 
@@ -38,7 +38,7 @@ export const supabaseStorageService = {
       .from('imoveis')
       .delete()
       .eq('id', id);
-    
+
     if (error) throw error;
   },
 
@@ -90,7 +90,7 @@ export const supabaseStorageService = {
       .from('metricas')
       .select('*')
       .order('mes', { ascending: false });
-    
+
     if (error) throw error;
     return data || [];
   },
@@ -101,7 +101,7 @@ export const supabaseStorageService = {
       .insert([metrica])
       .select()
       .single();
-    
+
     if (error) throw error;
     return data;
   },
@@ -112,7 +112,7 @@ export const supabaseStorageService = {
       .update(updates)
       .eq('imovel_id', imovelId)
       .eq('mes', mes);
-    
+
     if (error) throw error;
   },
 
@@ -121,7 +121,7 @@ export const supabaseStorageService = {
       .from('metricas')
       .delete()
       .eq('id', id);
-    
+
     if (error) throw error;
   },
 
@@ -132,7 +132,7 @@ export const supabaseStorageService = {
       .eq('imovel_id', imovelId)
       .eq('mes', mes)
       .maybeSingle();
-    
+
     if (error) throw error;
     return data;
   },
@@ -141,7 +141,7 @@ export const supabaseStorageService = {
   async exportData(): Promise<ExportData> {
     const imoveis = await this.getImoveis();
     const metricas = await this.getMetricas();
-    
+
     return {
       imoveis,
       metricas,
@@ -160,7 +160,7 @@ export const supabaseStorageService = {
       const { error: imoveisError } = await supabase
         .from('imoveis')
         .insert(data.imoveis);
-      
+
       if (imoveisError) throw imoveisError;
     }
 
@@ -169,8 +169,58 @@ export const supabaseStorageService = {
       const { error: metricasError } = await supabase
         .from('metricas')
         .insert(data.metricas);
-      
+
       if (metricasError) throw metricasError;
+    }
+  },
+
+  // Comentários e Histórico
+  async getImovelComments(imovelId: string): Promise<any[]> {
+    const { data, error } = await supabase
+      .from('imovel_comments')
+      .select('*')
+      .eq('imovel_id', imovelId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.warn('Error fetching comments (table might not exist yet):', error);
+      return [];
+    }
+    return data || [];
+  },
+
+  async addImovelComment(comment: { imovel_id: string; content: string; created_by: string; created_by_name: string }): Promise<any> {
+    const { data, error } = await supabase
+      .from('imovel_comments')
+      .insert([comment])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async getImovelHistory(imovelId: string): Promise<any[]> {
+    const { data, error } = await supabase
+      .from('imovel_history')
+      .select('*')
+      .eq('imovel_id', imovelId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.warn('Error fetching history (table might not exist yet):', error);
+      return [];
+    }
+    return data || [];
+  },
+
+  async logImovelHistory(history: { imovel_id: string; action: string; description: string; created_by: string; created_by_name: string }): Promise<void> {
+    try {
+      await supabase
+        .from('imovel_history')
+        .insert([history]);
+    } catch (error) {
+      console.warn('Error logging history:', error);
     }
   },
 };

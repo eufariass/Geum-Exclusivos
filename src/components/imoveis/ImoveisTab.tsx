@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ImovelModal } from './ImovelModal';
+import { ImovelDetailsModal } from './ImovelDetailsModal';
 import type { Imovel } from '@/types';
 import { supabaseStorageService } from '@/lib/supabaseStorage';
 import { formatCurrency } from '@/lib/dateUtils';
@@ -19,6 +20,13 @@ export const ImoveisTab = ({ onToast }: ImoveisTabProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingImovel, setEditingImovel] = useState<Imovel | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [selectedImovel, setSelectedImovel] = useState<Imovel | null>(null);
+
+  const handleViewDetails = (imovel: Imovel) => {
+    setSelectedImovel(imovel);
+    setIsDetailsOpen(true);
+  };
 
   const loadImoveis = async () => {
     try {
@@ -100,14 +108,14 @@ export const ImoveisTab = ({ onToast }: ImoveisTabProps) => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {imoveis.map((imovel) => (
-            <Card key={imovel.id} className="overflow-hidden card-hover group">
+            <Card key={imovel.id} className="overflow-hidden card-hover group cursor-pointer border-transparent shadow-sm hover:shadow-md transition-all" onClick={() => handleViewDetails(imovel)}>
               <div className="relative h-48 bg-muted overflow-hidden">
                 {imovel.image_urls && imovel.image_urls.length > 0 ? (
                   <>
                     <img
                       src={imovel.image_urls[0]}
                       alt={imovel.endereco}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     {imovel.image_urls.length > 1 && (
                       <div className="absolute bottom-3 left-3 px-2 py-1 bg-background/90 backdrop-blur-sm rounded text-xs font-medium">
@@ -134,14 +142,15 @@ export const ImoveisTab = ({ onToast }: ImoveisTabProps) => {
                       <img src={googleAdsLogo} alt="Google Ads" className="w-4 h-4 object-contain" />
                     </div>
                   )}
-                  <Link 
-                    to={`/${imovel.codigo}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-3 py-1 bg-primary text-primary-foreground rounded-full text-xs font-bold hover:bg-primary/90 transition-colors cursor-pointer"
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Prevent opening modal when clicking code badge if used for copying later
+                    }}
+                    className="px-3 py-1 bg-primary text-primary-foreground rounded-full text-xs font-bold hover:bg-primary/90 transition-colors"
                   >
                     {imovel.codigo}
-                  </Link>
+                  </div>
                 </div>
               </div>
 
@@ -169,8 +178,11 @@ export const ImoveisTab = ({ onToast }: ImoveisTabProps) => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleEdit(imovel)}
-                    className="flex-1 gap-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleEdit(imovel);
+                    }}
+                    className="flex-1 gap-2 rounded-xl"
                   >
                     <Pencil className="h-3 w-3" />
                     Editar
@@ -178,8 +190,11 @@ export const ImoveisTab = ({ onToast }: ImoveisTabProps) => {
                   <Button
                     variant="destructive"
                     size="sm"
-                    onClick={() => handleDelete(imovel)}
-                    className="gap-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(imovel);
+                    }}
+                    className="gap-2 rounded-xl"
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>
@@ -195,6 +210,12 @@ export const ImoveisTab = ({ onToast }: ImoveisTabProps) => {
         onClose={() => setIsModalOpen(false)}
         onSave={handleSave}
         editingImovel={editingImovel}
+      />
+
+      <ImovelDetailsModal
+        isOpen={isDetailsOpen}
+        onClose={() => setIsDetailsOpen(false)}
+        imovel={selectedImovel}
       />
     </div>
   );
