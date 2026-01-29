@@ -456,28 +456,52 @@ export const ImovelDetailsModal = ({ isOpen, onClose, imovel }: ImovelDetailsMod
             {/* Lightbox for Full Screen Image */}
             {isLightboxOpen && (
                 <div
-                    className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 animate-in fade-in duration-200"
+                    className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 animate-in fade-in duration-200"
                     onClick={() => setIsLightboxOpen(false)}
                 >
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="absolute top-4 right-4 text-white hover:bg-white/10 rounded-full h-12 w-12"
+                        className="absolute top-4 right-4 text-white hover:bg-white/10 rounded-full h-12 w-12 z-[110]"
                         onClick={() => setIsLightboxOpen(false)}
                     >
                         <X className="h-6 w-6" />
                     </Button>
 
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/10 rounded-full h-12 w-12 z-[110]"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedImageIndex((prev) => (prev > 0 ? prev - 1 : (imovel.image_urls?.length || 1) - 1));
+                        }}
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-left"><path d="m15 18-6-6 6-6" /></svg>
+                    </Button>
+
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:bg-white/10 rounded-full h-12 w-12 z-[110]"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedImageIndex((prev) => (prev < (imovel.image_urls?.length || 1) - 1 ? prev + 1 : 0));
+                        }}
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-chevron-right"><path d="m9 18 6-6-6-6" /></svg>
+                    </Button>
+
                     <img
                         src={imovel.image_urls?.[selectedImageIndex]}
                         alt="Full screen view"
-                        className="max-w-full max-h-[90vh] object-contain rounded-md shadow-2xl"
+                        className="max-w-full max-h-[90vh] object-contain rounded-md shadow-2xl z-[105]"
                         onClick={(e) => e.stopPropagation()}
                     />
 
                     {imovel.image_urls && imovel.image_urls.length > 1 && (
                         <div
-                            className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 p-2 bg-black/50 backdrop-blur-md rounded-full max-w-[90vw] overflow-x-auto"
+                            className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 p-2 bg-black/50 backdrop-blur-md rounded-full max-w-[90vw] overflow-x-auto z-[110]"
                             onClick={(e) => e.stopPropagation()}
                         >
                             {imovel.image_urls.map((url, idx) => (
