@@ -141,7 +141,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
 
   const buscarCEP = async (cep: string) => {
     const cleanCEP = cep.replace(/\D/g, '');
-    
+
     if (cleanCEP.length !== 8) {
       return;
     }
@@ -171,7 +171,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
     const value = e.target.value.replace(/\D/g, '');
     const formatted = value.replace(/^(\d{5})(\d)/, '$1-$2');
     setFormData(prev => ({ ...prev, cep: formatted }));
-    
+
     if (value.length === 8) {
       buscarCEP(value);
     }
@@ -222,18 +222,18 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
       // Download todas as imagens e adiciona ao ZIP
       for (let i = 0; i < editingImovel.image_urls.length; i++) {
         const imageUrl = editingImovel.image_urls[i];
-        
+
         try {
           const response = await fetch(imageUrl, {
             mode: 'cors',
           });
-          
+
           if (!response.ok) {
             throw new Error(`Erro ao baixar imagem ${i + 1}`);
           }
-          
+
           const arrayBuffer = await response.arrayBuffer();
-          
+
           // Adiciona ao ZIP com nome formatado
           zip.file(`${editingImovel.codigo}_foto_${i + 1}.jpg`, arrayBuffer);
         } catch (imgError) {
@@ -245,7 +245,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
       // Gera o arquivo ZIP
       toast.info('Gerando arquivo ZIP...');
       const nomeArquivo = `${editingImovel.codigo}_fotos.zip`;
-      const zipBlob = await zip.generateAsync({ 
+      const zipBlob = await zip.generateAsync({
         type: 'blob',
         compression: 'DEFLATE',
         compressionOptions: {
@@ -277,11 +277,11 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
         const imagesToDelete = removedImageIndices
           .map(index => editingImovel.image_urls?.[index])
           .filter(url => url) as string[];
-        
+
         if (imagesToDelete.length > 0) {
           await supabaseStorageService.deleteImages(imagesToDelete);
         }
-        
+
         imageUrls = imageUrls.filter((_, index) => !removedImageIndices.includes(index));
       }
 
@@ -298,7 +298,7 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
       }
 
       // Montar endereço completo
-      const enderecoCompleto = formData.numero 
+      const enderecoCompleto = formData.numero
         ? `${formData.rua}, ${formData.numero}${formData.bairro ? ` - ${formData.bairro}` : ''}`
         : formData.rua;
 
@@ -331,8 +331,22 @@ export const ImovelModal = ({ isOpen, onClose, onSave, editingImovel }: ImovelMo
 
       if (editingImovel) {
         await supabaseStorageService.updateImovel(editingImovel.id, imovelData);
+        await supabaseStorageService.logImovelHistory({
+          imovel_id: editingImovel.id,
+          action: 'updated',
+          description: 'Atualizou as informações do imóvel',
+          created_by: user?.id || 'system',
+          created_by_name: user?.email?.split('@')[0] || 'Usuário',
+        });
       } else {
-        await supabaseStorageService.addImovel(imovelData);
+        const newImovel = await supabaseStorageService.addImovel(imovelData);
+        await supabaseStorageService.logImovelHistory({
+          imovel_id: newImovel.id,
+          action: 'created',
+          description: 'Imóvel cadastrado',
+          created_by: user?.id || 'system',
+          created_by_name: user?.email?.split('@')[0] || 'Usuário',
+        });
       }
 
       onSave({} as Imovel); // Trigger refresh

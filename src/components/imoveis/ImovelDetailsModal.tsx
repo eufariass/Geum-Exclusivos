@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -14,22 +14,24 @@ import {
     Bath,
     Car,
     Ruler,
-    Calendar,
     DollarSign,
     User,
-    Share2,
-    Clock,
     MessageSquare,
     History,
     Send,
     Building2,
-    X
+    Maximize2,
+    Minimize2,
+    Download,
+    X,
+    Image as ImageIcon
 } from 'lucide-react';
 import type { Imovel, ImovelComment, ImovelHistory } from '@/types';
 import { formatCurrency } from '@/lib/dateUtils';
 import { supabaseStorageService } from '@/lib/supabaseStorage';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import JSZip from 'jszip'; // Ensure JSZip is installed or use logic
 
 interface ImovelDetailsModalProps {
     isOpen: boolean;
@@ -46,6 +48,9 @@ export const ImovelDetailsModal = ({ isOpen, onClose, imovel }: ImovelDetailsMod
     const [loadingComments, setLoadingComments] = useState(false);
     const [loadingHistory, setLoadingHistory] = useState(false);
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+    const [isFullScreen, setIsFullScreen] = useState(false);
+    const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+    const [isDownloading, setIsDownloading] = useState(false);
 
     useEffect(() => {
         if (isOpen && imovel) {
@@ -63,6 +68,7 @@ export const ImovelDetailsModal = ({ isOpen, onClose, imovel }: ImovelDetailsMod
             setComments(data);
         } catch (error) {
             console.error('Erro ao carregar comentários:', error);
+            // Silent fail is okay, but we might want to inform if it's not just "empty"
         } finally {
             setLoadingComments(false);
         }
@@ -72,6 +78,8 @@ export const ImovelDetailsModal = ({ isOpen, onClose, imovel }: ImovelDetailsMod
         if (!imovel) return;
         setLoadingHistory(true);
         try {
+            // In a real app, you might merge 'imovel_history' table with local audit logs if needed
+            // For now, we fetch from the dedicated table
             const data = await supabaseStorageService.getImovelHistory(imovel.id);
             setHistory(data);
         } catch (error) {
@@ -106,7 +114,43 @@ export const ImovelDetailsModal = ({ isOpen, onClose, imovel }: ImovelDetailsMod
             loadHistory();
         } catch (error) {
             console.error('Erro ao adicionar comentário:', error);
-            toast.error('Erro ao adicionar comentário');
+            toast.error('Erro ao salvar comentário. Verifique se as tabelas foram criadas.');
+        }
+    };
+
+    const handleDownloadPhotos = async () => {
+        if (!imovel || !imovel.image_urls || imovel.image_urls.length === 0) return;
+
+        setIsDownloading(true);
+        try {
+            const zip = new JSZip();
+
+            // Promise.all to fetch all images
+            const promises = imovel.image_urls.map(async (url, i) => {
+                const response = await fetch(url);
+                const blob = await response.blob();
+                const ext = url.split('.').pop()?.split('?')[0] || 'jpg';
+                zip.file(`foto-${i + 1}.${ext}`, blob);
+            });
+
+            await Promise.all(promises);
+
+            const content = await zip.generateAsync({ type: 'blob' });
+
+            // Create download link
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(content);
+            link.download = `${imovel.titulo || 'imovel'}-${imovel.codigo}.zip`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            toast.success('Download iniciado!');
+        } catch (error) {
+            console.error('Erro ao baixar fotos:', error);
+            toast.error('Erro ao baixar fotos.');
+        } finally {
+            setIsDownloading(false);
         }
     };
 
@@ -114,16 +158,19 @@ export const ImovelDetailsModal = ({ isOpen, onClose, imovel }: ImovelDetailsMod
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-5xl h-[90vh] p-0 gap-0 bg-background/95 backdrop-blur-xl border-border/40 overflow-hidden flex flex-col md:flex-row rounded-3xl">
+            <DialogContent className={`p-0 gap-0 bg-background/95 backdrop-blur-xl border-border/40 overflow-hidden flex flex-col md:flex-row transition-all duration-300 [&>button]:hidden ${isFullScreen ? 'w-screen h-screen max-w-none rounded-none' : 'max-w-5xl h-[90vh] rounded-3xl'}`}>
 
                 {/* Left Column - Image Gallery & Key Info */}
-                <div className="w-full md:w-1/2 bg-muted/30 flex flex-col h-full border-r border-border/40">
+                <div className={`w-full md:w-1/2 bg-muted/30 flex flex-col h-full border-r border-border/40 relative ${isFullScreen ? 'md:w-[60%]' : ''}`}>
+
+                    {/* Main Image Area */}
                     <div className="relative flex-1 bg-black/5 overflow-hidden group">
                         {imovel.image_urls && imovel.image_urls.length > 0 ? (
                             <img
                                 src={imovel.image_urls[selectedImageIndex]}
                                 alt={imovel.titulo}
-                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 cursor-zoom-in"
+                                onClick={() => setIsLightboxOpen(true)}
                             />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center bg-muted">
@@ -131,6 +178,7 @@ export const ImovelDetailsModal = ({ isOpen, onClose, imovel }: ImovelDetailsMod
                             </div>
                         )}
 
+                        {/* Badges Overlay */}
                         <div className="absolute top-4 left-4 flex gap-2">
                             <Badge className="bg-background/90 text-foreground backdrop-blur-md shadow-sm pointer-events-none data-[type=Venda]:bg-blue-500/10 data-[type=Venda]:text-blue-700 data-[type=Locação]:bg-green-500/10 data-[type=Locação]:text-green-700">
                                 {imovel.tipo}
@@ -140,6 +188,29 @@ export const ImovelDetailsModal = ({ isOpen, onClose, imovel }: ImovelDetailsMod
                                     {p}
                                 </Badge>
                             ))}
+                        </div>
+
+                        {/* Action Buttons Overlay */}
+                        <div className="absolute top-4 right-4 flex gap-2">
+                            <Button
+                                variant="secondary"
+                                size="icon"
+                                className="h-8 w-8 rounded-full bg-background/80 backdrop-blur"
+                                onClick={handleDownloadPhotos}
+                                disabled={isDownloading}
+                                title="Baixar todas as fotos"
+                            >
+                                <Download className={`h-4 w-4 ${isDownloading ? 'animate-pulse' : ''}`} />
+                            </Button>
+                            <Button
+                                variant="secondary"
+                                size="icon"
+                                className="h-8 w-8 rounded-full bg-background/80 backdrop-blur"
+                                onClick={() => setIsLightboxOpen(true)}
+                                title="Ver em tela cheia"
+                            >
+                                <Maximize2 className="h-4 w-4" />
+                            </Button>
                         </div>
                     </div>
 
@@ -152,8 +223,8 @@ export const ImovelDetailsModal = ({ isOpen, onClose, imovel }: ImovelDetailsMod
                                         key={idx}
                                         onClick={() => setSelectedImageIndex(idx)}
                                         className={`relative w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 border-2 transition-all ${selectedImageIndex === idx
-                                                ? 'border-primary ring-2 ring-primary/20 scale-105 z-10'
-                                                : 'border-transparent opacity-70 hover:opacity-100 hover:scale-105'
+                                            ? 'border-primary ring-2 ring-primary/20 scale-105 z-10'
+                                            : 'border-transparent opacity-70 hover:opacity-100 hover:scale-105'
                                             }`}
                                     >
                                         <img src={url} alt="" className="w-full h-full object-cover" />
@@ -180,7 +251,7 @@ export const ImovelDetailsModal = ({ isOpen, onClose, imovel }: ImovelDetailsMod
                 </div>
 
                 {/* Right Column - Tabs & Details */}
-                <div className="w-full md:w-1/2 flex flex-col h-full bg-background/60 backdrop-blur-xl">
+                <div className={`w-full flex flex-col h-full bg-background/60 backdrop-blur-xl ${isFullScreen ? 'md:w-[40%]' : 'md:w-1/2'}`}>
                     <div className="flex items-center justify-between p-4 border-b border-border/40">
                         <div className="flex items-center gap-2">
                             <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
@@ -191,9 +262,21 @@ export const ImovelDetailsModal = ({ isOpen, onClose, imovel }: ImovelDetailsMod
                                 <p className="font-mono font-medium">{imovel.codigo}</p>
                             </div>
                         </div>
-                        <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full hover:bg-muted/50">
-                            <X className="h-5 w-5" />
-                        </Button>
+
+                        <div className="flex items-center gap-1">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setIsFullScreen(!isFullScreen)}
+                                className="rounded-full hover:bg-muted/50 hidden md:flex"
+                                title={isFullScreen ? "Restaurar" : "Tela Cheia"}
+                            >
+                                {isFullScreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full hover:bg-muted/50">
+                                <X className="h-5 w-5" />
+                            </Button>
+                        </div>
                     </div>
 
                     <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
@@ -205,10 +288,9 @@ export const ImovelDetailsModal = ({ isOpen, onClose, imovel }: ImovelDetailsMod
                             </TabsList>
                         </div>
 
-                        <div className="flex-1 overflow-hidden p-6">
-                            <ScrollArea className="h-full pr-4">
-                                <TabsContent value="detalhes" className="mt-0 space-y-6 focus-visible:ring-0">
-
+                        <div className="flex-1 overflow-hidden p-6 pb-0"> {/* Removed bottom padding to handle sticky input */}
+                            <TabsContent value="detalhes" className="mt-0 space-y-6 focus-visible:ring-0 h-full">
+                                <ScrollArea className="h-full pr-4 pb-6">
                                     {/* Features Grid */}
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="p-4 rounded-2xl bg-secondary/30 border border-border/50 flex flex-col gap-1">
@@ -241,7 +323,7 @@ export const ImovelDetailsModal = ({ isOpen, onClose, imovel }: ImovelDetailsMod
                                         </div>
                                     </div>
 
-                                    <Separator className="bg-border/50" />
+                                    <Separator className="bg-border/50 my-6" />
 
                                     {/* Description */}
                                     <div className="space-y-3">
@@ -254,10 +336,10 @@ export const ImovelDetailsModal = ({ isOpen, onClose, imovel }: ImovelDetailsMod
                                         </p>
                                     </div>
 
-                                    <Separator className="bg-border/50" />
+                                    <Separator className="bg-border/50 my-6" />
 
                                     {/* Owner Info */}
-                                    <div className="space-y-3">
+                                    <div className="space-y-3 pb-4">
                                         <h3 className="font-semibold flex items-center gap-2">
                                             <User className="h-4 w-4 text-primary" />
                                             Proprietário
@@ -274,11 +356,12 @@ export const ImovelDetailsModal = ({ isOpen, onClose, imovel }: ImovelDetailsMod
                                             </div>
                                         </div>
                                     </div>
+                                </ScrollArea>
+                            </TabsContent>
 
-                                </TabsContent>
-
-                                <TabsContent value="comentarios" className="mt-0 h-full flex flex-col focus-visible:ring-0">
-                                    <div className="space-y-4 mb-6">
+                            <TabsContent value="comentarios" className="mt-0 h-full flex flex-col focus-visible:ring-0">
+                                <ScrollArea className="flex-1 pr-4 -mr-4">
+                                    <div className="pr-4 pb-4 space-y-4">
                                         {loadingComments ? (
                                             <p className="text-center text-muted-foreground text-sm py-8">Carregando comentários...</p>
                                         ) : comments.length === 0 ? (
@@ -309,30 +392,31 @@ export const ImovelDetailsModal = ({ isOpen, onClose, imovel }: ImovelDetailsMod
                                             </div>
                                         )}
                                     </div>
+                                </ScrollArea>
 
-                                    {/* Input Area - Fixed at bottom of tab content in a real scenario, but here inside scroll for simplicity in this modal layout */}
-                                    <div className="mt-auto pt-4 sticky bottom-0 bg-background/95 backdrop-blur-md pb-2">
-                                        <div className="flex gap-2">
-                                            <Textarea
-                                                placeholder="Adicione um comentário..."
-                                                value={newComment}
-                                                onChange={(e) => setNewComment(e.target.value)}
-                                                className="resize-none min-h-[80px] rounded-xl bg-muted/30 focus:bg-background transition-colors"
-                                            />
-                                            <Button
-                                                size="icon"
-                                                onClick={handleAddComment}
-                                                disabled={!newComment.trim()}
-                                                className="h-auto w-12 rounded-xl"
-                                            >
-                                                <Send className="h-4 w-4" />
-                                            </Button>
-                                        </div>
+                                <div className="pt-4 pb-6 mt-auto">
+                                    <div className="flex gap-2">
+                                        <Textarea
+                                            placeholder="Adicione um comentário..."
+                                            value={newComment}
+                                            onChange={(e) => setNewComment(e.target.value)}
+                                            className="resize-none min-h-[44px] max-h-[120px] rounded-xl bg-muted/30 focus:bg-background transition-colors"
+                                        />
+                                        <Button
+                                            size="icon"
+                                            onClick={handleAddComment}
+                                            disabled={!newComment.trim()}
+                                            className="h-auto w-12 rounded-xl shrink-0"
+                                        >
+                                            <Send className="h-4 w-4" />
+                                        </Button>
                                     </div>
-                                </TabsContent>
+                                </div>
+                            </TabsContent>
 
-                                <TabsContent value="historico" className="mt-0 focus-visible:ring-0">
-                                    <div className="space-y-6 pl-2">
+                            <TabsContent value="historico" className="mt-0 h-full focus-visible:ring-0">
+                                <ScrollArea className="h-full pr-4 pb-6">
+                                    <div className="space-y-6 pl-2 pb-4">
                                         {loadingHistory ? (
                                             <p className="text-center text-muted-foreground text-sm py-8">Carregando histórico...</p>
                                         ) : history.length === 0 ? (
@@ -362,12 +446,54 @@ export const ImovelDetailsModal = ({ isOpen, onClose, imovel }: ImovelDetailsMod
                                             </div>
                                         )}
                                     </div>
-                                </TabsContent>
-                            </ScrollArea>
+                                </ScrollArea>
+                            </TabsContent>
                         </div>
                     </Tabs>
                 </div>
             </DialogContent>
+
+            {/* Lightbox for Full Screen Image */}
+            {isLightboxOpen && (
+                <div
+                    className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 animate-in fade-in duration-200"
+                    onClick={() => setIsLightboxOpen(false)}
+                >
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute top-4 right-4 text-white hover:bg-white/10 rounded-full h-12 w-12"
+                        onClick={() => setIsLightboxOpen(false)}
+                    >
+                        <X className="h-6 w-6" />
+                    </Button>
+
+                    <img
+                        src={imovel.image_urls?.[selectedImageIndex]}
+                        alt="Full screen view"
+                        className="max-w-full max-h-[90vh] object-contain rounded-md shadow-2xl"
+                        onClick={(e) => e.stopPropagation()}
+                    />
+
+                    {imovel.image_urls && imovel.image_urls.length > 1 && (
+                        <div
+                            className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 p-2 bg-black/50 backdrop-blur-md rounded-full max-w-[90vw] overflow-x-auto"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {imovel.image_urls.map((url, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => setSelectedImageIndex(idx)}
+                                    className={`w-12 h-12 rounded-lg overflow-hidden border-2 transition-all ${selectedImageIndex === idx ? 'border-primary opacity-100' : 'border-transparent opacity-50 hover:opacity-100'
+                                        }`}
+                                >
+                                    <img src={url} alt="" className="w-full h-full object-cover" />
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
         </Dialog>
     );
 };
