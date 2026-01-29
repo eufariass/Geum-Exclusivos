@@ -138,32 +138,32 @@ export const DashboardTab = () => {
       <motion.div variants={itemVariants} className="space-y-4">
         <h2 className="text-xl font-bold tracking-tight px-1">Dados gerais</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <motion.div whileHover={{ scale: 1.02 }} className="bg-white/40 dark:bg-black/20 backdrop-blur-md p-6 rounded-2xl border border-white/20 shadow-sm flex items-center justify-between">
+          <motion.div whileHover={{ scale: 1.02 }} className="bg-white dark:bg-zinc-900 p-6 rounded-[2rem] shadow-sm hover:shadow-md transition-all border border-transparent hover:border-border/50 flex items-center justify-between group">
             <div>
               <p className="text-sm font-medium text-muted-foreground mb-1">Total de Imóveis</p>
               <p className="text-3xl font-bold">{totalStats.totalImoveis}</p>
             </div>
-            <div className="p-3 bg-primary/10 rounded-xl">
+            <div className="p-3 bg-primary/5 rounded-2xl group-hover:bg-primary/10 transition-colors">
               <Building2 className="h-6 w-6 text-primary" />
             </div>
           </motion.div>
 
-          <motion.div whileHover={{ scale: 1.02 }} className="bg-white/40 dark:bg-black/20 backdrop-blur-md p-6 rounded-2xl border border-white/20 shadow-sm flex items-center justify-between">
+          <motion.div whileHover={{ scale: 1.02 }} className="bg-white dark:bg-zinc-900 p-6 rounded-[2rem] shadow-sm hover:shadow-md transition-all border border-transparent hover:border-border/50 flex items-center justify-between group">
             <div>
               <p className="text-sm font-medium text-muted-foreground mb-1">Visualizações Totais</p>
               <p className="text-3xl font-bold">{totalStats.views.toLocaleString('pt-BR')}</p>
             </div>
-            <div className="p-3 bg-primary/10 rounded-xl">
+            <div className="p-3 bg-primary/5 rounded-2xl group-hover:bg-primary/10 transition-colors">
               <Eye className="h-6 w-6 text-primary" />
             </div>
           </motion.div>
 
-          <motion.div whileHover={{ scale: 1.02 }} className="bg-white/40 dark:bg-black/20 backdrop-blur-md p-6 rounded-2xl border border-white/20 shadow-sm flex items-center justify-between">
+          <motion.div whileHover={{ scale: 1.02 }} className="bg-white dark:bg-zinc-900 p-6 rounded-[2rem] shadow-sm hover:shadow-md transition-all border border-transparent hover:border-border/50 flex items-center justify-between group">
             <div>
               <p className="text-sm font-medium text-muted-foreground mb-1">Visitas Totais</p>
               <p className="text-3xl font-bold">{totalStats.visits}</p>
             </div>
-            <div className="p-3 bg-primary/10 rounded-xl">
+            <div className="p-3 bg-primary/5 rounded-2xl group-hover:bg-primary/10 transition-colors">
               <Calendar className="h-6 w-6 text-primary" />
             </div>
           </motion.div>
@@ -175,7 +175,7 @@ export const DashboardTab = () => {
         {/* Gráfico de Leads e Visitas */}
         <motion.div
           variants={itemVariants}
-          className="bg-white/60 dark:bg-black/30 backdrop-blur-xl rounded-3xl p-6 border border-white/20 shadow-sm"
+          className="bg-white dark:bg-zinc-900 rounded-[2.5rem] p-8 shadow-sm border border-transparent hover:shadow-md transition-all"
         >
           <div className="mb-6">
             <h2 className="text-lg font-bold">Leads e Visitas</h2>
@@ -187,7 +187,7 @@ export const DashboardTab = () => {
         {/* Gráfico de Visualizações */}
         <motion.div
           variants={itemVariants}
-          className="bg-white/60 dark:bg-black/30 backdrop-blur-xl rounded-3xl p-6 border border-white/20 shadow-sm"
+          className="bg-white dark:bg-zinc-900 rounded-[2.5rem] p-8 shadow-sm border border-transparent hover:shadow-md transition-all"
         >
           <div className="mb-6">
             <h2 className="text-lg font-bold">Visualizações</h2>

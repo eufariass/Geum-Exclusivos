@@ -59,9 +59,9 @@ export function AppSidebar({ activeTab, onTabChange }: AppSidebarProps) {
       <div className="h-full bg-card flex flex-col">
         {/* Header com Logo */}
         <div className="p-4 border-b border-border">
-          <img 
-            src={logoGeum} 
-            alt="Geum Imobiliária" 
+          <img
+            src={logoGeum}
+            alt="Geum Imobiliária"
             className={`${isCollapsed ? 'w-8 h-8 object-contain mx-auto' : 'h-8 w-auto'} transition-all`}
           />
         </div>
@@ -77,11 +77,11 @@ export function AppSidebar({ activeTab, onTabChange }: AppSidebarProps) {
               {menuGroups.map((group) => (
                 <SidebarGroup key={group.label}>
                   {!isCollapsed && (
-                    <div className="flex items-center gap-2 px-3 mb-2">
-                      <span className="text-xs text-muted-foreground uppercase tracking-wider whitespace-nowrap">
+                    <div className="flex items-center gap-3 px-2 mb-2 mt-4 first:mt-0">
+                      <span className="text-[10px] font-bold text-muted-foreground/70 uppercase tracking-widest whitespace-nowrap">
                         {group.label}
                       </span>
-                      <div className="h-px bg-border flex-1" />
+                      <div className="h-px bg-border/50 flex-1" />
                     </div>
                   )}
                   <SidebarGroupContent>
@@ -92,8 +92,8 @@ export function AppSidebar({ activeTab, onTabChange }: AppSidebarProps) {
                             onClick={() => onTabChange(item.id)}
                             className={`
                               rounded-lg transition-all
-                              ${activeTab === item.id 
-                                ? 'bg-accent text-foreground font-medium' 
+                              ${activeTab === item.id
+                                ? 'bg-accent text-foreground font-medium'
                                 : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                               }
                               ${isCollapsed ? 'justify-center' : ''}
@@ -113,11 +113,11 @@ export function AppSidebar({ activeTab, onTabChange }: AppSidebarProps) {
               {isAdmin && (
                 <SidebarGroup>
                   {!isCollapsed && (
-                    <div className="flex items-center gap-2 px-3 mb-2">
-                      <span className="text-xs text-muted-foreground uppercase tracking-wider whitespace-nowrap">
+                    <div className="flex items-center gap-3 px-2 mb-2 mt-4">
+                      <span className="text-[10px] font-bold text-muted-foreground/70 uppercase tracking-widest whitespace-nowrap">
                         Configurações
                       </span>
-                      <div className="h-px bg-border flex-1" />
+                      <div className="h-px bg-border/50 flex-1" />
                     </div>
                   )}
                   <SidebarGroupContent>
@@ -127,8 +127,8 @@ export function AppSidebar({ activeTab, onTabChange }: AppSidebarProps) {
                           onClick={() => onTabChange('usuarios')}
                           className={`
                             rounded-lg transition-all
-                            ${activeTab === 'usuarios' 
-                              ? 'bg-accent text-foreground font-medium' 
+                            ${activeTab === 'usuarios'
+                              ? 'bg-accent text-foreground font-medium'
                               : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                             }
                             ${isCollapsed ? 'justify-center' : ''}
