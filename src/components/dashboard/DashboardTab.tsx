@@ -1,32 +1,19 @@
 import { useMemo, useEffect, useState } from 'react';
-import { Line, Bar } from 'react-chartjs-2';
 import { Building2, Eye, Calendar } from 'lucide-react';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler,
-} from 'chart.js';
+import { motion } from 'framer-motion';
 import { supabaseStorageService } from '@/lib/supabaseStorage';
 import { getCurrentMonth, getPreviousMonth, getLast6Months } from '@/lib/dateUtils';
 import { Card } from '@/components/ui/card';
 import { KPICard } from './KPICard';
+import { LeadsVisitsChart } from './LeadsVisitsChart';
+import { ViewsChart } from './ViewsChart';
 import type { Imovel, Metrica } from '@/types';
-
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler);
 
 export const DashboardTab = () => {
   const [imoveis, setImoveis] = useState<Imovel[]>([]);
   const [metricas, setMetricas] = useState<Metrica[]>([]);
   const [loading, setLoading] = useState(true);
   const currentMonth = getCurrentMonth();
-  const previousMonth = getPreviousMonth(currentMonth);
 
   useEffect(() => {
     const loadData = async () => {
@@ -50,7 +37,7 @@ export const DashboardTab = () => {
     // Encontrar o mês mais recente com dados
     const availableMonths = [...new Set(metricas.map(m => m.mes))].sort().reverse();
     const latestMonth = availableMonths[0] || currentMonth;
-    
+
     const latestMetrics = metricas.filter((m) => m.mes === latestMonth);
     const totalLeads = latestMetrics.reduce((sum, m) => sum + m.leads, 0);
     const totalViews = latestMetrics.reduce((sum, m) => sum + m.visualizacoes, 0);
@@ -77,316 +64,138 @@ export const DashboardTab = () => {
     };
   }, [imoveis, metricas]);
 
-  // Gráfico 1: Leads e Visitas (linha)
-  const leadsChartData = useMemo(() => {
+  // Dados para os gráficos
+  const chartData = useMemo(() => {
     const last6Months = getLast6Months();
-    const labels = last6Months.map((month) => {
+    return last6Months.map((month) => {
       const [, m] = month.split('-');
-      return new Date(2000, parseInt(m) - 1).toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '').toUpperCase();
+      const monthLabel = new Date(2000, parseInt(m) - 1).toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '').toUpperCase();
+
+      const metricsForMonth = metricas.filter((m) => m.mes === month);
+      const leads = metricsForMonth.reduce((sum, m) => sum + m.leads, 0);
+      const visits = metricsForMonth.reduce((sum, m) => sum + m.visitas_realizadas, 0);
+      const views = metricsForMonth.reduce((sum, m) => sum + m.visualizacoes, 0);
+
+      return {
+        name: monthLabel,
+        leads,
+        visits,
+        views
+      };
     });
-
-    const leadsData = last6Months.map((month) => {
-      return metricas.filter((m) => m.mes === month).reduce((sum, m) => sum + m.leads, 0);
-    });
-
-    const visitsData = last6Months.map((month) => {
-      return metricas.filter((m) => m.mes === month).reduce((sum, m) => sum + m.visitas_realizadas, 0);
-    });
-
-    return {
-      labels,
-      datasets: [
-        {
-          label: 'Leads',
-          data: leadsData,
-          borderColor: 'rgb(139, 92, 246)',
-          backgroundColor: (context: any) => {
-            const ctx = context.chart.ctx;
-            const gradient = ctx.createLinearGradient(0, 0, 0, 320);
-            gradient.addColorStop(0, 'rgba(139, 92, 246, 0.4)');
-            gradient.addColorStop(1, 'rgba(139, 92, 246, 0)');
-            return gradient;
-          },
-          fill: true,
-          tension: 0.4,
-          borderWidth: 2.5,
-          pointRadius: 4,
-          pointHoverRadius: 6,
-          pointBackgroundColor: '#fff',
-          pointBorderColor: 'rgb(139, 92, 246)',
-          pointBorderWidth: 2,
-        },
-        {
-          label: 'Visitas',
-          data: visitsData,
-          borderColor: 'rgb(59, 130, 246)',
-          backgroundColor: (context: any) => {
-            const ctx = context.chart.ctx;
-            const gradient = ctx.createLinearGradient(0, 0, 0, 320);
-            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
-            gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
-            return gradient;
-          },
-          fill: true,
-          tension: 0.4,
-          borderWidth: 2.5,
-          pointRadius: 4,
-          pointHoverRadius: 6,
-          pointBackgroundColor: '#fff',
-          pointBorderColor: 'rgb(59, 130, 246)',
-          pointBorderWidth: 2,
-        },
-      ],
-    };
-  }, [metricas]);
-
-  // Gráfico 2: Visualizações (barras)
-  const viewsChartData = useMemo(() => {
-    const last6Months = getLast6Months();
-    const labels = last6Months.map((month) => {
-      const [, m] = month.split('-');
-      return new Date(2000, parseInt(m) - 1).toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '').toUpperCase();
-    });
-
-    const viewsData = last6Months.map((month) => {
-      return metricas.filter((m) => m.mes === month).reduce((sum, m) => sum + m.visualizacoes, 0);
-    });
-
-    return {
-      labels,
-      datasets: [
-        {
-          label: 'Visualizações',
-          data: viewsData,
-          backgroundColor: 'rgb(139, 92, 246)',
-          borderRadius: 6,
-          borderSkipped: false,
-        },
-      ],
-    };
   }, [metricas]);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">Carregando...</div>
+      <div className="flex items-center justify-center h-[calc(100vh-200px)]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 50 } }
+  };
+
   return (
-    <div className="space-y-6 p-6">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className="space-y-6 p-2 md:p-6"
+    >
       {/* Activity Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <KPICard
           title="Total de Leads"
           value={stats.leads}
+          index={0}
         />
         <KPICard
           title="Visualizações"
           value={stats.views.toLocaleString('pt-BR')}
+          index={1}
         />
         <KPICard
           title="Visitas Realizadas"
           value={stats.visits}
+          index={2}
         />
       </div>
 
       {/* General Data Section */}
-      <div>
-        <h2 className="text-lg font-semibold mb-4">Dados gerais</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="p-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Total de Imóveis</p>
-                <p className="text-2xl font-bold">{totalStats.totalImoveis}</p>
-              </div>
-              <Building2 className="h-8 w-8 text-muted-foreground" />
+      <motion.div variants={itemVariants} className="space-y-4">
+        <h2 className="text-xl font-bold tracking-tight px-1">Dados gerais</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <motion.div whileHover={{ scale: 1.02 }} className="bg-white/40 dark:bg-black/20 backdrop-blur-md p-6 rounded-2xl border border-white/20 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">Total de Imóveis</p>
+              <p className="text-3xl font-bold">{totalStats.totalImoveis}</p>
             </div>
-          </Card>
+            <div className="p-3 bg-primary/10 rounded-xl">
+              <Building2 className="h-6 w-6 text-primary" />
+            </div>
+          </motion.div>
 
-          <Card className="p-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Visualizações</p>
-                <p className="text-2xl font-bold">{totalStats.views.toLocaleString('pt-BR')}</p>
-              </div>
-              <Eye className="h-8 w-8 text-muted-foreground" />
+          <motion.div whileHover={{ scale: 1.02 }} className="bg-white/40 dark:bg-black/20 backdrop-blur-md p-6 rounded-2xl border border-white/20 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">Visualizações Totais</p>
+              <p className="text-3xl font-bold">{totalStats.views.toLocaleString('pt-BR')}</p>
             </div>
-          </Card>
+            <div className="p-3 bg-primary/10 rounded-xl">
+              <Eye className="h-6 w-6 text-primary" />
+            </div>
+          </motion.div>
 
-          <Card className="p-6">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Visitas Realizadas</p>
-                <p className="text-2xl font-bold">{totalStats.visits}</p>
-              </div>
-              <Calendar className="h-8 w-8 text-muted-foreground" />
+          <motion.div whileHover={{ scale: 1.02 }} className="bg-white/40 dark:bg-black/20 backdrop-blur-md p-6 rounded-2xl border border-white/20 shadow-sm flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground mb-1">Visitas Totais</p>
+              <p className="text-3xl font-bold">{totalStats.visits}</p>
             </div>
-          </Card>
+            <div className="p-3 bg-primary/10 rounded-xl">
+              <Calendar className="h-6 w-6 text-primary" />
+            </div>
+          </motion.div>
         </div>
+      </motion.div>
+
+      {/* Charts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Gráfico de Leads e Visitas */}
+        <motion.div
+          variants={itemVariants}
+          className="bg-white/60 dark:bg-black/30 backdrop-blur-xl rounded-3xl p-6 border border-white/20 shadow-sm"
+        >
+          <div className="mb-6">
+            <h2 className="text-lg font-bold">Leads e Visitas</h2>
+            <p className="text-sm text-muted-foreground">Últimos 6 meses</p>
+          </div>
+          <LeadsVisitsChart data={chartData} />
+        </motion.div>
+
+        {/* Gráfico de Visualizações */}
+        <motion.div
+          variants={itemVariants}
+          className="bg-white/60 dark:bg-black/30 backdrop-blur-xl rounded-3xl p-6 border border-white/20 shadow-sm"
+        >
+          <div className="mb-6">
+            <h2 className="text-lg font-bold">Visualizações</h2>
+            <p className="text-sm text-muted-foreground">Desempenho nos portais</p>
+          </div>
+          <ViewsChart data={chartData} />
+        </motion.div>
       </div>
-
-      {/* Gráfico de Leads e Visitas */}
-      <Card className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-lg font-semibold">Leads e Visitas - Últimos 6 Meses</h2>
-            <p className="text-sm text-muted-foreground mt-1">Acompanhamento de leads e visitas realizadas</p>
-          </div>
-        </div>
-        <div className="h-[320px]">
-          <Line
-            data={leadsChartData}
-            options={{
-              responsive: true,
-              maintainAspectRatio: false,
-              interaction: {
-                mode: 'index',
-                intersect: false,
-              },
-              plugins: {
-                legend: { 
-                  display: true,
-                  position: 'top',
-                  align: 'end',
-                  labels: {
-                    usePointStyle: true,
-                    padding: 20,
-                    font: {
-                      size: 12,
-                      weight: 500
-                    },
-                    boxWidth: 8,
-                    boxHeight: 8,
-                  }
-                },
-                tooltip: {
-                  backgroundColor: '#fff',
-                  titleColor: '#000',
-                  bodyColor: '#000',
-                  borderColor: 'rgb(229, 231, 235)',
-                  borderWidth: 1,
-                  padding: 12,
-                  displayColors: true,
-                  boxPadding: 6,
-                  cornerRadius: 8,
-                }
-              },
-              scales: {
-                y: { 
-                  beginAtZero: true,
-                  grid: {
-                    display: true,
-                    color: 'rgba(0, 0, 0, 0.05)',
-                    drawTicks: false,
-                  },
-                  border: {
-                    display: false
-                  },
-                  ticks: {
-                    padding: 12,
-                    font: {
-                      size: 11,
-                      family: 'Inter'
-                    },
-                    color: 'rgba(0, 0, 0, 0.6)'
-                  }
-                },
-                x: {
-                  grid: {
-                    display: false
-                  },
-                  border: {
-                    display: false
-                  },
-                  ticks: {
-                    padding: 12,
-                    font: {
-                      size: 11,
-                      family: 'Inter'
-                    },
-                    color: 'rgba(0, 0, 0, 0.6)'
-                  }
-                }
-              },
-            }}
-          />
-        </div>
-      </Card>
-
-      {/* Gráfico de Visualizações */}
-      <Card className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h2 className="text-lg font-semibold">Visualizações - Últimos 6 Meses</h2>
-            <p className="text-sm text-muted-foreground mt-1">Acompanhamento de visualizações nos portais</p>
-          </div>
-        </div>
-        <div className="h-[320px]">
-          <Bar 
-            data={viewsChartData} 
-            options={{
-              responsive: true,
-              maintainAspectRatio: false,
-              plugins: {
-                legend: { 
-                  display: false,
-                },
-                tooltip: {
-                  backgroundColor: '#fff',
-                  titleColor: '#000',
-                  bodyColor: '#000',
-                  borderColor: 'rgb(229, 231, 235)',
-                  borderWidth: 1,
-                  padding: 12,
-                  displayColors: true,
-                  boxPadding: 6,
-                  cornerRadius: 8,
-                }
-              },
-              scales: {
-                y: { 
-                  beginAtZero: true,
-                  grid: {
-                    display: true,
-                    color: 'rgba(0, 0, 0, 0.05)',
-                    drawTicks: false,
-                  },
-                  border: {
-                    display: false
-                  },
-                  ticks: {
-                    padding: 12,
-                    font: {
-                      size: 11,
-                      family: 'Inter'
-                    },
-                    color: 'rgba(0, 0, 0, 0.6)'
-                  }
-                },
-                x: {
-                  grid: {
-                    display: false
-                  },
-                  border: {
-                    display: false
-                  },
-                  ticks: {
-                    padding: 12,
-                    font: {
-                      size: 11,
-                      family: 'Inter'
-                    },
-                    color: 'rgba(0, 0, 0, 0.6)'
-                  }
-                }
-              },
-            }} 
-          />
-        </div>
-      </Card>
-    </div>
+    </motion.div>
   );
 };

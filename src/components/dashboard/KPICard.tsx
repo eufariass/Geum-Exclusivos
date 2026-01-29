@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
 import { ArrowRight } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface KPICardProps {
   title: string;
@@ -8,33 +9,41 @@ interface KPICardProps {
   badge?: string;
   onClick?: () => void;
   className?: string;
+  index?: number;
 }
 
-export const KPICard = ({ title, value, icon, badge, onClick, className }: KPICardProps) => {
+export const KPICard = ({ title, value, icon, badge, onClick, className, index = 0 }: KPICardProps) => {
   return (
-    <div 
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.1, ease: "easeOut" }}
       className={cn(
-        "bg-card rounded-xl p-6 border border-border hover:shadow-md transition-all cursor-pointer group",
+        "bg-white/50 dark:bg-black/20 backdrop-blur-xl rounded-2xl p-6 border border-white/20 shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group hover:-translate-y-1",
         className
       )}
       onClick={onClick}
     >
-      <div className="flex items-start justify-between mb-3">
+      <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
-          <div className="text-4xl font-bold text-foreground mb-2">{value}</div>
-          {badge && (
-            <span className="inline-block px-2.5 py-1 rounded-full bg-muted text-muted-foreground text-xs font-medium mb-2">
-              {badge}
-            </span>
-          )}
-          <p className="text-sm text-muted-foreground">{title}</p>
+          <div className="flex items-center gap-2 mb-2">
+             <span className="text-sm font-medium text-muted-foreground">{title}</span>
+            {badge && (
+              <span className="inline-flex px-2 py-0.5 rounded-full bg-primary/5 text-primary text-[10px] font-bold uppercase tracking-wider">
+                {badge}
+              </span>
+            )}
+          </div>
+          <div className="text-3xl font-bold text-foreground tracking-tight">{value}</div>
         </div>
-        {icon ? (
-          <div className="text-primary">{icon}</div>
-        ) : (
-          <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-        )}
+        <div className="bg-white dark:bg-white/5 p-3 rounded-xl shadow-sm group-hover:scale-110 transition-transform duration-300">
+            {icon ? (
+            <div className="text-foreground">{icon}</div>
+            ) : (
+            <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
+            )}
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
