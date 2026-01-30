@@ -27,7 +27,7 @@ const MediaSection = () => {
             source: "Folha de Londrina",
             logo: logoFolha,
             link: "https://www.folhadelondrina.com.br/colunistas/ana-maziero/geum-imob-a-campea-de-vendas-do-estancia-albatroz-residence-3276149e.html",
-            logoClass: "h-8 md:h-10"
+            logoClass: "h-8 md:h-10 brightness-0 opacity-90" // Fix visibility (Force Black)
         },
         {
             title: "Cenas de uma noite especial: Geumland 2026",
@@ -143,8 +143,8 @@ const BannerCarousel = () => {
                                 key={index}
                                 onClick={(e) => { e.preventDefault(); setCurrentIndex(index); }}
                                 className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentIndex
-                                        ? 'bg-white w-8'
-                                        : 'bg-white/50 hover:bg-white/80'
+                                    ? 'bg-white w-8'
+                                    : 'bg-white/50 hover:bg-white/80'
                                     }`}
                                 aria-label={`Go to slide ${index + 1}`}
                             />
