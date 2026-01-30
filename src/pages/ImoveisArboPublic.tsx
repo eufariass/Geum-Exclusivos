@@ -8,7 +8,7 @@ import logoBlack from '@/assets/logo-geum-black.png';
 import logoWhite from '@/assets/logo-geum-white.png';
 import bannerExclusividade from '@/assets/banner-exclusividade.jpg';
 import bannerGeumCast from '@/assets/banner-geumcast.jpg';
-import heroSearchBg from '@/assets/hero-search-bg.jpg';
+import heroSearchBg from '@/assets/londrina-hero.jpg';
 import logoTaroba from '@/assets/logo-taroba.png';
 import logoFolha from '@/assets/logo-folha.png';
 
@@ -466,15 +466,17 @@ const ImoveisArboPublic = () => {
 
             <main className="flex-grow container mx-auto px-6 py-8 max-w-7xl">
                 {/* Search Hero with Custom Background */}
-                <div className="mb-12 relative rounded-3xl bg-black overflow-hidden min-h-[600px] flex flex-col items-center justify-center text-center">
+                <div className="mb-12 relative rounded-3xl bg-black overflow-hidden min-h-[750px] flex flex-col items-center justify-center text-center">
                     {/* Background Image */}
                     <div className="absolute inset-0 z-0">
                         <img
                             src={heroSearchBg}
                             alt="Background"
-                            className="w-full h-full object-cover opacity-80"
+                            className="w-full h-full object-cover opacity-50"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/30" />
+                        {/* Light black overlay + Gradient */}
+                        <div className="absolute inset-0 bg-black/20" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-black/40" />
                     </div>
 
                     {/* Content */}
