@@ -478,34 +478,36 @@ const ImoveisArboPublic = () => {
 
                     {/* Content */}
                     <div className="relative z-10 w-full max-w-5xl mx-auto px-4 flex flex-col items-center">
-                        <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 drop-shadow-lg tracking-tight leading-tight">
-                            Imobiliária Geum.<br />
-                            <span className="text-white/90">Encontre seu próximo imóvel.</span>
+                        <h1 className="text-4xl md:text-6xl font-bold text-white mb-2 drop-shadow-lg tracking-tight">
+                            Imobiliária Geum.
                         </h1>
+                        <p className="text-xl md:text-3xl font-medium text-white/90 mb-10 drop-shadow-md tracking-wide">
+                            Encontre seu próximo imóvel.
+                        </p>
 
                         {/* Search Bar - Reference Style */}
-                        <div className="w-full bg-white rounded-full p-2 shadow-2xl flex flex-col md:flex-row items-center gap-2 md:gap-0 animate-in zoom-in-95 duration-500">
+                        <div className="w-full bg-white rounded-full p-1.5 shadow-2xl flex flex-col md:flex-row items-center gap-2 md:gap-0 animate-in zoom-in-95 duration-500 max-w-4xl">
 
                             {/* Transaction Type */}
-                            <div className="relative group w-full md:w-auto min-w-[120px]">
+                            <div className="relative group w-full md:w-auto min-w-[110px]">
                                 <select
-                                    className="w-full appearance-none bg-transparent py-3 pl-6 pr-8 text-foreground font-medium outline-none cursor-pointer hover:bg-muted/50 rounded-full transition-colors truncate"
+                                    className="w-full appearance-none bg-transparent py-2.5 pl-6 pr-8 text-foreground font-medium outline-none cursor-pointer hover:bg-muted/50 rounded-full transition-colors truncate text-sm md:text-base"
                                     defaultValue="Venda"
                                 >
                                     <option value="For Sale">Venda</option>
                                     <option value="For Rent">Locação</option>
                                 </select>
                                 <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
-                                    <ChevronLeft className="h-4 w-4 -rotate-90" />
+                                    <ChevronLeft className="h-3.5 w-3.5 -rotate-90" />
                                 </div>
                             </div>
 
-                            <div className="hidden md:block w-px h-8 bg-border mx-2" />
+                            <div className="hidden md:block w-px h-6 bg-border mx-1" />
 
                             {/* Property Type */}
-                            <div className="relative group w-full md:w-auto min-w-[160px]">
+                            <div className="relative group w-full md:w-auto min-w-[150px]">
                                 <select
-                                    className="w-full appearance-none bg-transparent py-3 pl-6 pr-8 text-foreground font-medium outline-none cursor-pointer hover:bg-muted/50 rounded-full transition-colors truncate"
+                                    className="w-full appearance-none bg-transparent py-2.5 pl-6 pr-8 text-foreground font-medium outline-none cursor-pointer hover:bg-muted/50 rounded-full transition-colors truncate text-sm md:text-base"
                                 >
                                     <option value="">Tipo de imóvel</option>
                                     <option value="Apartment">Apartamento</option>
@@ -514,38 +516,38 @@ const ImoveisArboPublic = () => {
                                     <option value="Land">Terreno</option>
                                 </select>
                                 <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
-                                    <ChevronLeft className="h-4 w-4 -rotate-90" />
+                                    <ChevronLeft className="h-3.5 w-3.5 -rotate-90" />
                                 </div>
                             </div>
 
-                            <div className="hidden md:block w-px h-8 bg-border mx-2" />
+                            <div className="hidden md:block w-px h-6 bg-border mx-1" />
 
                             {/* Search Input */}
                             <div className="relative flex-grow w-full">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground hidden md:block" />
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground hidden md:block" />
                                 <input
                                     type="text"
                                     placeholder="Pesquise aqui..."
-                                    className="w-full h-12 md:h-14 pl-4 md:pl-12 pr-4 bg-transparent border-0 outline-none text-foreground placeholder:text-muted-foreground text-base md:text-lg"
+                                    className="w-full h-10 md:h-12 pl-4 md:pl-10 pr-4 bg-transparent border-0 outline-none text-foreground placeholder:text-muted-foreground text-sm md:text-base"
                                     value={searchInput}
                                     onChange={(e) => setSearchInput(e.target.value)}
                                 />
                             </div>
 
                             {/* Filters Button (Visual) */}
-                            <button className="hidden md:flex items-center gap-2 px-4 py-3 text-muted-foreground hover:text-foreground font-medium hover:bg-muted/50 rounded-full transition-colors whitespace-nowrap">
-                                <div className="h-5 w-5 border-2 border-current rounded bg-transparent" /> {/* Icon replacement */}
+                            <button className="hidden md:flex items-center gap-2 px-4 py-2 text-muted-foreground hover:text-foreground font-medium hover:bg-muted/50 rounded-full transition-colors whitespace-nowrap text-sm md:text-base">
+                                <div className="h-4 w-4 border-2 border-current rounded bg-transparent" /> {/* Icon replacement */}
                                 Filtros
                             </button>
 
                             {/* Submit Button */}
                             <button
                                 onClick={handleSearchCheck}
-                                className="w-full md:w-auto h-12 md:h-14 px-8 bg-black hover:bg-black/90 text-white font-bold rounded-full transition-all shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center gap-2"
+                                className="w-full md:w-auto h-10 md:h-12 px-8 bg-black hover:bg-black/90 text-white font-bold rounded-full transition-all shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center gap-2 text-sm md:text-base cursor-pointer"
                             >
-                                <Search className="h-5 w-5 md:hidden" />
+                                <Search className="h-4 w-4 md:hidden" />
                                 <span className="hidden md:inline">Buscar</span>
-                                <span className="md:hidden">Buscar Imóveis</span>
+                                <span className="md:hidden">Buscar</span>
                             </button>
                         </div>
 
