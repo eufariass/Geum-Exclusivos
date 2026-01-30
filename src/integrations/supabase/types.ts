@@ -463,10 +463,12 @@ export type Database = {
           created_by: string | null
           email: string
           id: string
-          imovel_id: string
+          imovel_arbo_id: string | null
+          imovel_id: string | null
           lost_reason_id: string | null
           nome: string
           observacoes: string | null
+          origem: string | null
           stage_id: string | null
           status: string
           telefone: string
@@ -480,10 +482,12 @@ export type Database = {
           created_by?: string | null
           email: string
           id?: string
-          imovel_id: string
+          imovel_arbo_id?: string | null
+          imovel_id?: string | null
           lost_reason_id?: string | null
           nome: string
           observacoes?: string | null
+          origem?: string | null
           stage_id?: string | null
           status?: string
           telefone: string
@@ -497,10 +501,12 @@ export type Database = {
           created_by?: string | null
           email?: string
           id?: string
-          imovel_id?: string
+          imovel_arbo_id?: string | null
+          imovel_id?: string | null
           lost_reason_id?: string | null
           nome?: string
           observacoes?: string | null
+          origem?: string | null
           stage_id?: string | null
           status?: string
           telefone?: string
@@ -509,6 +515,13 @@ export type Database = {
           updated_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "leads_imovel_arbo_id_fkey"
+            columns: ["imovel_arbo_id"]
+            isOneToOne: false
+            referencedRelation: "imoveis_arbo"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "leads_imovel_id_fkey"
             columns: ["imovel_id"]
