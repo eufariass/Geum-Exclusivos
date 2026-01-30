@@ -377,7 +377,8 @@ const ImoveisArboPublic = () => {
             try {
                 const { data, error } = await supabase
                     .from('imoveis_arbo')
-                    .select('*')
+                    // Select specific fields for performance optimization
+                    .select('id, title, price, city, neighborhood, property_type, transaction_type, features, bedrooms, bathrooms, living_area, featured, publication_type, listing_id, primary_image, images')
                     .eq('active', true)
                     .order('featured', { ascending: false })
                     .order('last_update_date', { ascending: false });
