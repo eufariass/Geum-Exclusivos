@@ -3,12 +3,14 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import type { ImovelArbo } from '@/types';
 import { CardContent } from '@/components/ui/card';
-import { BedDouble, Bath, Maximize, Home, MapPin, Phone, Mail, ArrowRight, ChevronLeft, ChevronRight, Search, X } from 'lucide-react';
+import { BedDouble, Bath, Maximize, Home, MapPin, Phone, Mail, ArrowRight, ChevronLeft, ChevronRight, Search, X, ExternalLink } from 'lucide-react';
 import logoBlack from '@/assets/logo-geum-black.png';
 import logoWhite from '@/assets/logo-geum-white.png';
 import bannerExclusividade from '@/assets/banner-exclusividade.jpg';
 import bannerGeumCast from '@/assets/banner-geumcast.jpg';
 import heroSearchBg from '@/assets/hero-search-bg.jpg';
+import logoTaroba from '@/assets/logo-taroba.png';
+import logoFolha from '@/assets/logo-folha.png';
 
 // --- Components ---
 
@@ -17,6 +19,62 @@ const GlassBadge = ({ children, className = '' }: { children: React.ReactNode, c
         {children}
     </span>
 );
+
+const MediaSection = () => {
+    const mediaItems = [
+        {
+            title: "Geum Imob: a campeã de vendas do Estância Albatroz Residence",
+            source: "Folha de Londrina",
+            logo: logoFolha,
+            link: "https://www.folhadelondrina.com.br/colunistas/ana-maziero/geum-imob-a-campea-de-vendas-do-estancia-albatroz-residence-3276149e.html",
+            logoClass: "h-8 md:h-10"
+        },
+        {
+            title: "Cenas de uma noite especial: Geumland 2026",
+            source: "Tarobá News",
+            logo: logoTaroba,
+            link: "https://taroba.com.br/blog-do-nassif/cenas-de-uma-noite-especial-geumland-2026",
+            logoClass: "h-8 md:h-12 brightness-0" // Taroba logo fix if needed
+        }
+    ];
+
+    return (
+        <section className="py-20 bg-muted/20 border-t border-border/40">
+            <div className="flex flex-col items-center justify-center mb-12 text-center px-4">
+                <h2 className="text-3xl font-bold text-foreground mb-3">Geum na Mídia</h2>
+                <p className="text-muted-foreground max-w-2xl text-lg">
+                    Confira o que os principais portais de notícias falam sobre a Imobiliária Geum.
+                </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto px-6">
+                {mediaItems.map((item, index) => (
+                    <a
+                        key={index}
+                        href={item.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group bg-card hover:bg-card/80 border border-border/40 rounded-2xl p-8 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-center text-center h-full"
+                    >
+                        <div className="h-20 w-full flex items-center justify-center mb-6 overflow-hidden bg-muted/10 rounded-xl p-4 group-hover:bg-muted/20 transition-colors">
+                            <img
+                                src={item.logo}
+                                alt={item.source}
+                                className={`w-auto object-contain transition-transform duration-500 group-hover:scale-110 ${item.logoClass}`}
+                            />
+                        </div>
+                        <h3 className="text-xl font-bold text-foreground mb-4 line-clamp-2 md:min-h-[3.5rem]">
+                            {item.title}
+                        </h3>
+                        <div className="mt-auto flex items-center gap-2 text-primary font-medium opacity-80 group-hover:opacity-100 transition-opacity">
+                            Ler matéria completa <ExternalLink className="h-4 w-4" />
+                        </div>
+                    </a>
+                ))}
+            </div>
+        </section>
+    );
+};
 
 const BannerCarousel = () => {
     const banners = [
@@ -40,7 +98,7 @@ const BannerCarousel = () => {
     useEffect(() => {
         const interval = setInterval(() => {
             setCurrentIndex((prev) => (prev + 1) % banners.length);
-        }, 5000); // Increased to 5s for better UX with slower fade
+        }, 5000);
         return () => clearInterval(interval);
     }, [banners.length]);
 
@@ -532,6 +590,9 @@ const ImoveisArboPublic = () => {
                             imagesLoaded={imagesLoaded}
                             onImageLoad={handleImageLoad}
                         />
+
+                        {/* Media Section */}
+                        <MediaSection />
                     </div>
                 )}
             </main>
