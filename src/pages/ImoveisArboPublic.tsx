@@ -7,6 +7,7 @@ import { BedDouble, Bath, Maximize, Home, MapPin, Phone, Mail, ArrowRight, Chevr
 import logoBlack from '@/assets/logo-geum-black.png';
 import logoWhite from '@/assets/logo-geum-white.png';
 import bannerExclusividade from '@/assets/banner-exclusividade.jpg';
+import bannerGeumCast from '@/assets/banner-geumcast.jpg';
 
 // --- Components ---
 
@@ -15,6 +16,102 @@ const GlassBadge = ({ children, className = '' }: { children: React.ReactNode, c
         {children}
     </span>
 );
+
+const BannerCarousel = () => {
+    const banners = [
+        {
+            image: bannerExclusividade,
+            link: '/',
+            external: false,
+            alt: "Imóveis Exclusivos Geum"
+        },
+        {
+            image: bannerGeumCast,
+            link: 'https://www.youtube.com/@geumcast',
+            external: true,
+            alt: "Geum Cast - Podcast Imobiliário"
+        }
+    ];
+
+    const [currentIndex, setCurrentIndex] = useState(0);
+
+    // Auto-rotate
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentIndex((prev) => (prev + 1) % banners.length);
+        }, 3000);
+        return () => clearInterval(interval);
+    }, [banners.length]);
+
+    const nextSlide = (e?: React.MouseEvent) => {
+        e?.preventDefault();
+        setCurrentIndex((prev) => (prev + 1) % banners.length);
+    };
+
+    const prevSlide = (e?: React.MouseEvent) => {
+        e?.preventDefault();
+        setCurrentIndex((prev) => (prev - 1 + banners.length) % banners.length);
+    };
+
+    const currentBanner = banners[currentIndex];
+    const LinkComponent = currentBanner.external ? 'a' : Link;
+    const linkProps = currentBanner.external
+        ? { href: currentBanner.link, target: '_blank', rel: 'noopener noreferrer' }
+        : { to: currentBanner.link };
+
+    return (
+        <section className="py-12 relative group/banner">
+            <LinkComponent {...(linkProps as any)} className="block relative w-full rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer">
+                <div className="relative h-[250px] md:h-[350px] w-full">
+                    {banners.map((banner, index) => (
+                        <div
+                            key={index}
+                            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                                }`}
+                        >
+                            <img
+                                src={banner.image}
+                                alt={banner.alt}
+                                className="w-full h-full object-cover"
+                            />
+                        </div>
+                    ))}
+
+                    {/* Dots Indicators */}
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+                        {banners.map((_, index) => (
+                            <button
+                                key={index}
+                                onClick={(e) => { e.preventDefault(); setCurrentIndex(index); }}
+                                className={`w-2 h-2 rounded-full transition-all ${index === currentIndex
+                                        ? 'bg-white w-6'
+                                        : 'bg-white/50 hover:bg-white/80'
+                                    }`}
+                                aria-label={`Go to slide ${index + 1}`}
+                            />
+                        ))}
+                    </div>
+                </div>
+            </LinkComponent>
+
+            {/* Navigation Buttons (Outside or Overlaid?) - User asked "lados para passar" */}
+            <button
+                onClick={prevSlide}
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-black/20 backdrop-blur-md text-white hover:bg-black/40 transition-all opacity-0 group-hover/banner:opacity-100 -translate-x-2 group-hover/banner:translate-x-0"
+                aria-label="Previous slide"
+            >
+                <ChevronLeft className="h-6 w-6" />
+            </button>
+            <button
+                onClick={nextSlide}
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-black/20 backdrop-blur-md text-white hover:bg-black/40 transition-all opacity-0 group-hover/banner:opacity-100 translate-x-2 group-hover/banner:translate-x-0"
+                aria-label="Next slide"
+            >
+                <ChevronRight className="h-6 w-6" />
+            </button>
+        </section>
+    );
+};
 
 const PropertyCard = ({ imovel, loading = false, imagesLoaded, onImageLoad }: { imovel: ImovelArbo, loading?: boolean, imagesLoaded?: Record<string, boolean>, onImageLoad?: (id: string) => void }) => {
     const formatPrice = (price?: number) => {
@@ -388,17 +485,8 @@ const ImoveisArboPublic = () => {
                             onImageLoad={handleImageLoad}
                         />
 
-                        {/* Banner Exclusivos - Clean Clickable */}
-                        <section className="py-12">
-                            <Link to="/" className="block relative w-full rounded-2xl overflow-hidden group hover:shadow-2xl transition-all duration-500 cursor-pointer">
-                                <img
-                                    src={bannerExclusividade}
-                                    alt="Veja nossos imóveis exclusivos"
-                                    className="w-full h-[250px] md:h-[350px] object-cover"
-                                />
-                                {/* removed text overlay as requested */}
-                            </Link>
-                        </section>
+                        {/* Banner Carousel */}
+                        <BannerCarousel />
 
                         {/* Casas em Condomínio */}
                         <PropertySection
