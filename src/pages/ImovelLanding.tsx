@@ -12,6 +12,12 @@ import logoWhite from '@/assets/logo-geum-white.png';
 
 const ImovelLanding = () => {
   const { codigo } = useParams<{ codigo: string }>();
+
+  // Safety check to prevent routing collisions
+  if (codigo?.toLowerCase() === 'imoveis') {
+    return null; // Let the correct route handle it, or show nothing if matched incorrectly
+  }
+
   const [imovel, setImovel] = useState<Imovel | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -215,14 +221,14 @@ const ImovelLanding = () => {
       <header className="border-b border-border bg-card sticky top-0 z-10 shadow-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/" className="cursor-pointer">
-            <img 
-              src={logoBlack} 
-              alt="Imobiliária Geum" 
+            <img
+              src={logoBlack}
+              alt="Imobiliária Geum"
               className="h-10 dark:hidden"
             />
-            <img 
-              src={logoWhite} 
-              alt="Imobiliária Geum" 
+            <img
+              src={logoWhite}
+              alt="Imobiliária Geum"
               className="h-10 hidden dark:block"
             />
           </Link>
@@ -243,7 +249,7 @@ const ImovelLanding = () => {
                   className="w-full h-full object-cover"
                   fetchPriority="high"
                 />
-                
+
                 {/* Botões de navegação */}
                 {imovel.image_urls.length > 1 && (
                   <>
@@ -279,11 +285,10 @@ const ImovelLanding = () => {
                     <button
                       key={index}
                       onClick={() => setCurrentImageIndex(index)}
-                      className={`flex-shrink-0 w-20 h-20 rounded-md overflow-hidden border-2 transition-all ${
-                        index === currentImageIndex
+                      className={`flex-shrink-0 w-20 h-20 rounded-md overflow-hidden border-2 transition-all ${index === currentImageIndex
                           ? 'border-primary scale-105'
                           : 'border-border hover:border-primary/50'
-                      }`}
+                        }`}
                     >
                       <img
                         src={url}
@@ -311,24 +316,24 @@ const ImovelLanding = () => {
                     <h1 className="text-2xl font-bold text-foreground">{imovel.titulo}</h1>
                   </div>
                 )}
-                
+
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Código</p>
                   <p className="text-lg font-semibold text-foreground">{imovel.codigo}</p>
                 </div>
-                
+
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Endereço</p>
                   <p className="text-lg text-foreground">{imovel.endereco}</p>
                 </div>
-                
+
                 <div className="space-y-4">
                   <div className="flex gap-6">
                     <div>
                       <p className="text-sm text-muted-foreground mb-1">Tipo</p>
                       <p className="text-base text-foreground">{imovel.tipo}</p>
                     </div>
-                    
+
                     {imovel.valor && (
                       <div>
                         <p className="text-sm text-muted-foreground mb-1">Valor</p>
@@ -379,7 +384,7 @@ const ImovelLanding = () => {
           {/* Formulário - ordem 2 em mobile, coluna direita no desktop */}
           <div className="order-2 lg:order-4 lg:col-span-1 lg:row-span-3">
             <div className="lg:sticky lg:top-24">
-              <LeadForm 
+              <LeadForm
                 imovelId={imovel.id}
                 imovelCodigo={imovel.codigo}
                 imovelValor={imovel.valor}
@@ -394,7 +399,7 @@ const ImovelLanding = () => {
               <Card>
                 <CardContent className="p-6">
                   <h2 className="text-xl font-semibold text-foreground mb-4">Sobre o Imóvel</h2>
-                  <p 
+                  <p
                     className="text-[15px] leading-[1.7] text-foreground whitespace-pre-wrap"
                     style={{ textAlign: 'justify', fontFamily: 'Inter, sans-serif' }}
                   >

@@ -48,9 +48,9 @@ const App = () => (
           <AuthProvider>
             <Suspense fallback={<PageLoader />}>
               <Routes>
-                <Route path="/" element={<ImoveisPublic />} />
                 <Route path="/imoveis" element={<ImoveisArboPublic />} />
                 <Route path="/imovel/:listingId" element={<ImovelArboLanding />} />
+                <Route path="/" element={<ImoveisPublic />} />
                 <Route path="/login" element={<Auth />} />
                 <Route path="/redefinir-senha" element={<ResetPassword />} />
                 <Route path="/definir-senha" element={<SetupPassword />} />
