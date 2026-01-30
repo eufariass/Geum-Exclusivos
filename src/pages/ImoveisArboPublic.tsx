@@ -464,7 +464,7 @@ const ImoveisArboPublic = () => {
                 </div>
             </header>
 
-            <main className="flex-grow container mx-auto px-6 py-8 max-w-7xl">
+            <main className="flex-grow container mx-auto px-4 sm:px-6 py-8 w-full max-w-[95%]">
                 {/* Search Hero with Custom Background */}
                 <div className="mb-12 relative rounded-3xl bg-black overflow-hidden min-h-[750px] flex flex-col items-center justify-center text-center">
                     {/* Background Image */}
@@ -472,11 +472,11 @@ const ImoveisArboPublic = () => {
                         <img
                             src={heroSearchBg}
                             alt="Background"
-                            className="w-full h-full object-cover opacity-50"
+                            className="w-full h-full object-cover opacity-85"
                         />
                         {/* Light black overlay + Gradient */}
-                        <div className="absolute inset-0 bg-black/20" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-black/40" />
+                        <div className="absolute inset-0 bg-black/5" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/5 to-black/30" />
                     </div>
 
                     {/* Content */}
