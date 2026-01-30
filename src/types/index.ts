@@ -121,7 +121,62 @@ export interface LeadComment {
   created_at: string;
 }
 
-export type TabType = 'dashboard' | 'imoveis' | 'leads' | 'tasks' | 'metricas' | 'relatorios' | 'usuarios' | 'chat-ia';
+export type TabType = 'dashboard' | 'imoveis' | 'imoveis-arbo' | 'leads' | 'tasks' | 'metricas' | 'relatorios' | 'usuarios' | 'chat-ia';
+
+// Imóveis do Arbo/Superlógica (Vitrine Pública)
+export interface ImovelArbo {
+  id: string;
+  listing_id: string;
+  list_date?: string;
+  last_update_date?: string;
+  synced_at?: string;
+  title?: string;
+  description?: string;
+  transaction_type?: string;
+  property_type?: string;
+  publication_type?: string;
+  featured?: boolean;
+  price?: number;
+  currency?: string;
+  state?: string;
+  state_abbr?: string;
+  city?: string;
+  neighborhood?: string;
+  address?: string;
+  street_number?: string;
+  complement?: string;
+  postal_code?: string;
+  latitude?: number;
+  longitude?: number;
+  living_area?: number;
+  lot_area?: number;
+  bedrooms?: number;
+  bathrooms?: number;
+  suites?: number;
+  garage?: number;
+  unit_floor?: number;
+  year_built?: number;
+  features?: string[];
+  images?: string[];
+  primary_image?: string;
+  detail_url?: string;
+  active?: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ArboSyncLog {
+  id: string;
+  started_at: string;
+  finished_at?: string;
+  status: 'running' | 'success' | 'error';
+  total_xml?: number;
+  created_count?: number;
+  updated_count?: number;
+  deactivated_count?: number;
+  error_message?: string;
+  created_by?: string;
+}
 
 // User Roles
 export type UserRole = 'admin' | 'corretor';

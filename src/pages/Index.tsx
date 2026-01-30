@@ -5,6 +5,7 @@ import { AppSidebar } from '@/components/AppSidebar';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { DashboardTab } from '@/components/dashboard/DashboardTab';
 import { ImoveisTab } from '@/components/imoveis/ImoveisTab';
+import { ImoveisArboTab } from '@/components/imoveis-arbo/ImoveisArboTab';
 import { LeadsTab } from '@/components/leads/LeadsTab';
 import { TasksTab } from '@/components/tasks/TasksTab';
 import { MetricasTab } from '@/components/metricas/MetricasTab';
@@ -43,6 +44,11 @@ const Index = () => {
               {activeTab === 'imoveis' && (
                 <PageTransition>
                   <ImoveisTab onToast={showToast} key={refreshKey} />
+                </PageTransition>
+              )}
+              {activeTab === 'imoveis-arbo' && (
+                <PageTransition>
+                  <ImoveisArboTab key={refreshKey} />
                 </PageTransition>
               )}
               {activeTab === 'leads' && (

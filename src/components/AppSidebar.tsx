@@ -1,4 +1,4 @@
-import { Home, Building2, Users, CheckSquare, BarChart3, FileText, UserCog, Sparkles } from 'lucide-react';
+import { Home, Building2, Users, CheckSquare, BarChart3, FileText, UserCog, Sparkles, Globe } from 'lucide-react';
 import type { TabType } from '@/types';
 import { usePermissions } from '@/hooks/usePermissions';
 import logoGeum from '@/assets/logo-geum-black.png';
@@ -36,7 +36,8 @@ const menuGroups = [
   {
     label: 'Gestão de Imóveis',
     items: [
-      { id: 'imoveis' as TabType, label: 'Imóveis', icon: Building2 },
+      { id: 'imoveis' as TabType, label: 'Exclusivos', icon: Building2 },
+      { id: 'imoveis-arbo' as TabType, label: 'Vitrine Pública', icon: Globe },
       { id: 'metricas' as TabType, label: 'Métricas', icon: BarChart3 },
       { id: 'chat-ia' as TabType, label: 'Chat com IA', icon: Sparkles },
     ]
