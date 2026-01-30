@@ -8,6 +8,7 @@ import logoBlack from '@/assets/logo-geum-black.png';
 import logoWhite from '@/assets/logo-geum-white.png';
 import bannerExclusividade from '@/assets/banner-exclusividade.jpg';
 import bannerGeumCast from '@/assets/banner-geumcast.jpg';
+import heroSearchBg from '@/assets/hero-search-bg.jpg';
 
 // --- Components ---
 
@@ -39,7 +40,7 @@ const BannerCarousel = () => {
     useEffect(() => {
         const interval = setInterval(() => {
             setCurrentIndex((prev) => (prev + 1) % banners.length);
-        }, 3000);
+        }, 5000); // Increased to 5s for better UX with slower fade
         return () => clearInterval(interval);
     }, [banners.length]);
 
@@ -62,11 +63,11 @@ const BannerCarousel = () => {
     return (
         <section className="py-12 relative group/banner">
             <LinkComponent {...(linkProps as any)} className="block relative w-full rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer">
-                <div className="relative h-[250px] md:h-[350px] w-full">
+                <div className="relative h-[250px] md:h-[350px] w-full bg-black">
                     {banners.map((banner, index) => (
                         <div
                             key={index}
-                            className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                            className={`absolute inset-0 transition-all duration-1000 ease-in-out ${index === currentIndex ? 'opacity-100 scale-100 z-10' : 'opacity-0 scale-105 z-0'
                                 }`}
                         >
                             <img
@@ -83,8 +84,8 @@ const BannerCarousel = () => {
                             <button
                                 key={index}
                                 onClick={(e) => { e.preventDefault(); setCurrentIndex(index); }}
-                                className={`w-2 h-2 rounded-full transition-all ${index === currentIndex
-                                        ? 'bg-white w-6'
+                                className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentIndex
+                                        ? 'bg-white w-8'
                                         : 'bg-white/50 hover:bg-white/80'
                                     }`}
                                 aria-label={`Go to slide ${index + 1}`}
@@ -94,17 +95,17 @@ const BannerCarousel = () => {
                 </div>
             </LinkComponent>
 
-            {/* Navigation Buttons (Outside or Overlaid?) - User asked "lados para passar" */}
+            {/* Navigation Buttons */}
             <button
                 onClick={prevSlide}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-black/20 backdrop-blur-md text-white hover:bg-black/40 transition-all opacity-0 group-hover/banner:opacity-100 -translate-x-2 group-hover/banner:translate-x-0"
+                className="absolute left-6 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-black/20 backdrop-blur-md text-white hover:bg-black/40 transition-all border border-white/10 opacity-0 group-hover/banner:opacity-100 -translate-x-4 group-hover/banner:translate-x-0"
                 aria-label="Previous slide"
             >
                 <ChevronLeft className="h-6 w-6" />
             </button>
             <button
                 onClick={nextSlide}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-black/20 backdrop-blur-md text-white hover:bg-black/40 transition-all opacity-0 group-hover/banner:opacity-100 translate-x-2 group-hover/banner:translate-x-0"
+                className="absolute right-6 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-black/20 backdrop-blur-md text-white hover:bg-black/40 transition-all border border-white/10 opacity-0 group-hover/banner:opacity-100 translate-x-4 group-hover/banner:translate-x-0"
                 aria-label="Next slide"
             >
                 <ChevronRight className="h-6 w-6" />
@@ -405,34 +406,48 @@ const ImoveisArboPublic = () => {
             </header>
 
             <main className="flex-grow container mx-auto px-6 py-8 max-w-7xl">
-                {/* Search Hero */}
-                <div className="mb-12 relative rounded-2xl bg-muted/30 p-8 md:p-12 text-center overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent pointer-events-none" />
-                    <h1 className="text-2xl md:text-4xl font-bold text-foreground mb-4 relative z-10">Encontre seu próximo imóvel</h1>
-                    <p className="text-muted-foreground max-w-xl mx-auto mb-8 relative z-10">
-                        Milhares de opções em Londrina e região para você.
-                    </p>
+                {/* Search Hero with Custom Background */}
+                <div className="mb-12 relative rounded-2xl bg-black p-16 md:p-24 text-center overflow-hidden min-h-[400px] flex flex-col items-center justify-center">
+                    {/* Background Image */}
+                    <div className="absolute inset-0 z-0">
+                        <img
+                            src={heroSearchBg}
+                            alt="Background"
+                            className="w-full h-full object-cover opacity-60 transition-transform hover:scale-105 duration-[30s]"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/30" />
+                    </div>
 
-                    <form onSubmit={handleSearchCheck} className="max-w-2xl mx-auto relative z-10 flex gap-2">
-                        <div className="relative flex-grow">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                            <input
-                                type="text"
-                                placeholder="Busque por bairro, cidade, tipo..."
-                                className="w-full h-14 pl-12 pr-4 rounded-xl border border-border/60 bg-background shadow-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-lg"
-                                value={searchInput}
-                                onChange={(e) => setSearchInput(e.target.value)}
-                            />
-                            {searchInput && (
-                                <button type="button" onClick={clearSearch} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
-                                    <X className="h-5 w-5" />
-                                </button>
-                            )}
-                        </div>
-                        <button type="submit" className="h-14 px-8 bg-primary text-primary-foreground font-bold rounded-xl hover:bg-primary/90 transition-all shadow-md">
-                            Buscar
-                        </button>
-                    </form>
+                    {/* Content */}
+                    <div className="relative z-10 w-full max-w-4xl mx-auto">
+                        <h1 className="text-3xl md:text-5xl font-bold text-white mb-6 drop-shadow-lg tracking-tight">
+                            Encontre seu próximo imóvel
+                        </h1>
+                        <p className="text-white/90 text-lg md:text-xl max-w-2xl mx-auto mb-10 drop-shadow-md font-medium">
+                            Milhares de opções em Londrina e região esperando por você.
+                        </p>
+
+                        <form onSubmit={handleSearchCheck} className="max-w-2xl mx-auto flex gap-2">
+                            <div className="relative flex-grow">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                                <input
+                                    type="text"
+                                    placeholder="Busque por bairro, cidade, tipo..."
+                                    className="w-full h-14 pl-12 pr-4 rounded-xl border-0 bg-white/95 backdrop-blur shadow-xl text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/50 transition-all text-lg"
+                                    value={searchInput}
+                                    onChange={(e) => setSearchInput(e.target.value)}
+                                />
+                                {searchInput && (
+                                    <button type="button" onClick={clearSearch} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary">
+                                        <X className="h-5 w-5" />
+                                    </button>
+                                )}
+                            </div>
+                            <button type="submit" className="h-14 px-8 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl transition-all shadow-xl hover:shadow-2xl active:scale-95">
+                                Buscar
+                            </button>
+                        </form>
+                    </div>
                 </div>
 
                 {searchQuery ? (
