@@ -11,3 +11,6 @@ verify_jwt = true
 
 [functions.generate-property-description]
 verify_jwt = true
+
+[functions.sync-arbo-imoveis]
+verify_jwt = false
