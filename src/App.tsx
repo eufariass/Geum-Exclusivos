@@ -15,6 +15,8 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const SetupPassword = lazy(() => import("./pages/SetupPassword"));
 const ImovelLanding = lazy(() => import("./pages/ImovelLanding"));
 const ImoveisPublic = lazy(() => import("./pages/ImoveisPublic"));
+const ImovelArboLanding = lazy(() => import("./pages/ImovelArboLanding"));
+const ImoveisArboPublic = lazy(() => import("./pages/ImoveisArboPublic"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Loading fallback component
@@ -47,6 +49,8 @@ const App = () => (
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/" element={<ImoveisPublic />} />
+                <Route path="/imoveis" element={<ImoveisArboPublic />} />
+                <Route path="/imovel/:listingId" element={<ImovelArboLanding />} />
                 <Route path="/login" element={<Auth />} />
                 <Route path="/redefinir-senha" element={<ResetPassword />} />
                 <Route path="/definir-senha" element={<SetupPassword />} />
