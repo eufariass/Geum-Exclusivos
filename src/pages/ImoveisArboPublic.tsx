@@ -27,7 +27,7 @@ const MediaSection = () => {
             source: "Folha de Londrina",
             logo: logoFolha,
             link: "https://www.folhadelondrina.com.br/colunistas/ana-maziero/geum-imob-a-campea-de-vendas-do-estancia-albatroz-residence-3276149e.html",
-            logoClass: "h-8 md:h-10 brightness-0 opacity-90" // Fix visibility (Force Black)
+            logoClass: "h-8 md:h-10 opacity-100 mix-blend-multiply filter contrast-[2] brightness-[0.2]" // Stronger Contrast Force
         },
         {
             title: "Cenas de uma noite especial: Geumland 2026",
@@ -465,46 +465,95 @@ const ImoveisArboPublic = () => {
 
             <main className="flex-grow container mx-auto px-6 py-8 max-w-7xl">
                 {/* Search Hero with Custom Background */}
-                <div className="mb-12 relative rounded-2xl bg-black p-16 md:p-24 text-center overflow-hidden min-h-[400px] flex flex-col items-center justify-center">
+                <div className="mb-12 relative rounded-3xl bg-black overflow-hidden min-h-[600px] flex flex-col items-center justify-center text-center">
                     {/* Background Image */}
                     <div className="absolute inset-0 z-0">
                         <img
                             src={heroSearchBg}
                             alt="Background"
-                            className="w-full h-full object-cover opacity-60 transition-transform hover:scale-105 duration-[30s]"
+                            className="w-full h-full object-cover opacity-80"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/30" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/30" />
                     </div>
 
                     {/* Content */}
-                    <div className="relative z-10 w-full max-w-4xl mx-auto">
-                        <h1 className="text-3xl md:text-5xl font-bold text-white mb-6 drop-shadow-lg tracking-tight">
-                            Encontre seu próximo imóvel
+                    <div className="relative z-10 w-full max-w-5xl mx-auto px-4 flex flex-col items-center">
+                        <h1 className="text-4xl md:text-6xl font-bold text-white mb-6 drop-shadow-lg tracking-tight leading-tight">
+                            Imobiliária Geum.<br />
+                            <span className="text-white/90">Encontre seu próximo imóvel.</span>
                         </h1>
-                        <p className="text-white/90 text-lg md:text-xl max-w-2xl mx-auto mb-10 drop-shadow-md font-medium">
-                            Milhares de opções em Londrina e região esperando por você.
-                        </p>
 
-                        <form onSubmit={handleSearchCheck} className="max-w-2xl mx-auto flex gap-2">
-                            <div className="relative flex-grow">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        {/* Search Bar - Reference Style */}
+                        <div className="w-full bg-white rounded-full p-2 shadow-2xl flex flex-col md:flex-row items-center gap-2 md:gap-0 animate-in zoom-in-95 duration-500">
+
+                            {/* Transaction Type */}
+                            <div className="relative group w-full md:w-auto min-w-[120px]">
+                                <select
+                                    className="w-full appearance-none bg-transparent py-3 pl-6 pr-8 text-foreground font-medium outline-none cursor-pointer hover:bg-muted/50 rounded-full transition-colors truncate"
+                                    defaultValue="Venda"
+                                >
+                                    <option value="For Sale">Venda</option>
+                                    <option value="For Rent">Locação</option>
+                                </select>
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                                    <ChevronLeft className="h-4 w-4 -rotate-90" />
+                                </div>
+                            </div>
+
+                            <div className="hidden md:block w-px h-8 bg-border mx-2" />
+
+                            {/* Property Type */}
+                            <div className="relative group w-full md:w-auto min-w-[160px]">
+                                <select
+                                    className="w-full appearance-none bg-transparent py-3 pl-6 pr-8 text-foreground font-medium outline-none cursor-pointer hover:bg-muted/50 rounded-full transition-colors truncate"
+                                >
+                                    <option value="">Tipo de imóvel</option>
+                                    <option value="Apartment">Apartamento</option>
+                                    <option value="House">Casa</option>
+                                    <option value="Condo">Em Condomínio</option>
+                                    <option value="Land">Terreno</option>
+                                </select>
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                                    <ChevronLeft className="h-4 w-4 -rotate-90" />
+                                </div>
+                            </div>
+
+                            <div className="hidden md:block w-px h-8 bg-border mx-2" />
+
+                            {/* Search Input */}
+                            <div className="relative flex-grow w-full">
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground hidden md:block" />
                                 <input
                                     type="text"
-                                    placeholder="Busque por bairro, cidade, tipo..."
-                                    className="w-full h-14 pl-12 pr-4 rounded-xl border-0 bg-white/95 backdrop-blur shadow-xl text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary/50 transition-all text-lg"
+                                    placeholder="Pesquise aqui..."
+                                    className="w-full h-12 md:h-14 pl-4 md:pl-12 pr-4 bg-transparent border-0 outline-none text-foreground placeholder:text-muted-foreground text-base md:text-lg"
                                     value={searchInput}
                                     onChange={(e) => setSearchInput(e.target.value)}
                                 />
-                                {searchInput && (
-                                    <button type="button" onClick={clearSearch} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary">
-                                        <X className="h-5 w-5" />
-                                    </button>
-                                )}
                             </div>
-                            <button type="submit" className="h-14 px-8 bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-xl transition-all shadow-xl hover:shadow-2xl active:scale-95">
-                                Buscar
+
+                            {/* Filters Button (Visual) */}
+                            <button className="hidden md:flex items-center gap-2 px-4 py-3 text-muted-foreground hover:text-foreground font-medium hover:bg-muted/50 rounded-full transition-colors whitespace-nowrap">
+                                <div className="h-5 w-5 border-2 border-current rounded bg-transparent" /> {/* Icon replacement */}
+                                Filtros
                             </button>
-                        </form>
+
+                            {/* Submit Button */}
+                            <button
+                                onClick={handleSearchCheck}
+                                className="w-full md:w-auto h-12 md:h-14 px-8 bg-black hover:bg-black/90 text-white font-bold rounded-full transition-all shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center gap-2"
+                            >
+                                <Search className="h-5 w-5 md:hidden" />
+                                <span className="hidden md:inline">Buscar</span>
+                                <span className="md:hidden">Buscar Imóveis</span>
+                            </button>
+                        </div>
+
+                        {/* CTA Link */}
+                        <a href="https://geumimob.com/contato" className="mt-8 text-white/90 hover:text-white font-medium flex items-center gap-2 hover:underline underline-offset-4 transition-all drop-shadow-md">
+                            Anuncie seu imóvel gratuitamente
+                            <ArrowRight className="h-4 w-4" />
+                        </a>
                     </div>
                 </div>
 
