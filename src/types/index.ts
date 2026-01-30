@@ -161,6 +161,7 @@ export interface ImovelArbo {
   primary_image?: string;
   detail_url?: string;
   active?: boolean;
+  manual_override?: boolean;
   created_at?: string;
   updated_at?: string;
 }

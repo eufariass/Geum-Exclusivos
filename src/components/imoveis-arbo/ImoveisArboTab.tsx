@@ -1,13 +1,16 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { ImovelArbo, ArboSyncLog } from '@/types';
 import { ImovelArboCard } from './ImovelArboCard';
 import { ImovelArboFilters } from './ImovelArboFilters';
 import { ArboSyncPanel } from './ArboSyncPanel';
-import { Building2, AlertCircle } from 'lucide-react';
+import { Building2, AlertCircle, Plus } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useToast } from '@/hooks/use-toast';
 import { ImovelArboDetailsModal } from './ImovelArboDetailsModal';
+import { ImovelArboModal } from './ImovelArboModal';
+import { Button } from '@/components/ui/button';
 
 export function ImoveisArboTab() {
     const [imoveis, setImoveis] = useState<ImovelArbo[]>([]);
@@ -18,6 +21,10 @@ export function ImoveisArboTab() {
     // Modal state
     const [selectedImovel, setSelectedImovel] = useState<ImovelArbo | null>(null);
     const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
+    // Edit/Create Modal state
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editingImovel, setEditingImovel] = useState<ImovelArbo | null>(null);
 
     const [filters, setFilters] = useState({
         search: '',
@@ -65,7 +72,7 @@ export function ImoveisArboTab() {
             const searchLower = filters.search.toLowerCase();
             result = result.filter(imovel =>
                 imovel.title?.toLowerCase().includes(searchLower) ||
-                imovel.listing_id.toLowerCase().includes(searchLower) ||
+                (imovel.listing_id && imovel.listing_id.toLowerCase().includes(searchLower)) ||
                 imovel.property_type?.toLowerCase().includes(searchLower) ||
                 imovel.address?.toLowerCase().includes(searchLower)
             );
@@ -130,6 +137,16 @@ export function ImoveisArboTab() {
         setIsDetailsOpen(true);
     };
 
+    const handleEdit = (imovel: ImovelArbo) => {
+        setEditingImovel(imovel);
+        setIsEditModalOpen(true);
+    };
+
+    const handleCreate = () => {
+        setEditingImovel(null);
+        setIsEditModalOpen(true);
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -138,7 +155,7 @@ export function ImoveisArboTab() {
                         <Building2 className="h-7 w-7" />
                         Vitrine Pública
                     </h1>
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground p-1">
                         Imóveis sincronizados do Arbo/Superlógica
                     </p>
                 </div>
@@ -149,7 +166,15 @@ export function ImoveisArboTab() {
                     >
                         Atualizar lista
                     </button>
-                    {isAdmin && <ArboSyncPanel onSyncComplete={handleSyncComplete} />}
+                    {isAdmin && (
+                        <>
+                            <Button onClick={handleCreate} className="gap-2">
+                                <Plus className="h-4 w-4" />
+                                Novo Imóvel
+                            </Button>
+                            <ArboSyncPanel onSyncComplete={handleSyncComplete} />
+                        </>
+                    )}
                 </div>
             </div>
 
@@ -185,6 +210,7 @@ export function ImoveisArboTab() {
                             key={imovel.id}
                             imovel={imovel}
                             onClick={() => handleViewDetails(imovel)}
+                            onEdit={isAdmin ? handleEdit : undefined}
                         />
                     ))}
                 </div>
@@ -194,6 +220,16 @@ export function ImoveisArboTab() {
                 isOpen={isDetailsOpen}
                 onClose={() => setIsDetailsOpen(false)}
                 imovel={selectedImovel}
+            />
+
+            <ImovelArboModal
+                isOpen={isEditModalOpen}
+                onClose={() => {
+                    setIsEditModalOpen(false);
+                    setEditingImovel(null);
+                }}
+                onSave={loadImoveis}
+                editingImovel={editingImovel}
             />
         </div>
     );

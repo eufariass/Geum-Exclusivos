@@ -1,12 +1,15 @@
+
 import type { ImovelArbo } from '@/types';
-import { MapPin, Bed, Bath, Car, Maximize, ExternalLink } from 'lucide-react';
+import { MapPin, Bed, Bath, Car, Maximize, ExternalLink, Pencil } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface ImovelArboCardProps {
     imovel: ImovelArbo;
     onClick?: () => void;
+    onEdit?: (imovel: ImovelArbo) => void;
 }
 
-export function ImovelArboCard({ imovel, onClick }: ImovelArboCardProps) {
+export function ImovelArboCard({ imovel, onClick, onEdit }: ImovelArboCardProps) {
     const formatPrice = (price?: number) => {
         if (!price) return 'Sob consulta';
         return new Intl.NumberFormat('pt-BR', {
@@ -117,6 +120,7 @@ export function ImovelArboCard({ imovel, onClick }: ImovelArboCardProps) {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center gap-1 text-sm text-primary hover:underline"
+                            onClick={(e) => e.stopPropagation()}
                         >
                             <ExternalLink className="h-4 w-4" />
                             Ver no Arbo
@@ -124,9 +128,22 @@ export function ImovelArboCard({ imovel, onClick }: ImovelArboCardProps) {
                     )}
                 </div>
 
-                {/* Code */}
-                <div className="text-xs text-muted-foreground">
-                    Código: {imovel.listing_id}
+                {/* Code & Edit */}
+                <div className="text-xs text-muted-foreground flex justify-between items-center pt-2">
+                    <span>Código: {imovel.listing_id}</span>
+                    {onEdit && (
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onEdit(imovel);
+                            }}
+                        >
+                            <Pencil className="h-3 w-3" />
+                        </Button>
+                    )}
                 </div>
             </div>
         </div>

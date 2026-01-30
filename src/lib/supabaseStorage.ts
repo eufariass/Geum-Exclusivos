@@ -1,5 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-import type { Imovel, Metrica, ExportData } from '@/types';
+import type { Imovel, ImovelArbo, Metrica, ExportData } from '@/types';
 
 export const supabaseStorageService = {
   // Imóveis
@@ -37,6 +37,50 @@ export const supabaseStorageService = {
     const { error } = await supabase
       .from('imoveis')
       .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+  },
+
+  // Imóveis Arbo (Vitrine)
+  async getImoveisArbo(): Promise<ImovelArbo[]> {
+    const { data, error } = await supabase
+      .from('imoveis_arbo')
+      .select('*')
+      .eq('active', true)
+      .order('last_update_date', { ascending: false });
+
+    if (error) throw error;
+    return (data || []) as ImovelArbo[];
+  },
+
+  async addImovelArbo(imovel: Omit<ImovelArbo, 'id' | 'created_at' | 'updated_at'>): Promise<ImovelArbo> {
+    const { data, error } = await supabase
+      .from('imoveis_arbo')
+      .insert([{ ...imovel, manual_override: true }])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as ImovelArbo;
+  },
+
+  async updateImovelArbo(id: string, updates: Partial<ImovelArbo>): Promise<void> {
+    const { error } = await supabase
+      .from('imoveis_arbo')
+      .update({ ...updates, manual_override: true })
+      .eq('id', id);
+
+    if (error) throw error;
+  },
+
+  async deleteImovelArbo(id: string): Promise<void> {
+    // Soft delete usually, but user asked to manage. 
+    // If manual, we can delete? Or just set active=false?
+    // Let's set active=false and manual_override=true (so sync doesn't reactivate it if it comes back? Actually Sync filters active=true usually)
+    const { error } = await supabase
+      .from('imoveis_arbo')
+      .update({ active: false, manual_override: true })
       .eq('id', id);
 
     if (error) throw error;

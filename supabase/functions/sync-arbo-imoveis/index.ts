@@ -258,13 +258,15 @@ Deno.serve(async (req) => {
             synced_at: new Date().toISOString(),
         };
 
-        // Get current listing_ids from database
+        // Get current listing_ids from database with manual status
         const { data: currentImoveis } = await supabase
             .from('imoveis_arbo')
-            .select('listing_id')
+            .select('listing_id, manual_override')
             .eq('active', true);
 
         const currentListingIds = new Set(currentImoveis?.map(i => i.listing_id) || []);
+        const manualListingIds = new Set(currentImoveis?.filter(i => i.manual_override).map(i => i.listing_id) || []);
+
         const xmlListingIds = new Set<string>();
 
         // Process each listing
@@ -273,6 +275,17 @@ Deno.serve(async (req) => {
 
             if (!imovel.listing_id) {
                 console.warn('Skipping listing without ID');
+                continue;
+            }
+
+            // Skip if manually managed
+            if (manualListingIds.has(imovel.listing_id)) {
+                // console.log(`Skipping sync for manual item: ${imovel.listing_id}`);
+                // Ensure we mark it as "present" in XML so it's not deactivated if logic changes,
+                // BUT manual items shouldn't be deactivated anyway.
+                // However, adding to xmlListingIds is important if we used that list for deactivation diff.
+                // But we will filter deactivation list separately.
+                xmlListingIds.add(imovel.listing_id);
                 continue;
             }
 
@@ -298,8 +311,10 @@ Deno.serve(async (req) => {
             }
         }
 
-        // Deactivate removed listings
-        const toDeactivate = [...currentListingIds].filter(id => !xmlListingIds.has(id));
+        // Deactivate removed listings (BUT SKIP MANUAL ONES)
+        // Logic: active in DB, NOT in XML, AND NOT manual
+        const toDeactivate = [...currentListingIds].filter(id => !xmlListingIds.has(id) && !manualListingIds.has(id));
+
         if (toDeactivate.length > 0) {
             const { error: deactivateError } = await supabase
                 .from('imoveis_arbo')
