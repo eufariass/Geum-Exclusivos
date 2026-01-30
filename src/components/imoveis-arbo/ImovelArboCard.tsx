@@ -3,9 +3,10 @@ import { MapPin, Bed, Bath, Car, Maximize, ExternalLink } from 'lucide-react';
 
 interface ImovelArboCardProps {
     imovel: ImovelArbo;
+    onClick?: () => void;
 }
 
-export function ImovelArboCard({ imovel }: ImovelArboCardProps) {
+export function ImovelArboCard({ imovel, onClick }: ImovelArboCardProps) {
     const formatPrice = (price?: number) => {
         if (!price) return 'Sob consulta';
         return new Intl.NumberFormat('pt-BR', {
@@ -22,7 +23,10 @@ export function ImovelArboCard({ imovel }: ImovelArboCardProps) {
         : 'bg-blue-500/10 text-blue-600 dark:text-blue-400';
 
     return (
-        <div className="bg-card rounded-2xl border border-border overflow-hidden hover:shadow-lg transition-shadow group">
+        <div
+            className={`bg-card rounded-2xl border border-border overflow-hidden hover:shadow-lg transition-shadow group ${onClick ? 'cursor-pointer' : ''}`}
+            onClick={onClick}
+        >
             {/* Image */}
             <div className="relative h-48 bg-muted overflow-hidden">
                 {imovel.primary_image ? (

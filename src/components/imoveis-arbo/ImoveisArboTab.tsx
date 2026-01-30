@@ -1,49 +1,54 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import type { ImovelArbo, ArboSyncLog } from '@/types';
+import { ImovelArboCard } from './ImovelArboCard';
+import { ImovelArboFilters } from './ImovelArboFilters';
+import { ArboSyncPanel } from './ArboSyncPanel';
+import { Building2, AlertCircle } from 'lucide-react';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useToast } from '@/hooks/use-toast';
-import { ArboSyncPanel } from './ArboSyncPanel';
-import { ImovelArboCard } from './ImovelArboCard';
-import { ImovelArboFilters, FiltersState } from './ImovelArboFilters';
-import type { ImovelArbo } from '@/types';
-import { Building2, RefreshCw, AlertCircle } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { ImovelArboDetailsModal } from './ImovelArboDetailsModal';
 
 export function ImoveisArboTab() {
     const [imoveis, setImoveis] = useState<ImovelArbo[]>([]);
     const [filteredImoveis, setFilteredImoveis] = useState<ImovelArbo[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const { isAdmin } = usePermissions();
-    const { toast } = useToast();
 
-    const [filters, setFilters] = useState<FiltersState>({
+    // Modal state
+    const [selectedImovel, setSelectedImovel] = useState<ImovelArbo | null>(null);
+    const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
+    const [filters, setFilters] = useState({
         search: '',
         city: '',
         neighborhood: '',
         transactionType: '',
-        minPrice: '',
-        maxPrice: '',
+        priceMin: '',
+        priceMax: '',
         bedrooms: '',
     });
 
-    const loadImoveis = useCallback(async () => {
-        setLoading(true);
-        setError(null);
+    const { isAdmin } = usePermissions();
+    const { toast } = useToast();
 
+    const loadImoveis = useCallback(async () => {
         try {
-            const { data, error: queryError } = await supabase
+            setLoading(true);
+            setError(null);
+            const { data, error: dbError } = await supabase
                 .from('imoveis_arbo')
                 .select('*')
                 .eq('active', true)
-                .order('synced_at', { ascending: false });
+                .order('featured', { ascending: false })
+                .order('last_update_date', { ascending: false });
 
-            if (queryError) throw queryError;
+            if (dbError) throw dbError;
 
             setImoveis((data as ImovelArbo[]) || []);
-        } catch (err) {
-            console.error('Error loading imoveis:', err);
-            setError('Erro ao carregar imóveis. Verifique se a tabela foi criada.');
+        } catch (err: any) {
+            console.error('Erro ao carregar imóveis Arbo:', err);
+            setError('Não foi possível carregar os imóveis. Verifique a conexão ou tente sincronizar novamente.');
         } finally {
             setLoading(false);
         }
@@ -53,88 +58,101 @@ export function ImoveisArboTab() {
         loadImoveis();
     }, [loadImoveis]);
 
-    // Apply filters
     useEffect(() => {
-        let result = [...imoveis];
+        let result = imoveis;
 
         if (filters.search) {
             const searchLower = filters.search.toLowerCase();
-            result = result.filter(
-                (i) =>
-                    i.title?.toLowerCase().includes(searchLower) ||
-                    i.address?.toLowerCase().includes(searchLower) ||
-                    i.listing_id?.toLowerCase().includes(searchLower)
+            result = result.filter(imovel =>
+                imovel.title?.toLowerCase().includes(searchLower) ||
+                imovel.listing_id.toLowerCase().includes(searchLower) ||
+                imovel.property_type?.toLowerCase().includes(searchLower) ||
+                imovel.address?.toLowerCase().includes(searchLower)
             );
         }
 
         if (filters.city) {
-            result = result.filter((i) => i.city === filters.city);
+            result = result.filter(imovel => imovel.city === filters.city);
         }
 
         if (filters.neighborhood) {
-            result = result.filter((i) => i.neighborhood === filters.neighborhood);
+            result = result.filter(imovel => imovel.neighborhood === filters.neighborhood);
         }
 
         if (filters.transactionType) {
-            result = result.filter((i) => i.transaction_type === filters.transactionType);
+            result = result.filter(imovel => imovel.transaction_type === filters.transactionType);
         }
 
-        if (filters.minPrice) {
-            result = result.filter((i) => (i.price || 0) >= Number(filters.minPrice));
+        if (filters.priceMin) {
+            const min = parseFloat(filters.priceMin);
+            result = result.filter(imovel => (imovel.price || 0) >= min);
         }
 
-        if (filters.maxPrice) {
-            result = result.filter((i) => (i.price || 0) <= Number(filters.maxPrice));
+        if (filters.priceMax) {
+            const max = parseFloat(filters.priceMax);
+            result = result.filter(imovel => (imovel.price || 0) <= max);
         }
 
         if (filters.bedrooms) {
-            result = result.filter((i) => (i.bedrooms || 0) >= Number(filters.bedrooms));
+            const beds = parseInt(filters.bedrooms);
+            result = result.filter(imovel => (imovel.bedrooms || 0) >= beds);
         }
 
         setFilteredImoveis(result);
     }, [imoveis, filters]);
 
-    // Extract unique values for filters
-    const cities = [...new Set(imoveis.map((i) => i.city).filter(Boolean))] as string[];
-    const neighborhoods = [...new Set(imoveis.map((i) => i.neighborhood).filter(Boolean))] as string[];
+    const cities = Array.from(new Set(imoveis.map(i => i.city).filter(Boolean) as string[])).sort();
+    const neighborhoods = Array.from(new Set(
+        imoveis
+            .filter(i => !filters.city || i.city === filters.city)
+            .map(i => i.neighborhood)
+            .filter(Boolean) as string[]
+    )).sort();
 
-    const handleSyncComplete = () => {
-        loadImoveis();
-        toast({
-            title: 'Sincronização concluída',
-            description: 'Os imóveis foram atualizados com sucesso.',
-        });
+    const handleSyncComplete = (log: ArboSyncLog) => {
+        if (log.status === 'success') {
+            toast({
+                title: "Sincronização concluída",
+                description: `${log.created_count} criados, ${log.updated_count} atualizados.`,
+            });
+            loadImoveis();
+        } else {
+            toast({
+                variant: "destructive",
+                title: "Erro na sincronização",
+                description: log.error_message || "Erro desconhecido",
+            });
+        }
+    };
+
+    const handleViewDetails = (imovel: ImovelArbo) => {
+        setSelectedImovel(imovel);
+        setIsDetailsOpen(true);
     };
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
                         <Building2 className="h-7 w-7" />
                         Vitrine Pública
                     </h1>
-                    <p className="text-muted-foreground mt-1">
-                        Imóveis sincronizados do CRM Arbo/Superlógica
+                    <p className="text-muted-foreground">
+                        Imóveis sincronizados do Arbo/Superlógica
                     </p>
                 </div>
-
                 <div className="flex items-center gap-3">
                     <button
                         onClick={loadImoveis}
-                        disabled={loading}
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-muted hover:bg-muted/80 transition-colors text-sm font-medium"
+                        className="text-sm font-medium text-primary hover:underline px-3"
                     >
-                        <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-                        Atualizar
+                        Atualizar lista
                     </button>
-
                     {isAdmin && <ArboSyncPanel onSyncComplete={handleSyncComplete} />}
                 </div>
             </div>
 
-            {/* Filters */}
             <ImovelArboFilters
                 filters={filters}
                 onChange={setFilters}
@@ -142,80 +160,41 @@ export function ImoveisArboTab() {
                 neighborhoods={neighborhoods}
             />
 
-            {/* Stats */}
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <span>
-                    Exibindo <strong className="text-foreground">{filteredImoveis.length}</strong> de{' '}
-                    <strong className="text-foreground">{imoveis.length}</strong> imóveis
-                </span>
-            </div>
-
-            {/* Error State */}
-            {error && (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <AlertCircle className="h-12 w-12 text-destructive mb-4" />
-                    <h3 className="font-semibold text-lg mb-2">Erro ao carregar imóveis</h3>
-                    <p className="text-muted-foreground max-w-md">{error}</p>
-                    <button
-                        onClick={loadImoveis}
-                        className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity"
-                    >
-                        Tentar novamente
-                    </button>
+            {error ? (
+                <div className="p-8 text-center border border-destructive/20 bg-destructive/5 rounded-xl text-destructive flex flex-col items-center gap-2">
+                    <AlertCircle className="h-8 w-8" />
+                    <p>{error}</p>
+                    <button onClick={loadImoveis} className="text-sm underline font-medium">Tentar novamente</button>
                 </div>
-            )}
-
-            {/* Loading State */}
-            {loading && !error && (
+            ) : loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {[...Array(8)].map((_, i) => (
-                        <div
-                            key={i}
-                            className="bg-card rounded-2xl border border-border overflow-hidden animate-pulse"
-                        >
-                            <div className="h-48 bg-muted" />
-                            <div className="p-4 space-y-3">
-                                <div className="h-4 bg-muted rounded w-3/4" />
-                                <div className="h-3 bg-muted rounded w-1/2" />
-                                <div className="h-6 bg-muted rounded w-1/3 mt-4" />
-                            </div>
-                        </div>
+                    {[1, 2, 3, 4].map(i => (
+                        <div key={i} className="h-[350px] bg-muted animate-pulse rounded-2xl" />
                     ))}
                 </div>
-            )}
-
-            {/* Empty State */}
-            {!loading && !error && filteredImoveis.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-16 text-center">
-                    <Building2 className="h-16 w-16 text-muted-foreground/50 mb-4" />
-                    <h3 className="font-semibold text-lg mb-2">Nenhum imóvel encontrado</h3>
-                    <p className="text-muted-foreground max-w-md">
-                        {imoveis.length === 0
-                            ? 'Execute uma sincronização para importar os imóveis do Arbo.'
-                            : 'Nenhum imóvel corresponde aos filtros aplicados.'}
-                    </p>
+            ) : filteredImoveis.length === 0 ? (
+                <div className="text-center py-16 text-muted-foreground bg-muted/30 rounded-2xl border border-dashed border-border">
+                    <Building2 className="h-12 w-12 mx-auto mb-4 opacity-20" />
+                    <p className="text-lg font-medium">Nenhum imóvel encontrado</p>
+                    <p className="text-sm opacity-70">Tente ajustar os filtros ou sincronizar.</p>
                 </div>
-            )}
-
-            {/* Grid */}
-            {!loading && !error && filteredImoveis.length > 0 && (
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-                >
-                    {filteredImoveis.map((imovel, index) => (
-                        <motion.div
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {filteredImoveis.map((imovel) => (
+                        <ImovelArboCard
                             key={imovel.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.05, duration: 0.3 }}
-                        >
-                            <ImovelArboCard imovel={imovel} />
-                        </motion.div>
+                            imovel={imovel}
+                            onClick={() => handleViewDetails(imovel)}
+                        />
                     ))}
-                </motion.div>
+                </div>
             )}
+
+            <ImovelArboDetailsModal
+                isOpen={isDetailsOpen}
+                onClose={() => setIsDetailsOpen(false)}
+                imovel={selectedImovel}
+            />
         </div>
     );
 }
