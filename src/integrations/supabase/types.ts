@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      arbo_sync_log: {
+        Row: {
+          created_by: string | null
+          created_count: number | null
+          deactivated_count: number | null
+          error_message: string | null
+          finished_at: string | null
+          id: string
+          started_at: string | null
+          status: string | null
+          total_xml: number | null
+          updated_count: number | null
+        }
+        Insert: {
+          created_by?: string | null
+          created_count?: number | null
+          deactivated_count?: number | null
+          error_message?: string | null
+          finished_at?: string | null
+          id?: string
+          started_at?: string | null
+          status?: string | null
+          total_xml?: number | null
+          updated_count?: number | null
+        }
+        Update: {
+          created_by?: string | null
+          created_count?: number | null
+          deactivated_count?: number | null
+          error_message?: string | null
+          finished_at?: string | null
+          id?: string
+          started_at?: string | null
+          status?: string | null
+          total_xml?: number | null
+          updated_count?: number | null
+        }
+        Relationships: []
+      }
       imoveis: {
         Row: {
           area_m2: number | null
@@ -101,6 +140,129 @@ export type Database = {
           updated_by?: string | null
           vagas?: number | null
           valor?: number | null
+        }
+        Relationships: []
+      }
+      imoveis_arbo: {
+        Row: {
+          active: boolean | null
+          address: string | null
+          bathrooms: number | null
+          bedrooms: number | null
+          city: string | null
+          complement: string | null
+          created_at: string | null
+          currency: string | null
+          description: string | null
+          detail_url: string | null
+          featured: boolean | null
+          features: string[] | null
+          garage: number | null
+          id: string
+          images: string[] | null
+          last_update_date: string | null
+          latitude: number | null
+          list_date: string | null
+          listing_id: string
+          living_area: number | null
+          longitude: number | null
+          lot_area: number | null
+          neighborhood: string | null
+          postal_code: string | null
+          price: number | null
+          primary_image: string | null
+          property_type: string | null
+          publication_type: string | null
+          state: string | null
+          state_abbr: string | null
+          street_number: string | null
+          suites: number | null
+          synced_at: string | null
+          title: string | null
+          transaction_type: string | null
+          unit_floor: number | null
+          updated_at: string | null
+          year_built: number | null
+        }
+        Insert: {
+          active?: boolean | null
+          address?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          city?: string | null
+          complement?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          detail_url?: string | null
+          featured?: boolean | null
+          features?: string[] | null
+          garage?: number | null
+          id?: string
+          images?: string[] | null
+          last_update_date?: string | null
+          latitude?: number | null
+          list_date?: string | null
+          listing_id: string
+          living_area?: number | null
+          longitude?: number | null
+          lot_area?: number | null
+          neighborhood?: string | null
+          postal_code?: string | null
+          price?: number | null
+          primary_image?: string | null
+          property_type?: string | null
+          publication_type?: string | null
+          state?: string | null
+          state_abbr?: string | null
+          street_number?: string | null
+          suites?: number | null
+          synced_at?: string | null
+          title?: string | null
+          transaction_type?: string | null
+          unit_floor?: number | null
+          updated_at?: string | null
+          year_built?: number | null
+        }
+        Update: {
+          active?: boolean | null
+          address?: string | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          city?: string | null
+          complement?: string | null
+          created_at?: string | null
+          currency?: string | null
+          description?: string | null
+          detail_url?: string | null
+          featured?: boolean | null
+          features?: string[] | null
+          garage?: number | null
+          id?: string
+          images?: string[] | null
+          last_update_date?: string | null
+          latitude?: number | null
+          list_date?: string | null
+          listing_id?: string
+          living_area?: number | null
+          longitude?: number | null
+          lot_area?: number | null
+          neighborhood?: string | null
+          postal_code?: string | null
+          price?: number | null
+          primary_image?: string | null
+          property_type?: string | null
+          publication_type?: string | null
+          state?: string | null
+          state_abbr?: string | null
+          street_number?: string | null
+          suites?: number | null
+          synced_at?: string | null
+          title?: string | null
+          transaction_type?: string | null
+          unit_floor?: number | null
+          updated_at?: string | null
+          year_built?: number | null
         }
         Relationships: []
       }
