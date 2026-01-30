@@ -13,11 +13,6 @@ import logoWhite from '@/assets/logo-geum-white.png';
 const ImovelLanding = () => {
   const { codigo } = useParams<{ codigo: string }>();
 
-  // Safety check to prevent routing collisions
-  if (codigo?.toLowerCase() === 'imoveis') {
-    return null; // Let the correct route handle it, or show nothing if matched incorrectly
-  }
-
   const [imovel, setImovel] = useState<Imovel | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -153,6 +148,11 @@ const ImovelLanding = () => {
     }
   };
 
+  // Safety check to prevent routing collisions
+  if (codigo?.toLowerCase() === 'imoveis') {
+    return null;
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -202,18 +202,14 @@ const ImovelLanding = () => {
     );
   }
 
-  if (!imovel) {
-    return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 p-4">
-        <Home className="h-16 w-16 text-muted-foreground" />
-        <h1 className="text-2xl font-semibold text-foreground">Imóvel não encontrado</h1>
-        <p className="text-muted-foreground">O código informado não corresponde a nenhum imóvel cadastrado.</p>
-        <Link to="/">
-          <Button variant="outline">Voltar</Button>
-        </Link>
-      </div>
-    );
-  }
+  <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 p-4">
+    <Home className="h-16 w-16 text-muted-foreground" />
+    <h1 className="text-2xl font-semibold text-foreground">Imóvel não encontrado</h1>
+    <p className="text-muted-foreground">O código informado ({codigo}) não corresponde a nenhum imóvel cadastrado.</p>
+    <Link to="/">
+      <Button variant="outline">Voltar</Button>
+    </Link>
+  </div>
 
   return (
     <div className="min-h-screen bg-background">
@@ -286,8 +282,8 @@ const ImovelLanding = () => {
                       key={index}
                       onClick={() => setCurrentImageIndex(index)}
                       className={`flex-shrink-0 w-20 h-20 rounded-md overflow-hidden border-2 transition-all ${index === currentImageIndex
-                          ? 'border-primary scale-105'
-                          : 'border-border hover:border-primary/50'
+                        ? 'border-primary scale-105'
+                        : 'border-border hover:border-primary/50'
                         }`}
                     >
                       <img

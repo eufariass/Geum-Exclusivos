@@ -49,6 +49,7 @@ const App = () => (
             <Suspense fallback={<PageLoader />}>
               <Routes>
                 <Route path="/imoveis" element={<ImoveisArboPublic />} />
+                <Route path="/vitrine" element={<ImoveisArboPublic />} />
                 <Route path="/imovel/:listingId" element={<ImovelArboLanding />} />
                 <Route path="/" element={<ImoveisPublic />} />
                 <Route path="/login" element={<Auth />} />
