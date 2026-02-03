@@ -1,6 +1,7 @@
 import { Home, Building2, Users, CheckSquare, BarChart3, FileText, UserCog, Sparkles, Globe } from 'lucide-react';
 import type { TabType } from '@/types';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useAssistantContext } from '@/contexts/AssistantContext';
 import logoGeum from '@/assets/logo-geum-black.png';
 import {
   Sidebar,
@@ -55,6 +56,7 @@ export function AppSidebar({ activeTab, onTabChange }: AppSidebarProps) {
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
   const { isAdmin, loading } = usePermissions();
+  const { toggleOpen } = useAssistantContext();
 
   return (
     <Sidebar className="border-r border-border z-50">
@@ -91,7 +93,13 @@ export function AppSidebar({ activeTab, onTabChange }: AppSidebarProps) {
                       {group.items.map((item) => (
                         <SidebarMenuItem key={item.id}>
                           <SidebarMenuButton
-                            onClick={() => onTabChange(item.id)}
+                            onClick={() => {
+                              if (item.id === 'chat-ia') {
+                                toggleOpen();
+                              } else {
+                                onTabChange(item.id);
+                              }
+                            }}
                             className={`
                               rounded-lg transition-all
                               ${activeTab === item.id
