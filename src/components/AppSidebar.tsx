@@ -38,6 +38,7 @@ const menuGroups = [
     items: [
       { id: 'imoveis' as TabType, label: 'Exclusivos', icon: Building2 },
       { id: 'imoveis-arbo' as TabType, label: 'Vitrine Pública', icon: Globe },
+      { id: 'cms' as TabType, label: 'Editor de Site', icon: Sparkles },
       { id: 'metricas' as TabType, label: 'Métricas', icon: BarChart3 },
       { id: 'chat-ia' as TabType, label: 'Chat com IA', icon: Sparkles },
     ]

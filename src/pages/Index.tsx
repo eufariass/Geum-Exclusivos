@@ -12,6 +12,7 @@ import { MetricasTab } from '@/components/metricas/MetricasTab';
 import { RelatoriosTab } from '@/components/relatorios/RelatoriosTab';
 import { UsuariosTab } from '@/components/usuarios/UsuariosTab';
 import { ChatIATab } from '@/components/chat-ia/ChatIATab';
+import { SiteEditor } from '@/components/cms/SiteEditor';
 import { useToastManager } from '@/components/Toast';
 import { usePermissions } from '@/hooks/usePermissions';
 import type { TabType } from '@/types';
@@ -74,6 +75,11 @@ const Index = () => {
               {activeTab === 'chat-ia' && (
                 <PageTransition>
                   <ChatIATab key={refreshKey} />
+                </PageTransition>
+              )}
+              {activeTab === 'cms' && (
+                <PageTransition>
+                  <SiteEditor key={refreshKey} />
                 </PageTransition>
               )}
               {activeTab === 'usuarios' && isAdmin && (

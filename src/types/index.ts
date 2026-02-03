@@ -121,7 +121,7 @@ export interface LeadComment {
   created_at: string;
 }
 
-export type TabType = 'dashboard' | 'imoveis' | 'imoveis-arbo' | 'leads' | 'tasks' | 'metricas' | 'relatorios' | 'usuarios' | 'chat-ia';
+export type TabType = 'dashboard' | 'imoveis' | 'imoveis-arbo' | 'leads' | 'tasks' | 'metricas' | 'relatorios' | 'usuarios' | 'chat-ia' | 'cms';
 
 // Imóveis do Arbo/Superlógica (Vitrine Pública)
 export interface ImovelArbo {
