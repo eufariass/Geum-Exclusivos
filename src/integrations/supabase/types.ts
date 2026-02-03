@@ -783,6 +783,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      reorder_site_banners: {
+        Args: { banner_ids: string[] }
+        Returns: undefined
+      }
+      reorder_site_sections: {
+        Args: { section_ids: string[] }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "corretor"
