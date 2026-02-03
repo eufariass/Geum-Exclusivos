@@ -362,10 +362,20 @@ const ImoveisArboPublic = () => {
     const [loading, setLoading] = useState(true);
     const [imagesLoaded, setImagesLoaded] = useState<Record<string, boolean>>({});
     const [searchInput, setSearchInput] = useState(searchQuery);
+    const resultsRef = useRef<HTMLDivElement>(null);
 
     const handleImageLoad = useCallback((id: string) => {
         setImagesLoaded(prev => ({ ...prev, [id]: true }));
     }, []);
+
+    useEffect(() => {
+        if (searchQuery && resultsRef.current) {
+            // Wait a tick for render
+            setTimeout(() => {
+                resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+    }, [searchQuery]);
 
     useEffect(() => {
         const loadData = async () => {
@@ -579,7 +589,7 @@ const ImoveisArboPublic = () => {
 
                 {searchQuery ? (
                     /* Search Results View */
-                    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <div ref={resultsRef} className="animate-in fade-in slide-in-from-bottom-4 duration-500 scroll-mt-24">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-2xl font-bold">Resultados para "{searchQuery}"</h2>
                             <button onClick={clearSearch} className="text-primary hover:underline text-sm font-medium">Limpar busca</button>
