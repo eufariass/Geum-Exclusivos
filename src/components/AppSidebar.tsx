@@ -56,7 +56,6 @@ export function AppSidebar({ activeTab, onTabChange }: AppSidebarProps) {
   const { state } = useSidebar();
   const isCollapsed = state === 'collapsed';
   const { isAdmin, loading } = usePermissions();
-  const { toggleOpen } = useAssistantContext();
 
   return (
     <Sidebar className="border-r border-border z-50">
@@ -93,13 +92,7 @@ export function AppSidebar({ activeTab, onTabChange }: AppSidebarProps) {
                       {group.items.map((item) => (
                         <SidebarMenuItem key={item.id}>
                           <SidebarMenuButton
-                            onClick={() => {
-                              if (item.id === 'chat-ia') {
-                                toggleOpen();
-                              } else {
-                                onTabChange(item.id);
-                              }
-                            }}
+                            onClick={() => onTabChange(item.id)}
                             className={`
                               rounded-lg transition-all
                               ${activeTab === item.id

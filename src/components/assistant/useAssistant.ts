@@ -34,6 +34,8 @@ export function useAssistant() {
     const sendMessage = async (content: string) => {
         if (!content.trim()) return;
 
+        console.log('[Assistant] Sending message:', content);
+
         // Add User Message
         const userMsg: AssistantMessage = {
             id: crypto.randomUUID(),
@@ -51,13 +53,15 @@ export function useAssistant() {
                 { role: 'user', content }
             ].slice(-10); // Lookback window
 
-            console.log('Sending to AI:', apiMessages);
+            console.log('[Assistant] Calling Edge Function ai-assistant with:', apiMessages);
 
             const { data, error } = await supabase.functions.invoke('ai-assistant', {
                 body: { messages: apiMessages }
             });
 
             if (error) {
+                console.error('[Assistant] Supabase Function Error:', error);
+
                 // Handle specific startup errors (like missing keys)
                 if (error instanceof Error && error.message.includes('OPENAI_API_KEY_MISSING')) {
                     toast.error('Chave da OpenAI não configurada!', {
@@ -75,6 +79,8 @@ export function useAssistant() {
                 throw error;
             }
 
+            console.log('[Assistant] API Response:', data);
+
             // If the function returned a specific error payload (captured in catch block inside function)
             if (data && data.error === 'OPENAI_API_KEY_MISSING') {
                 toast.error('Chave da OpenAI ausente!');
@@ -87,6 +93,11 @@ export function useAssistant() {
                 return;
             }
 
+            if (data && data.error) {
+                console.error('[Assistant] API Business Error:', data.error);
+                throw new Error(data.error);
+            }
+
             const aiResponse = data?.choices?.[0]?.message?.content;
 
             if (aiResponse) {
@@ -97,12 +108,13 @@ export function useAssistant() {
                     timestamp: new Date()
                 }]);
             } else {
+                console.error('[Assistant] No AI response content found in data', data);
                 throw new Error('No response from AI');
             }
 
         } catch (error) {
-            console.error('AI Error:', error);
-            toast.error('Erro ao processar sua solicitação.');
+            console.error('[Assistant] Final Catch Error:', error);
+            toast.error('Erro ao processar sua solicitação: ' + (error instanceof Error ? error.message : String(error)));
             setMessages(prev => [...prev, {
                 id: crypto.randomUUID(),
                 role: 'assistant',
@@ -115,8 +127,18 @@ export function useAssistant() {
     };
 
     const startListening = () => {
+        console.log('[Assistant] Starting listening...');
+        if (!browserSupportsSpeechRecognition) {
+            console.error('[Assistant] Browser does NOT support speech recognition');
+            toast.error('Seu navegador não suporta reconhecimento de voz.');
+            return;
+        }
         resetTranscript();
-        SpeechRecognition.startListening({ continuous: false, language: 'pt-BR' });
+        SpeechRecognition.startListening({ continuous: false, language: 'pt-BR' })
+            .catch(err => {
+                console.error('[Assistant] Failed to start listening:', err);
+                toast.error('Erro ao iniciar microfone: ' + err.message);
+            });
     };
 
     const stopListening = () => {

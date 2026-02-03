@@ -12,6 +12,8 @@ import { MetricasTab } from '@/components/metricas/MetricasTab';
 import { RelatoriosTab } from '@/components/relatorios/RelatoriosTab';
 import { UsuariosTab } from '@/components/usuarios/UsuariosTab';
 import { SiteEditor } from '@/components/cms/SiteEditor';
+
+import { AssistantTab } from '@/components/assistant/AssistantTab';
 import { useToastManager } from '@/components/Toast';
 import { usePermissions } from '@/hooks/usePermissions';
 import type { TabType } from '@/types';
@@ -72,6 +74,11 @@ const Index = () => {
                 </PageTransition>
               )}
 
+              {activeTab === 'chat-ia' && (
+                <PageTransition>
+                  <AssistantTab />
+                </PageTransition>
+              )}
               {activeTab === 'cms' && (
                 <PageTransition>
                   <SiteEditor key={refreshKey} />
