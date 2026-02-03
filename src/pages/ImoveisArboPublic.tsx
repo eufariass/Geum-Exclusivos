@@ -352,6 +352,32 @@ const PropertySection = ({ title, subtitle, imoveis, loading, imagesLoaded, onIm
 
 // --- Page ---
 
+// Helper for slower smooth scroll
+const smoothScrollTo = (target: HTMLElement, duration: number = 1500) => {
+    const targetPosition = target.getBoundingClientRect().top + window.scrollY - 100; // Offset for header
+    const startPosition = window.scrollY;
+    const distance = targetPosition - startPosition;
+    let startTime: number | null = null;
+
+    const animation = (currentTime: number) => {
+        if (startTime === null) startTime = currentTime;
+        const timeElapsed = currentTime - startTime;
+        const run = ease(timeElapsed, startPosition, distance, duration);
+        window.scrollTo(0, run);
+        if (timeElapsed < duration) requestAnimationFrame(animation);
+    };
+
+    // Easing function (easeInOutVar)
+    const ease = (t: number, b: number, c: number, d: number) => {
+        t /= d / 2;
+        if (t < 1) return c / 2 * t * t + b;
+        t--;
+        return -c / 2 * (t * (t - 2) - 1) + b;
+    };
+
+    requestAnimationFrame(animation);
+};
+
 const ImoveisArboPublic = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const searchQuery = searchParams.get('q') || '';
@@ -361,21 +387,61 @@ const ImoveisArboPublic = () => {
     const [cmsBanners, setCmsBanners] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [imagesLoaded, setImagesLoaded] = useState<Record<string, boolean>>({});
+
     const [searchInput, setSearchInput] = useState(searchQuery);
+    const [suggestions, setSuggestions] = useState<string[]>([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+
     const resultsRef = useRef<HTMLDivElement>(null);
+    const wrapperRef = useRef<HTMLDivElement>(null); // To detect clicks outside
 
     const handleImageLoad = useCallback((id: string) => {
         setImagesLoaded(prev => ({ ...prev, [id]: true }));
     }, []);
 
+    // Filter suggestions based on input
+    useEffect(() => {
+        if (!searchInput || searchInput.length < 2) {
+            setSuggestions([]);
+            return;
+        }
+
+        const lowerInput = searchInput.toLowerCase();
+        const newSuggestions = new Set<string>();
+
+        imoveis.forEach(imovel => {
+            if (imovel.neighborhood?.toLowerCase().includes(lowerInput)) newSuggestions.add(imovel.neighborhood);
+            if (imovel.city?.toLowerCase().includes(lowerInput)) newSuggestions.add(imovel.city);
+            if (imovel.listing_id?.toLowerCase().includes(lowerInput)) newSuggestions.add(imovel.listing_id);
+            if (imovel.property_type?.toLowerCase().includes(lowerInput)) newSuggestions.add(imovel.property_type);
+        });
+
+        // Limit to 5 suggestions
+        setSuggestions(Array.from(newSuggestions).slice(0, 5));
+    }, [searchInput, imoveis]);
+
+    // Improved scroll effect
     useEffect(() => {
         if (searchQuery && resultsRef.current) {
-            // Wait a tick for render
+            // Delay slightly to ensure render
             setTimeout(() => {
-                resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                smoothScrollTo(resultsRef.current!, 1000); // 1 second duration
             }, 100);
         }
     }, [searchQuery]);
+
+    // Close suggestions on click outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+                setShowSuggestions(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     useEffect(() => {
         const loadData = async () => {
@@ -410,12 +476,25 @@ const ImoveisArboPublic = () => {
         loadData();
     }, []);
 
-    const handleSearchCheck = (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSearchCheck = (e?: React.FormEvent) => {
+        e?.preventDefault();
+        setShowSuggestions(false);
         if (searchInput.trim()) {
             setSearchParams({ q: searchInput });
         } else {
             setSearchParams({});
+        }
+    };
+
+    const handleSuggestionClick = (suggestion: string) => {
+        setSearchInput(suggestion);
+        setShowSuggestions(false);
+        setSearchParams({ q: suggestion });
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleSearchCheck();
         }
     };
 
@@ -564,15 +643,38 @@ const ImoveisArboPublic = () => {
                             <div className="hidden md:block w-px h-6 bg-border mx-1" />
 
                             {/* Search Input */}
-                            <div className="relative flex-grow w-full">
+                            <div className="relative flex-grow w-full" ref={wrapperRef}>
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground hidden md:block" />
                                 <input
                                     type="text"
-                                    placeholder="Pesquise aqui..."
+                                    placeholder="Pesquise por bairro, cidade ou código..."
                                     className="w-full h-10 md:h-12 pl-4 md:pl-10 pr-4 bg-transparent border-0 outline-none text-foreground placeholder:text-muted-foreground text-sm md:text-base"
                                     value={searchInput}
-                                    onChange={(e) => setSearchInput(e.target.value)}
+                                    onChange={(e) => {
+                                        setSearchInput(e.target.value);
+                                        setShowSuggestions(true);
+                                    }}
+                                    onFocus={() => setShowSuggestions(true)}
+                                    onKeyDown={handleKeyDown}
                                 />
+
+                                {/* Autocomplete Dropdown */}
+                                {showSuggestions && suggestions.length > 0 && (
+                                    <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-xl overflow-hidden z-50 border border-border/10 animate-in fade-in zoom-in-95 duration-200">
+                                        <ul className="py-2">
+                                            {suggestions.map((suggestion, index) => (
+                                                <li
+                                                    key={index}
+                                                    onClick={() => handleSuggestionClick(suggestion)}
+                                                    className="px-4 py-2 hover:bg-muted/50 cursor-pointer text-sm text-foreground flex items-center gap-2 group transition-colors"
+                                                >
+                                                    <Search className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary" />
+                                                    {suggestion}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Filters Button (Visual) */}
