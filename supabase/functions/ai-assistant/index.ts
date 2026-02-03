@@ -170,8 +170,9 @@ serve(async (req) => {
             throw new Error('Missing Authorization header');
         }
 
-        // Create client scoped to the user (respects RLS)
-        const supabase = createClient(supabaseUrl, authHeader.replace('Bearer ', ''), {
+        // Create client with service role key for database operations
+        // but still use the user's auth token for RLS
+        const supabase = createClient(supabaseUrl, supabaseServiceKey, {
             global: { headers: { Authorization: authHeader } },
         });
 
@@ -296,7 +297,7 @@ serve(async (req) => {
                     }
                 } catch (err) {
                     console.error(`Error executing ${functionName}:`, err);
-                    result = JSON.stringify({ error: err.message });
+                    result = JSON.stringify({ error: err instanceof Error ? err.message : String(err) });
                 }
 
                 toolMessages.push({
@@ -340,7 +341,7 @@ serve(async (req) => {
     } catch (error) {
         console.error('Error in ai-assistant:', error);
         // ... error handling
-        if (error.message === 'OPENAI_API_KEY_MISSING') {
+        if (error instanceof Error && error.message === 'OPENAI_API_KEY_MISSING') {
             return new Response(JSON.stringify({ error: 'OPENAI_API_KEY_MISSING' }), {
                 status: 400,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
