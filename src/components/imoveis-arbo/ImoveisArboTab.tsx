@@ -31,8 +31,8 @@ export function ImoveisArboTab() {
         city: '',
         neighborhood: '',
         transactionType: '',
-        priceMin: '',
-        priceMax: '',
+        minPrice: '',
+        maxPrice: '',
         bedrooms: '',
     });
 
@@ -90,13 +90,13 @@ export function ImoveisArboTab() {
             result = result.filter(imovel => imovel.transaction_type === filters.transactionType);
         }
 
-        if (filters.priceMin) {
-            const min = parseFloat(filters.priceMin);
+        if (filters.minPrice) {
+            const min = parseFloat(filters.minPrice);
             result = result.filter(imovel => (imovel.price || 0) >= min);
         }
 
-        if (filters.priceMax) {
-            const max = parseFloat(filters.priceMax);
+        if (filters.maxPrice) {
+            const max = parseFloat(filters.maxPrice);
             result = result.filter(imovel => (imovel.price || 0) <= max);
         }
 
@@ -116,20 +116,12 @@ export function ImoveisArboTab() {
             .filter(Boolean) as string[]
     )).sort();
 
-    const handleSyncComplete = (log: ArboSyncLog) => {
-        if (log.status === 'success') {
-            toast({
-                title: "Sincronização concluída",
-                description: `${log.created_count} criados, ${log.updated_count} atualizados.`,
-            });
-            loadImoveis();
-        } else {
-            toast({
-                variant: "destructive",
-                title: "Erro na sincronização",
-                description: log.error_message || "Erro desconhecido",
-            });
-        }
+    const handleSyncComplete = () => {
+        toast({
+            title: "Sincronização concluída",
+            description: "Imóveis atualizados com sucesso.",
+        });
+        loadImoveis();
     };
 
     const handleViewDetails = (imovel: ImovelArbo) => {
