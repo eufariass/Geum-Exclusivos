@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import type { ImovelArbo } from '@/types';
+import { cmsService, SiteBanner } from '@/services/cms.service';
 import { CardContent } from '@/components/ui/card';
 import { BedDouble, Bath, Maximize, Home, MapPin, Phone, Mail, ArrowRight, ChevronLeft, ChevronRight, Search, X, ExternalLink } from 'lucide-react';
 import logoBlack from '@/assets/logo-geum-black.png';
@@ -76,21 +77,9 @@ const MediaSection = () => {
     );
 };
 
-const BannerCarousel = () => {
-    const banners = [
-        {
-            image: bannerExclusividade,
-            link: '/',
-            external: false,
-            alt: "Imóveis Exclusivos Geum"
-        },
-        {
-            image: bannerGeumCast,
-            link: 'https://www.youtube.com/@geumcast',
-            external: true,
-            alt: "Geum Cast - Podcast Imobiliário"
-        }
-    ];
+const BannerCarousel = ({ banners }: { banners: SiteBanner[] }) => {
+    // If no banners provided, return null or fallback
+    if (!banners || banners.length === 0) return null;
 
     const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -113,10 +102,14 @@ const BannerCarousel = () => {
     };
 
     const currentBanner = banners[currentIndex];
-    const LinkComponent = currentBanner.external ? 'a' : Link;
-    const linkProps = currentBanner.external
-        ? { href: currentBanner.link, target: '_blank', rel: 'noopener noreferrer' }
-        : { to: currentBanner.link };
+
+    // Safety check
+    if (!currentBanner) return null;
+
+    const LinkComponent = currentBanner.external_link ? 'a' : Link;
+    const linkProps = currentBanner.external_link
+        ? { href: currentBanner.link_url, target: '_blank', rel: 'noopener noreferrer' }
+        : { to: currentBanner.link_url };
 
     return (
         <section className="py-12 relative group/banner">
@@ -129,8 +122,8 @@ const BannerCarousel = () => {
                                 }`}
                         >
                             <img
-                                src={banner.image}
-                                alt={banner.alt}
+                                src={banner.image_url}
+                                alt={banner.title}
                                 className="w-full h-full object-cover"
                             />
                         </div>
@@ -364,6 +357,8 @@ const ImoveisArboPublic = () => {
     const searchQuery = searchParams.get('q') || '';
 
     const [imoveis, setImoveis] = useState<ImovelArbo[]>([]);
+    const [cmsSections, setCmsSections] = useState<any[]>([]);
+    const [cmsBanners, setCmsBanners] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [imagesLoaded, setImagesLoaded] = useState<Record<string, boolean>>({});
     const [searchInput, setSearchInput] = useState(searchQuery);
@@ -373,26 +368,36 @@ const ImoveisArboPublic = () => {
     }, []);
 
     useEffect(() => {
-        const loadImoveis = async () => {
+        const loadData = async () => {
             try {
-                const { data, error } = await supabase
+                // Load Imoveis
+                const { data: imoveisData, error } = await supabase
                     .from('imoveis_arbo')
-                    // Select specific fields for performance optimization
                     .select('id, title, price, city, neighborhood, property_type, transaction_type, features, bedrooms, bathrooms, living_area, featured, publication_type, listing_id, primary_image, images')
                     .eq('active', true)
                     .order('featured', { ascending: false })
                     .order('last_update_date', { ascending: false });
 
                 if (error) throw error;
-                setImoveis((data as ImovelArbo[]) || []);
+                setImoveis((imoveisData as ImovelArbo[]) || []);
+
+                // Load CMS Data
+                const [sections, banners] = await Promise.all([
+                    cmsService.getSections(),
+                    cmsService.getBanners()
+                ]);
+
+                setCmsSections(sections.filter(s => s.active));
+                setCmsBanners(banners.filter(b => b.active));
+
             } catch (error) {
-                console.error('Erro ao carregar imóveis:', error);
+                console.error('Erro ao carregar dados:', error);
             } finally {
                 setLoading(false);
             }
         };
 
-        loadImoveis();
+        loadData();
     }, []);
 
     const handleSearchCheck = (e: React.FormEvent) => {
@@ -422,30 +427,40 @@ const ImoveisArboPublic = () => {
         );
     }, [imoveis, searchQuery]);
 
-    const featuredImoveis = useMemo(() => imoveis.filter(i => i.featured), [imoveis]);
+    // CMS Filter Helper
+    const getSectionImoveis = useCallback((filters: any) => {
+        if (!filters) return [];
 
-    const glebaImoveis = useMemo(() => imoveis.filter(i =>
-        i.neighborhood?.toLowerCase().includes('gleba') ||
-        i.neighborhood?.toLowerCase().includes('palhano')
-    ), [imoveis]);
+        let filtered = [...imoveis];
 
-    const condoImoveis = useMemo(() => imoveis.filter(i =>
-        i.property_type?.toLowerCase().includes('condo') ||
-        i.property_type?.toLowerCase().includes('condomínio') ||
-        i.features?.some(f => f.toLowerCase().includes('condomínio'))
-    ), [imoveis]);
+        if (filters.featured) {
+            filtered = filtered.filter(i => i.featured);
+        }
 
-    const landImoveis = useMemo(() => imoveis.filter(i =>
-        i.property_type?.toLowerCase().includes('land') ||
-        i.property_type?.toLowerCase().includes('lot') ||
-        i.property_type?.toLowerCase().includes('terreno')
-    ), [imoveis]);
+        if (filters.neighborhoods && filters.neighborhoods.length > 0) {
+            filtered = filtered.filter(i =>
+                filters.neighborhoods.some((n: string) => i.neighborhood?.toLowerCase().includes(n.toLowerCase()))
+            );
+        }
 
-    const launchImoveis = useMemo(() => imoveis.filter(i =>
-        i.publication_type === 'Launch' ||
-        i.features?.some(f => f.toLowerCase().includes('lançamento')) ||
-        i.property_type?.toLowerCase().includes('development')
-    ), [imoveis]);
+        if (filters.property_types && filters.property_types.length > 0) {
+            filtered = filtered.filter(i =>
+                filters.property_types.some((t: string) => i.property_type?.toLowerCase().includes(t.toLowerCase()))
+            );
+        }
+
+        if (filters.features && filters.features.length > 0) {
+            filtered = filtered.filter(i =>
+                i.features?.some(f => filters.features.some((filterF: string) => f.toLowerCase().includes(filterF.toLowerCase())))
+            );
+        }
+
+        if (filters.publication_type) {
+            filtered = filtered.filter(i => i.publication_type === filters.publication_type);
+        }
+
+        return filtered.slice(0, 10); // Limit to 10 items
+    }, [imoveis]);
 
     return (
         <div className="min-h-screen bg-background flex flex-col font-sans">
@@ -590,66 +605,55 @@ const ImoveisArboPublic = () => {
                         )}
                     </div>
                 ) : (
-                    /* Showcase View */
+                    /* Showcase View - CMS Driven */
                     <div className="space-y-4 animate-in fade-in duration-700">
-                        {/* Destaques */}
-                        <PropertySection
-                            title="Destaques"
-                            subtitle="Imóveis selecionados para você"
-                            imoveis={featuredImoveis}
-                            loading={loading}
-                            imagesLoaded={imagesLoaded}
-                            onImageLoad={handleImageLoad}
-                        />
+                        {cmsSections.length > 0 ? (
+                            cmsSections.map((section) => {
+                                if (section.type === 'banner_carousel') {
+                                    return <BannerCarousel key={section.id} banners={cmsBanners} />;
+                                }
 
-                        {/* Gleba Palhano */}
-                        <PropertySection
-                            title="Gleba Palhano"
-                            subtitle="A região mais valorizada de Londrina"
-                            imoveis={glebaImoveis}
-                            loading={loading}
-                            imagesLoaded={imagesLoaded}
-                            onImageLoad={handleImageLoad}
-                        />
+                                if (section.type === 'media_grid') {
+                                    return <MediaSection key={section.id} />;
+                                }
 
-                        {/* Banner Carousel */}
-                        <BannerCarousel />
+                                if (section.type === 'property_list') {
+                                    const sectionImoveis = getSectionImoveis(section.content?.filters);
+                                    if (sectionImoveis.length === 0) return null;
 
-                        {/* Casas em Condomínio */}
-                        <PropertySection
-                            title="Casas em Condomínio"
-                            subtitle="Segurança e conforto para sua família"
-                            imoveis={condoImoveis}
-                            loading={loading}
-                            imagesLoaded={imagesLoaded}
-                            onImageLoad={handleImageLoad}
-                        />
+                                    return (
+                                        <PropertySection
+                                            key={section.id}
+                                            title={section.title || ''}
+                                            subtitle={section.subtitle}
+                                            imoveis={sectionImoveis}
+                                            loading={loading}
+                                            imagesLoaded={imagesLoaded}
+                                            onImageLoad={handleImageLoad}
+                                        />
+                                    );
+                                }
 
-                        {/* Terrenos */}
-                        <PropertySection
-                            title="Terrenos"
-                            subtitle="Construa o sonho da sua vida"
-                            imoveis={landImoveis}
-                            loading={loading}
-                            imagesLoaded={imagesLoaded}
-                            onImageLoad={handleImageLoad}
-                        />
-
-                        {/* Lançamentos */}
-                        <PropertySection
-                            title="Lançamentos"
-                            subtitle="Novidades e empreendimentos na planta"
-                            imoveis={launchImoveis}
-                            loading={loading}
-                            imagesLoaded={imagesLoaded}
-                            onImageLoad={handleImageLoad}
-                        />
-
-                        {/* Media Section */}
-                        <MediaSection />
+                                return null;
+                            })
+                        ) : (
+                            // Fallback skeleton if CMS is empty or loading
+                            loading ? (
+                                <div className="space-y-12">
+                                    <div className="h-96 bg-muted animate-pulse rounded-2xl" />
+                                    <div className="space-y-4">
+                                        <div className="h-8 w-64 bg-muted animate-pulse rounded" />
+                                        <div className="flex gap-4 overflow-hidden">
+                                            {[1, 2, 3, 4].map(i => <div key={i} className="h-80 w-80 bg-muted animate-pulse rounded-xl flex-shrink-0" />)}
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : null
+                        )}
                     </div>
                 )}
             </main>
+
 
             {/* Footer */}
             <footer className="bg-primary text-primary-foreground mt-auto">
