@@ -18,13 +18,13 @@ const tools = [
         type: "function",
         function: {
             name: "search_leads",
-            description: "Search for leads in the database by name, email, or stage.",
+            description: "Search for leads in the database by name, email, or phone. Use this to find a lead before updating them.",
             parameters: {
                 type: "object",
                 properties: {
                     query: {
                         type: "string",
-                        description: "The search query (name, email, etc)."
+                        description: "The search query (name, email, phone)."
                     }
                 },
                 required: ["query"]
@@ -45,7 +45,7 @@ const tools = [
                     },
                     stage_id: {
                         type: "string",
-                        description: "The ID of the target stage (e.g., 'novo-lead', 'qualificacao', 'encerrado')."
+                        description: "The ID of the target stage (e.g., 'novo-lead', 'qualificacao', 'visita', 'proposta', 'fechamento', 'perdido')."
                     }
                 },
                 required: ["lead_id", "stage_id"]
@@ -84,20 +84,71 @@ const tools = [
                 required: []
             }
         }
+    },
+    {
+        type: "function",
+        function: {
+            name: "search_properties",
+            description: "Search for properties (imóveis) by code, title, address, or type.",
+            parameters: {
+                type: "object",
+                properties: {
+                    query: {
+                        type: "string",
+                        description: "The search query (code, address, neighborhood, type)."
+                    }
+                },
+                required: ["query"]
+            }
+        }
+    },
+    {
+        type: "function",
+        function: {
+            name: "get_property_details",
+            description: "Get full details of a specific property by ID. Use this when you need to write a description or answer specific questions about a property.",
+            parameters: {
+                type: "object",
+                properties: {
+                    property_id: {
+                        type: "string",
+                        description: "The UUID of the property."
+                    }
+                },
+                required: ["property_id"]
+            }
+        }
     }
 ];
 
 // --- System Prompt ---
-const systemPrompt = `Você é o Assistente Virtual da Geum Imob. Sua função é ajudar corretores e administradores a gerenciar leads e tarefas no CRM de forma rápida e eficiente.
-Você tem acesso direto ao banco de dados através de ferramentas. Sempre que o usuário pedir algo que exija dados, USE AS FERRAMENTAS.
+const systemPrompt = `Você é o Assistente Virtual Inteligente da Geum Imob. 
+Sua missão é auxiliar corretores e administradores a:
+1. Gerenciar LEADS (crm).
+2. Consultar e criar conteúdos para IMÓVEIS.
 
-Regras:
-1. Seja educado, profissional e objetivo.
-2. Se o usuário pedir para mudar um lead de etapa, primeiro PEQUISE o lead para obter o ID, se não for fornecido.
-3. Se o usuário pedir para adicionar um comentário, faça o mesmo.
-4. Responda em português do Brasil.
-5. Se uma ação falhar (erro de permissão, etc.), avise o usuário claramente.
-6. Não invente IDs. Use apenas os IDs retornados pelas buscas.
+FERRAMENTAS:
+Você TEM acesso direto ao banco de dados via ferramentas (tools). 
+NUNCA diga "não tenho acesso ao banco". USE AS FERRAMENTAS.
+
+REGRAS DE OURO - LEADS:
+1. **Identificação Precisa**: Antes de alterar ou comentar em um lead, tenha CERTEZA de quem é. 
+   - Se o usuário disser "Mude o João de etapa", USE \`search_leads("João")\`.
+   - Se a busca retornar mais de um "João", **PERGUNTE** ao usuário qual deles é (mostre nome, email/telefone e etapa atual).
+   - Se não encontrar ninguém, avise e peça para verificar o nome.
+   - Só prossiga com a ação quando tiver um ID confirmado.
+
+REGRAS DE OURO - IMÓVEIS:
+1. Você pode buscar imóveis por código, bairro, tipo, etc.
+2. **Descrições**: Se pedirem para "Criar uma descrição" para um imóvel:
+   - Primeiro busque o imóvel para achar o ID.
+   - Depois use \`get_property_details(id)\` para ler todas as características.
+   - Com os dados, escreva uma descrição vendedora, criativa e profissional, destacando os pontos fortes.
+
+PERSONALIDADE:
+- Profissional, eficiente e proativo.
+- Responda em Português do Brasil.
+- Se ocorrer um erro técnico, explique de forma simples.
 `;
 
 serve(async (req) => {
@@ -124,9 +175,6 @@ serve(async (req) => {
             global: { headers: { Authorization: authHeader } },
         });
 
-        // Also create a service client for read-only metadata if needed, but primarily use user client for actions
-        // const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
-
         // 1. Call OpenAI with tools
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
@@ -142,7 +190,7 @@ serve(async (req) => {
                 ],
                 tools: tools,
                 tool_choice: "auto",
-                temperature: 0.3, // Lower temperature for actions
+                temperature: 0.2, // Lower temperature to force tool usage accuracy
             }),
         });
 
@@ -171,12 +219,27 @@ serve(async (req) => {
                     if (functionName === 'search_leads') {
                         const { data: leads, error } = await supabase
                             .from('leads')
-                            .select('id, name, email, stage_id, imovel_arbo_id')
-                            .or(`name.ilike.%${args.query}%,email.ilike.%${args.query}%`)
+                            .select('id, name, email, telefone, stage_id, updated_at')
+                            .or(`name.ilike.%${args.query}%,email.ilike.%${args.query}%,telefone.ilike.%${args.query}%`)
                             .limit(5);
 
                         if (error) throw error;
-                        result = JSON.stringify(leads);
+
+                        if (!leads || leads.length === 0) {
+                            result = JSON.stringify({ found: false, message: "Nenhum lead encontrado com esses termos." });
+                        } else {
+                            result = JSON.stringify({
+                                found: true,
+                                count: leads.length,
+                                leads: leads.map(l => ({
+                                    id: l.id,
+                                    name: l.name,
+                                    info: `${l.email || 'Sem email'} | ${l.telefone || 'Sem tel'}`,
+                                    stage: l.stage_id, // AI handles raw IDs, but meaningful names would be better if possible. 
+                                    // ideally we join with stages table, but let's keep it simple for now.
+                                }))
+                            });
+                        }
                     }
                     else if (functionName === 'update_lead_stage') {
                         const { error } = await supabase
@@ -185,20 +248,10 @@ serve(async (req) => {
                             .eq('id', args.lead_id);
 
                         if (error) throw error;
-                        result = JSON.stringify({ success: true, message: "Lead updated successfully" });
+                        result = JSON.stringify({ success: true, message: "Lead movido com sucesso." });
                     }
                     else if (functionName === 'add_lead_comment') {
-                        // Check if we have a table for comments. If not, maybe we use notes or a separate table.
-                        // Based on schema analysis, 'lead_stage_history' has 'notes'. 
-                        // Or typically there is a 'lead_interactions' or 'comments' table.
-                        // Let's assume we append to a timeline or create a generic task/note.
-                        // For now, let's look for a comments table or use lead_stage_history as a log.
-                        // Actually, the user asked to "incluir um comentario". 
-                        // In the absence of a verified 'comments' table, I will use 'lead_stage_history' to log this event OR check if I missed a table.
-                        // Re-reading schema: `lead_stage_history` has `notes`. This fits "comentario".
-                        // However, we need 'from_stage_id' and 'to_stage_id'. 
-                        // Let's try to fetch current stage first.
-
+                        // Confirm lead exists/get stage
                         const { data: lead } = await supabase.from('leads').select('stage_id').eq('id', args.lead_id).single();
 
                         if (lead) {
@@ -207,24 +260,43 @@ serve(async (req) => {
                                 .insert({
                                     lead_id: args.lead_id,
                                     from_stage_id: lead.stage_id,
-                                    to_stage_id: lead.stage_id, // No change
+                                    to_stage_id: lead.stage_id,
                                     notes: args.comment,
                                     changed_at: new Date().toISOString()
                                 });
                             if (error) throw error;
-                            result = JSON.stringify({ success: true, message: "Comment added" });
+                            result = JSON.stringify({ success: true, message: "Comentário registrado no histórico." });
                         } else {
-                            throw new Error("Lead not found");
+                            throw new Error("Lead não encontrado (ID inválido).");
                         }
                     }
                     else if (functionName === 'get_dashboard_stats') {
-                        // Simple stats
                         const { count } = await supabase.from('leads').select('*', { count: 'exact', head: true });
                         result = JSON.stringify({ total_leads: count });
                     }
+                    else if (functionName === 'search_properties') {
+                        const { data: props, error } = await supabase
+                            .from('imoveis')
+                            .select('id, codigo, titulo, tipo, cidade, bairro, valor')
+                            .or(`codigo.ilike.%${args.query}%,titulo.ilike.%${args.query}%,bairro.ilike.%${args.query}%,tipo.ilike.%${args.query}%`)
+                            .limit(5);
+
+                        if (error) throw error;
+                        result = JSON.stringify(props);
+                    }
+                    else if (functionName === 'get_property_details') {
+                        const { data: prop, error } = await supabase
+                            .from('imoveis')
+                            .select('*')
+                            .eq('id', args.property_id)
+                            .single();
+
+                        if (error) throw error;
+                        result = JSON.stringify(prop);
+                    }
                 } catch (err) {
                     console.error(`Error executing ${functionName}:`, err);
-                    result = JSON.stringify({ error: err instanceof Error ? err.message : String(err) });
+                    result = JSON.stringify({ error: err.message });
                 }
 
                 toolMessages.push({
@@ -235,7 +307,7 @@ serve(async (req) => {
                 });
             }
 
-            // 3. Follow-up call to OpenAI to get the final natural language response
+            // 3. Follow-up call to OpenAI
             const followUpResponse = await fetch('https://api.openai.com/v1/chat/completions', {
                 method: 'POST',
                 headers: {
@@ -249,7 +321,7 @@ serve(async (req) => {
                         ...messages,
                         ...toolMessages
                     ],
-                    temperature: 0.7,
+                    temperature: 0.4, // Balanced for creativity + accuracy
                 }),
             });
 
@@ -259,7 +331,7 @@ serve(async (req) => {
             });
 
         } else {
-            // No tool called, just return the message
+            // No tool called
             return new Response(JSON.stringify(data), {
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             });
@@ -267,15 +339,13 @@ serve(async (req) => {
 
     } catch (error) {
         console.error('Error in ai-assistant:', error);
-
-        // Check if it's the specific missing key error
-        if (error instanceof Error && error.message === 'OPENAI_API_KEY_MISSING') {
+        // ... error handling
+        if (error.message === 'OPENAI_API_KEY_MISSING') {
             return new Response(JSON.stringify({ error: 'OPENAI_API_KEY_MISSING' }), {
-                status: 400, // Bad Request
+                status: 400,
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
             });
         }
-
         return new Response(
             JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
             {
