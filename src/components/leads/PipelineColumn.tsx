@@ -30,8 +30,8 @@ export const PipelineColumn = ({ stage, leads, onLeadClick }: PipelineColumnProp
       };
     }
 
-    if (stageName.includes('qualifica')) {
-      // Qualificação - Amarelo
+    if (stageName.includes('atendimento') || stageName.includes('qualifica')) {
+      // Em atendimento - Amarelo
       return {
         header: 'bg-gradient-to-r from-yellow-400/90 to-amber-400/80 border-yellow-500/30 shadow-sm',
         text: 'text-yellow-900',
@@ -40,8 +40,8 @@ export const PipelineColumn = ({ stage, leads, onLeadClick }: PipelineColumnProp
       };
     }
 
-    if (stageName.includes('encerrado') || stageName.includes('conclu') || stage.is_final) {
-      // Encerrado - Verde
+    if (stageName.includes('concluido') || stageName.includes('encerrado') || stage.is_final) {
+      // Concluido - Verde
       return {
         header: 'bg-gradient-to-r from-green-500/90 to-emerald-500/80 border-green-500/30 shadow-sm',
         text: 'text-white',
