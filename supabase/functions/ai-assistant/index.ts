@@ -224,7 +224,7 @@ serve(async (req) => {
                     }
                 } catch (err) {
                     console.error(`Error executing ${functionName}:`, err);
-                    result = JSON.stringify({ error: err.message });
+                    result = JSON.stringify({ error: err instanceof Error ? err.message : String(err) });
                 }
 
                 toolMessages.push({
@@ -269,7 +269,7 @@ serve(async (req) => {
         console.error('Error in ai-assistant:', error);
 
         // Check if it's the specific missing key error
-        if (error.message === 'OPENAI_API_KEY_MISSING') {
+        if (error instanceof Error && error.message === 'OPENAI_API_KEY_MISSING') {
             return new Response(JSON.stringify({ error: 'OPENAI_API_KEY_MISSING' }), {
                 status: 400, // Bad Request
                 headers: { ...corsHeaders, 'Content-Type': 'application/json' },
