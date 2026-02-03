@@ -10,6 +10,8 @@ const MAPBOX_TOKEN = 'pk.eyJ1IjoiZmVsaXBlZmFyaWFzMzYyOSIsImEiOiJjbWk5NnU5b2swazQ
 interface LocationMapProps {
   cep?: string;
   endereco: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 interface Coordinates {
@@ -17,7 +19,7 @@ interface Coordinates {
   lng: number;
 }
 
-export const LocationMap = ({ cep, endereco }: LocationMapProps) => {
+export const LocationMap = ({ cep, endereco, latitude, longitude }: LocationMapProps) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const [coordinates, setCoordinates] = useState<Coordinates | null>(null);
@@ -75,6 +77,14 @@ export const LocationMap = ({ cep, endereco }: LocationMapProps) => {
     const loadCoordinates = async () => {
       setLoading(true);
       
+      // If latitude and longitude are provided, use them directly
+      if (latitude && longitude) {
+        console.log('[Mapbox] Using provided coordinates:', { lat: latitude, lng: longitude });
+        setCoordinates({ lat: latitude, lng: longitude });
+        setLoading(false);
+        return;
+      }
+      
       const coords = await fetchCoordinatesFromAddress(endereco, cep);
       
       if (coords) {
@@ -87,7 +97,7 @@ export const LocationMap = ({ cep, endereco }: LocationMapProps) => {
     };
 
     loadCoordinates();
-  }, [endereco, cep]);
+  }, [endereco, cep, latitude, longitude]);
 
   useEffect(() => {
     if (!mapContainerRef.current || mapRef.current || !coordinates || loading) return;
