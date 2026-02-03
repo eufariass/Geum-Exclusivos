@@ -10,14 +10,17 @@ import { toast } from 'sonner';
 import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { SectionFilterDialog } from './SectionFilterDialog';
+import { SlidersHorizontal } from 'lucide-react';
 
 interface SortableSectionProps {
     section: SiteSection;
     onEdit: (section: SiteSection) => void;
     onToggleActive: (section: SiteSection) => void;
+    onEditFilters: (section: SiteSection) => void;
 }
 
-const SortableSection = ({ section, onEdit, onToggleActive }: SortableSectionProps) => {
+const SortableSection = ({ section, onEdit, onToggleActive, onEditFilters }: SortableSectionProps) => {
     const {
         attributes,
         listeners,
@@ -47,6 +50,13 @@ const SortableSection = ({ section, onEdit, onToggleActive }: SortableSectionPro
             </div>
 
             <div className="flex items-center gap-4">
+                {section.type === 'property_list' && (
+                    <Button variant="outline" size="sm" onClick={() => onEditFilters(section)} className="gap-2">
+                        <SlidersHorizontal className="h-3.5 w-3.5" />
+                        Filtros
+                    </Button>
+                )}
+
                 <div className="flex items-center gap-2">
                     <Switch
                         checked={section.active}
@@ -69,6 +79,7 @@ export const SectionsManager = () => {
     const [sections, setSections] = useState<SiteSection[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isFiltersOpen, setIsFiltersOpen] = useState(false);
     const [editingSection, setEditingSection] = useState<SiteSection | null>(null);
     const [formData, setFormData] = useState({ title: '', subtitle: '' });
 
@@ -80,7 +91,8 @@ export const SectionsManager = () => {
         try {
             setLoading(true);
             const data = await cmsService.getSections();
-            setSections(data);
+            // Filter out hero, as it is managed in General Settings
+            setSections(data.filter(s => s.type !== 'hero'));
         } catch (error) {
             toast.error('Erro ao carregar seções');
         } finally {
@@ -114,6 +126,27 @@ export const SectionsManager = () => {
             subtitle: section.subtitle || '',
         });
         setIsModalOpen(true);
+    };
+
+    const handleEditFilters = (section: SiteSection) => {
+        setEditingSection(section);
+        setIsFiltersOpen(true);
+    };
+
+    const handleSaveFilters = async (filters: any) => {
+        if (!editingSection) return;
+
+        try {
+            const updated = await cmsService.updateSection(editingSection.id, {
+                content: { ...editingSection.content, filters }
+            });
+
+            setSections(prev => prev.map(s => s.id === updated.id ? updated : s));
+            toast.success('Filtros atualizados com sucesso!');
+        } catch (error) {
+            toast.error('Erro ao salvar filtros');
+            throw error;
+        }
     };
 
     const handleToggleActive = async (section: SiteSection) => {
@@ -173,6 +206,7 @@ export const SectionsManager = () => {
                                 section={section}
                                 onEdit={handleEdit}
                                 onToggleActive={handleToggleActive}
+                                onEditFilters={handleEditFilters}
                             />
                         ))}
                     </div>
@@ -217,6 +251,15 @@ export const SectionsManager = () => {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
+
+            {editingSection && (
+                <SectionFilterDialog
+                    open={isFiltersOpen}
+                    onOpenChange={setIsFiltersOpen}
+                    section={editingSection}
+                    onSave={handleSaveFilters}
+                />
+            )}
         </div>
     );
 };

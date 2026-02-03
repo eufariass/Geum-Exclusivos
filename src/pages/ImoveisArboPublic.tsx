@@ -485,7 +485,7 @@ const ImoveisArboPublic = () => {
                     {/* Background Image */}
                     <div className="absolute inset-0 z-0">
                         <img
-                            src={heroSearchBg}
+                            src={(cmsSections.find(s => s.type === 'hero')?.content?.background_image) || heroSearchBg}
                             alt="Background"
                             className="w-full h-full object-cover opacity-85"
                         />
@@ -497,10 +497,10 @@ const ImoveisArboPublic = () => {
                     {/* Content */}
                     <div className="relative z-10 w-full max-w-5xl mx-auto px-4 flex flex-col items-center">
                         <h1 className="text-4xl md:text-6xl font-bold text-white mb-2 drop-shadow-lg tracking-tight">
-                            Imobiliária Geum.
+                            {cmsSections.find(s => s.type === 'hero')?.title || 'Imobiliária Geum.'}
                         </h1>
                         <p className="text-xl md:text-3xl font-medium text-white/90 mb-10 drop-shadow-md tracking-wide">
-                            Encontre seu próximo imóvel.
+                            {cmsSections.find(s => s.type === 'hero')?.subtitle || 'Encontre seu próximo imóvel.'}
                         </p>
 
                         {/* Search Bar - Reference Style */}

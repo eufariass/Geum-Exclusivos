@@ -177,4 +177,24 @@ export const cmsService = {
             throw error;
         }
     },
+
+    async getFilterOptions() {
+        try {
+            const { data, error } = await supabase
+                .from('imoveis_arbo')
+                .select('neighborhood, property_type, publication_type')
+                .eq('active', true);
+
+            if (error) throw error;
+
+            const neighborhoods = [...new Set(data.map(i => i.neighborhood).filter(Boolean))].sort();
+            const propertyTypes = [...new Set(data.map(i => i.property_type).filter(Boolean))].sort();
+            const publicationTypes = [...new Set(data.map(i => i.publication_type).filter(Boolean))].sort();
+
+            return { neighborhoods, propertyTypes, publicationTypes };
+        } catch (error) {
+            logger.error('Error fetching filter options', error);
+            throw error;
+        }
+    },
 };

@@ -1,7 +1,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BannersManager } from './BannersManager';
 import { SectionsManager } from './SectionsManager';
-import { Globe, Layout, Image } from 'lucide-react';
+import { GeneralSettings } from './GeneralSettings';
+import { Globe, Layout, Image, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ExternalLink } from 'lucide-react';
 
@@ -22,7 +23,7 @@ export const SiteEditor = () => {
             </div>
 
             <Tabs defaultValue="banners" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
+                <TabsList className="grid w-full grid-cols-3 max-w-[600px]">
                     <TabsTrigger value="banners" className="gap-2">
                         <Image className="h-4 w-4" />
                         Banners
@@ -30,6 +31,10 @@ export const SiteEditor = () => {
                     <TabsTrigger value="sections" className="gap-2">
                         <Layout className="h-4 w-4" />
                         Seções
+                    </TabsTrigger>
+                    <TabsTrigger value="settings" className="gap-2">
+                        <Settings className="h-4 w-4" />
+                        Geral
                     </TabsTrigger>
                 </TabsList>
 
@@ -40,6 +45,10 @@ export const SiteEditor = () => {
 
                     <TabsContent value="sections" className="mt-0">
                         <SectionsManager />
+                    </TabsContent>
+
+                    <TabsContent value="settings" className="mt-0">
+                        <GeneralSettings />
                     </TabsContent>
                 </div>
             </Tabs>
