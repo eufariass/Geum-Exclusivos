@@ -649,6 +649,84 @@ export type Database = {
         }
         Relationships: []
       }
+      site_banners: {
+        Row: {
+          active: boolean
+          created_at: string
+          desktop_image_url: string | null
+          external_link: boolean
+          id: string
+          image_url: string
+          link_url: string | null
+          mobile_image_url: string | null
+          order_index: number
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          desktop_image_url?: string | null
+          external_link?: boolean
+          id?: string
+          image_url: string
+          link_url?: string | null
+          mobile_image_url?: string | null
+          order_index?: number
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          desktop_image_url?: string | null
+          external_link?: boolean
+          id?: string
+          image_url?: string
+          link_url?: string | null
+          mobile_image_url?: string | null
+          order_index?: number
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      site_sections: {
+        Row: {
+          active: boolean
+          content: Json
+          created_at: string
+          id: string
+          order_index: number
+          subtitle: string | null
+          title: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          content?: Json
+          created_at?: string
+          id?: string
+          order_index?: number
+          subtitle?: string | null
+          title?: string | null
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          content?: Json
+          created_at?: string
+          id?: string
+          order_index?: number
+          subtitle?: string | null
+          title?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           activities: Json | null
