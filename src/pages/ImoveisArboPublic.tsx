@@ -494,11 +494,15 @@ const ImoveisArboPublic = () => {
                 <div className="mb-12 relative rounded-3xl bg-black overflow-hidden min-h-[750px] flex flex-col items-center justify-center text-center">
                     {/* Background Image */}
                     <div className="absolute inset-0 z-0">
-                        <img
-                            src={(cmsSections.find(s => s.type === 'hero')?.content?.background_image) || heroSearchBg}
-                            alt="Background"
-                            className="w-full h-full object-cover opacity-85"
-                        />
+                        {loading ? (
+                            <div className="w-full h-full bg-neutral-900 animate-pulse" />
+                        ) : (
+                            <img
+                                src={cmsSections.find(s => s.type === 'hero')?.content?.background_image || heroSearchBg}
+                                alt="Background"
+                                className="w-full h-full object-cover opacity-85"
+                            />
+                        )}
                         {/* Light black overlay + Gradient */}
                         <div className="absolute inset-0 bg-black/5" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/5 to-black/30" />
@@ -506,12 +510,21 @@ const ImoveisArboPublic = () => {
 
                     {/* Content */}
                     <div className="relative z-10 w-full max-w-5xl mx-auto px-4 flex flex-col items-center">
-                        <h1 className="text-4xl md:text-6xl font-bold text-white mb-2 drop-shadow-lg tracking-tight">
-                            {cmsSections.find(s => s.type === 'hero')?.title || 'Imobiliária Geum.'}
-                        </h1>
-                        <p className="text-xl md:text-3xl font-medium text-white/90 mb-10 drop-shadow-md tracking-wide">
-                            {cmsSections.find(s => s.type === 'hero')?.subtitle || 'Encontre seu próximo imóvel.'}
-                        </p>
+                        {loading ? (
+                            <>
+                                <div className="h-12 md:h-16 w-3/4 max-w-xl bg-white/10 animate-pulse rounded-lg mb-4" />
+                                <div className="h-6 md:h-10 w-1/2 max-w-md bg-white/10 animate-pulse rounded-lg mb-10" />
+                            </>
+                        ) : (
+                            <>
+                                <h1 className="text-4xl md:text-6xl font-bold text-white mb-2 drop-shadow-lg tracking-tight">
+                                    {cmsSections.find(s => s.type === 'hero')?.title || 'Imobiliária Geum.'}
+                                </h1>
+                                <p className="text-xl md:text-3xl font-medium text-white/90 mb-10 drop-shadow-md tracking-wide">
+                                    {cmsSections.find(s => s.type === 'hero')?.subtitle || 'Encontre seu próximo imóvel.'}
+                                </p>
+                            </>
+                        )}
 
                         {/* Search Bar - Reference Style */}
                         <div className="w-full bg-white rounded-full p-1.5 shadow-2xl flex flex-col md:flex-row items-center gap-2 md:gap-0 animate-in zoom-in-95 duration-500 max-w-4xl">
