@@ -14,6 +14,3 @@ verify_jwt = true
 
 [functions.sync-arbo-imoveis]
 verify_jwt = false
-
-[functions.ai-assistant]
-verify_jwt = false
