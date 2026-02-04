@@ -134,7 +134,11 @@ export function useAssistant() {
             return;
         }
         resetTranscript();
-        SpeechRecognition.startListening({ continuous: false, language: 'pt-BR' })
+        SpeechRecognition.startListening({
+            continuous: true, // Mantém o microfone ativo
+            language: 'pt-BR',
+            interimResults: true // Mostra resultados enquanto fala
+        })
             .catch(err => {
                 console.error('[Assistant] Failed to start listening:', err);
                 toast.error('Erro ao iniciar microfone: ' + err.message);
