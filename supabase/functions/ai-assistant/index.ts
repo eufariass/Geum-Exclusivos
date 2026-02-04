@@ -18,13 +18,13 @@ const tools = [
         type: "function",
         function: {
             name: "search_leads",
-            description: "Search for leads in the database by name, email, or phone. Use this to find a lead before updating them.",
+            description: "Buscar leads no banco de dados por nome, email ou telefone. Use SEMPRE antes de atualizar ou comentar em um lead.",
             parameters: {
                 type: "object",
                 properties: {
                     query: {
                         type: "string",
-                        description: "The search query (name, email, phone)."
+                        description: "Termo de busca (nome, email ou telefone do lead)."
                     }
                 },
                 required: ["query"]
@@ -34,18 +34,30 @@ const tools = [
     {
         type: "function",
         function: {
+            name: "get_pipeline_stages",
+            description: "Listar todas as etapas do funil de vendas (Kanban). Use para saber quais etapas existem e seus IDs antes de mover um lead.",
+            parameters: {
+                type: "object",
+                properties: {},
+                required: []
+            }
+        }
+    },
+    {
+        type: "function",
+        function: {
             name: "update_lead_stage",
-            description: "Move a lead to a specific stage in the pipeline.",
+            description: "Mover um lead para outra etapa do funil. IMPORTANTE: Primeiro use get_pipeline_stages para obter o stage_id correto.",
             parameters: {
                 type: "object",
                 properties: {
                     lead_id: {
                         type: "string",
-                        description: "The UUID of the lead to update."
+                        description: "O UUID do lead a ser movido."
                     },
                     stage_id: {
                         type: "string",
-                        description: "The ID of the target stage (e.g., 'novo-lead', 'qualificacao', 'visita', 'proposta', 'fechamento', 'perdido')."
+                        description: "O UUID da etapa de destino (obtido via get_pipeline_stages)."
                     }
                 },
                 required: ["lead_id", "stage_id"]
@@ -56,17 +68,17 @@ const tools = [
         type: "function",
         function: {
             name: "add_lead_comment",
-            description: "Add a comment or note to a lead's history.",
+            description: "Adicionar um comentário ou observação em um lead.",
             parameters: {
                 type: "object",
                 properties: {
                     lead_id: {
                         type: "string",
-                        description: "The UUID of the lead."
+                        description: "O UUID do lead."
                     },
                     comment: {
                         type: "string",
-                        description: "The comment text to add."
+                        description: "O texto do comentário a ser adicionado."
                     }
                 },
                 required: ["lead_id", "comment"]
@@ -77,7 +89,7 @@ const tools = [
         type: "function",
         function: {
             name: "get_dashboard_stats",
-            description: "Get general statistics about the leads pipeline.",
+            description: "Obter estatísticas gerais do funil de leads.",
             parameters: {
                 type: "object",
                 properties: {},
@@ -89,13 +101,13 @@ const tools = [
         type: "function",
         function: {
             name: "search_properties",
-            description: "Search for properties (imóveis) by code, title, address, or type.",
+            description: "Buscar imóveis por código, título, endereço, bairro ou tipo.",
             parameters: {
                 type: "object",
                 properties: {
                     query: {
                         type: "string",
-                        description: "The search query (code, address, neighborhood, type)."
+                        description: "Termo de busca (código, endereço, bairro ou tipo do imóvel)."
                     }
                 },
                 required: ["query"]
@@ -106,13 +118,13 @@ const tools = [
         type: "function",
         function: {
             name: "get_property_details",
-            description: "Get full details of a specific property by ID. Use this when you need to write a description or answer specific questions about a property.",
+            description: "Obter detalhes completos de um imóvel específico. Use quando precisar criar uma descrição ou responder perguntas sobre um imóvel.",
             parameters: {
                 type: "object",
                 properties: {
                     property_id: {
                         type: "string",
-                        description: "The UUID of the property."
+                        description: "O UUID do imóvel."
                     }
                 },
                 required: ["property_id"]
@@ -124,31 +136,44 @@ const tools = [
 // --- System Prompt ---
 const systemPrompt = `Você é o Assistente Virtual Inteligente da Geum Imob. 
 Sua missão é auxiliar corretores e administradores a:
-1. Gerenciar LEADS (crm).
+1. Gerenciar LEADS (CRM/Kanban).
 2. Consultar e criar conteúdos para IMÓVEIS.
 
-FERRAMENTAS:
+FERRAMENTAS DISPONÍVEIS:
 Você TEM acesso direto ao banco de dados via ferramentas (tools). 
 NUNCA diga "não tenho acesso ao banco". USE AS FERRAMENTAS.
 
-REGRAS DE OURO - LEADS:
-1. **Identificação Precisa**: Antes de alterar ou comentar em um lead, tenha CERTEZA de quem é. 
-   - Se o usuário disser "Mude o João de etapa", USE \`search_leads("João")\`.
-   - Se a busca retornar mais de um "João", **PERGUNTE** ao usuário qual deles é (mostre nome, email/telefone e etapa atual).
-   - Se não encontrar ninguém, avise e peça para verificar o nome.
-   - Só prossiga com a ação quando tiver um ID confirmado.
+## REGRAS DE OURO - LEADS:
 
-REGRAS DE OURO - IMÓVEIS:
-1. Você pode buscar imóveis por código, bairro, tipo, etc.
-2. **Descrições**: Se pedirem para "Criar uma descrição" para um imóvel:
-   - Primeiro busque o imóvel para achar o ID.
-   - Depois use \`get_property_details(id)\` para ler todas as características.
-   - Com os dados, escreva uma descrição vendedora, criativa e profissional, destacando os pontos fortes.
+### Para BUSCAR leads:
+- Use \`search_leads("termo")\` com nome, email ou telefone
+- A busca retorna: ID, nome, contato e etapa atual
 
-PERSONALIDADE:
-- Profissional, eficiente e proativo.
-- Responda em Português do Brasil.
-- Se ocorrer um erro técnico, explique de forma simples.
+### Para MOVER lead no Kanban:
+1. PRIMEIRO: Use \`get_pipeline_stages()\` para ver as etapas disponíveis
+2. SEGUNDO: Use \`search_leads("nome")\` para encontrar o lead
+3. Se encontrar MAIS DE UM lead, pergunte qual é mostrando nome e contato
+4. TERCEIRO: Use \`update_lead_stage(lead_id, stage_id)\` com os IDs corretos
+
+### Para COMENTAR em um lead:
+1. Use \`search_leads("nome")\` para encontrar o lead
+2. Use \`add_lead_comment(lead_id, "texto do comentário")\`
+
+## REGRAS DE OURO - IMÓVEIS:
+
+### Para BUSCAR imóveis:
+- Use \`search_properties("termo")\` com código, bairro, tipo ou endereço
+
+### Para criar DESCRIÇÃO de imóvel:
+1. Busque o imóvel para achar o ID
+2. Use \`get_property_details(id)\` para ler todas as características
+3. Escreva uma descrição vendedora, criativa e profissional
+
+## PERSONALIDADE:
+- Profissional, eficiente e proativo
+- Responda em Português do Brasil
+- Confirme as ações executadas com clareza
+- Se ocorrer erro, explique de forma simples
 `;
 
 serve(async (req) => {
@@ -218,10 +243,19 @@ serve(async (req) => {
 
                 try {
                     if (functionName === 'search_leads') {
+                        // Buscar leads com join para pegar nome da etapa
                         const { data: leads, error } = await supabase
                             .from('leads')
-                            .select('id, name, email, telefone, stage_id, updated_at')
-                            .or(`name.ilike.%${args.query}%,email.ilike.%${args.query}%,telefone.ilike.%${args.query}%`)
+                            .select(`
+                                id, 
+                                nome, 
+                                email, 
+                                telefone, 
+                                stage_id,
+                                stage:lead_pipeline_stages(id, name),
+                                imovel:imoveis(codigo, endereco)
+                            `)
+                            .or(`nome.ilike.%${args.query}%,email.ilike.%${args.query}%,telefone.ilike.%${args.query}%`)
                             .limit(5);
 
                         if (error) throw error;
@@ -232,44 +266,103 @@ serve(async (req) => {
                             result = JSON.stringify({
                                 found: true,
                                 count: leads.length,
-                                leads: leads.map(l => ({
+                                leads: leads.map((l: any) => ({
                                     id: l.id,
-                                    name: l.name,
-                                    info: `${l.email || 'Sem email'} | ${l.telefone || 'Sem tel'}`,
-                                    stage: l.stage_id, // AI handles raw IDs, but meaningful names would be better if possible. 
-                                    // ideally we join with stages table, but let's keep it simple for now.
+                                    nome: l.nome,
+                                    contato: `${l.email || 'Sem email'} | ${l.telefone || 'Sem tel'}`,
+                                    etapa_atual: l.stage?.name || 'Sem etapa',
+                                    imovel: l.imovel ? `${l.imovel.codigo} - ${l.imovel.endereco}` : 'Sem imóvel vinculado'
                                 }))
                             });
                         }
                     }
+                    else if (functionName === 'get_pipeline_stages') {
+                        const { data: stages, error } = await supabase
+                            .from('lead_pipeline_stages')
+                            .select('id, name, order_index, color, is_final, is_won')
+                            .order('order_index');
+
+                        if (error) throw error;
+
+                        result = JSON.stringify({
+                            stages: (stages || []).map((s: any) => ({
+                                id: s.id,
+                                nome: s.name,
+                                ordem: s.order_index,
+                                cor: s.color,
+                                etapa_final: s.is_final,
+                                ganho: s.is_won
+                            }))
+                        });
+                    }
                     else if (functionName === 'update_lead_stage') {
-                        const { error } = await supabase
+                        // Buscar lead atual para registrar histórico
+                        const { data: currentLead, error: leadError } = await supabase
+                            .from('leads')
+                            .select('stage_id, nome')
+                            .eq('id', args.lead_id)
+                            .single();
+
+                        if (leadError || !currentLead) {
+                            throw new Error("Lead não encontrado.");
+                        }
+
+                        const fromStageId = currentLead.stage_id;
+
+                        // Atualizar lead
+                        const { error: updateError } = await supabase
                             .from('leads')
                             .update({ stage_id: args.stage_id, updated_at: new Date().toISOString() })
                             .eq('id', args.lead_id);
 
-                        if (error) throw error;
-                        result = JSON.stringify({ success: true, message: "Lead movido com sucesso." });
+                        if (updateError) throw updateError;
+
+                        // Registrar no histórico
+                        await supabase.from('lead_stage_history').insert({
+                            lead_id: args.lead_id,
+                            from_stage_id: fromStageId,
+                            to_stage_id: args.stage_id,
+                            changed_at: new Date().toISOString()
+                        });
+
+                        // Buscar nome da nova etapa para confirmar
+                        const { data: newStage } = await supabase
+                            .from('lead_pipeline_stages')
+                            .select('name')
+                            .eq('id', args.stage_id)
+                            .single();
+
+                        result = JSON.stringify({
+                            success: true,
+                            message: `Lead "${currentLead.nome}" movido para "${newStage?.name || 'nova etapa'}" com sucesso.`
+                        });
                     }
                     else if (functionName === 'add_lead_comment') {
-                        // Confirm lead exists/get stage
-                        const { data: lead } = await supabase.from('leads').select('stage_id').eq('id', args.lead_id).single();
+                        // Verificar se lead existe
+                        const { data: lead, error: leadError } = await supabase
+                            .from('leads')
+                            .select('id, nome')
+                            .eq('id', args.lead_id)
+                            .single();
 
-                        if (lead) {
-                            const { error } = await supabase
-                                .from('lead_stage_history')
-                                .insert({
-                                    lead_id: args.lead_id,
-                                    from_stage_id: lead.stage_id,
-                                    to_stage_id: lead.stage_id,
-                                    notes: args.comment,
-                                    changed_at: new Date().toISOString()
-                                });
-                            if (error) throw error;
-                            result = JSON.stringify({ success: true, message: "Comentário registrado no histórico." });
-                        } else {
+                        if (leadError || !lead) {
                             throw new Error("Lead não encontrado (ID inválido).");
                         }
+
+                        // Inserir comentário na tabela correta (lead_comments)
+                        const { error } = await supabase
+                            .from('lead_comments')
+                            .insert({
+                                lead_id: args.lead_id,
+                                comment: args.comment,
+                                created_at: new Date().toISOString()
+                            });
+
+                        if (error) throw error;
+                        result = JSON.stringify({
+                            success: true,
+                            message: `Comentário adicionado ao lead "${lead.nome}" com sucesso.`
+                        });
                     }
                     else if (functionName === 'get_dashboard_stats') {
                         const { count } = await supabase.from('leads').select('*', { count: 'exact', head: true });
